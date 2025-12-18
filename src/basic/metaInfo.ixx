@@ -1,7 +1,7 @@
 export module original.basic.metaInfo;
 
 
-export namespace original::Info
+export namespace original::info
 {
     constexpr auto NAME = "Original";
 

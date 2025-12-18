@@ -12,50 +12,50 @@ protected:
 };
 
 TEST_F(MetaInfoTest, NameIsCorrect) {
-    EXPECT_EQ(std::string_view(Info::NAME), "Original");
-    EXPECT_NE(std::string_view(Info::NAME), "");
+    EXPECT_EQ(std::string_view(info::NAME), "Original");
+    EXPECT_NE(std::string_view(info::NAME), "");
 }
 
 TEST_F(MetaInfoTest, DescriptionIsCorrect) {
-    EXPECT_EQ(std::string_view(Info::DESCRIPTION), "A C++ tool library");
-    EXPECT_NE(std::string_view(Info::DESCRIPTION), "");
+    EXPECT_EQ(std::string_view(info::DESCRIPTION), "A C++ tool library");
+    EXPECT_NE(std::string_view(info::DESCRIPTION), "");
 }
 
 TEST_F(MetaInfoTest, RepoPageIsCorrect) {
-    EXPECT_EQ(std::string_view(Info::REPO_PAGE), "https://github.com/Original-org/original");
-    EXPECT_NE(std::string_view(Info::REPO_PAGE), "");
+    EXPECT_EQ(std::string_view(info::REPO_PAGE), "https://github.com/Original-org/original");
+    EXPECT_NE(std::string_view(info::REPO_PAGE), "");
 
-    std::string_view repo(Info::REPO_PAGE);
+    std::string_view repo(info::REPO_PAGE);
     EXPECT_TRUE(repo.find("github.com") != std::string_view::npos);
     EXPECT_TRUE(repo.find("Original-org") != std::string_view::npos);
 }
 
 TEST_F(MetaInfoTest, LicenseIsCorrect) {
-    EXPECT_EQ(std::string_view(Info::LICENSE), "MIT license");
-    EXPECT_NE(std::string_view(Info::LICENSE), "");
+    EXPECT_EQ(std::string_view(info::LICENSE), "MIT license");
+    EXPECT_NE(std::string_view(info::LICENSE), "");
 }
 
 TEST_F(MetaInfoTest, OrganizationIsCorrect) {
-    EXPECT_EQ(std::string_view(Info::ORGANIZATION), "Original-org");
-    EXPECT_NE(std::string_view(Info::ORGANIZATION), "");
+    EXPECT_EQ(std::string_view(info::ORGANIZATION), "Original-org");
+    EXPECT_NE(std::string_view(info::ORGANIZATION), "");
 }
 
 TEST_F(MetaInfoTest, AllConstantsAreNonEmpty) {
-    EXPECT_FALSE(std::string_view(Info::NAME).empty());
-    EXPECT_FALSE(std::string_view(Info::DESCRIPTION).empty());
-    EXPECT_FALSE(std::string_view(Info::REPO_PAGE).empty());
-    EXPECT_FALSE(std::string_view(Info::LICENSE).empty());
-    EXPECT_FALSE(std::string_view(Info::ORGANIZATION).empty());
+    EXPECT_FALSE(std::string_view(info::NAME).empty());
+    EXPECT_FALSE(std::string_view(info::DESCRIPTION).empty());
+    EXPECT_FALSE(std::string_view(info::REPO_PAGE).empty());
+    EXPECT_FALSE(std::string_view(info::LICENSE).empty());
+    EXPECT_FALSE(std::string_view(info::ORGANIZATION).empty());
 }
 
 TEST_F(MetaInfoTest, ConstantsAreAccessible) {
-    static_assert(std::string_view(Info::NAME) == "Original");
-    static_assert(std::string_view(Info::ORGANIZATION) == "Original-org");
+    static_assert(std::string_view(info::NAME) == "Original");
+    static_assert(std::string_view(info::ORGANIZATION) == "Original-org");
     EXPECT_NO_THROW({
-        [[maybe_unused]] auto name = Info::NAME;
-        [[maybe_unused]] auto desc = Info::DESCRIPTION;
-        [[maybe_unused]] auto repo = Info::REPO_PAGE;
-        [[maybe_unused]] auto license = Info::LICENSE;
-        [[maybe_unused]] auto org = Info::ORGANIZATION;
+        [[maybe_unused]] auto name = info::NAME;
+        [[maybe_unused]] auto desc = info::DESCRIPTION;
+        [[maybe_unused]] auto repo = info::REPO_PAGE;
+        [[maybe_unused]] auto license = info::LICENSE;
+        [[maybe_unused]] auto org = info::ORGANIZATION;
     });
 }
