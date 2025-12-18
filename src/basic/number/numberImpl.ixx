@@ -520,54 +520,54 @@ namespace original
         }
     };
 
-    export using i8 = Integer<std::int8_t>;
-    export using i16 = Integer<std::int16_t>;
-    export using i32 = Integer<std::int32_t>;
-    export using i64 = Integer<std::int64_t>;
-    export using u8 = Integer<std::uint8_t>;
-    export using u16 = Integer<std::uint16_t>;
-    export using u32 = Integer<std::uint32_t>;
-    export using u64 = Integer<std::uint64_t>;
-    export using byte = u8;
-    export using f32 = Floating<float>;
-    export using f64 = Floating<double>;
-    export using f80 = Floating<long double>;
+    export using I8 = Integer<std::int8_t>;
+    export using I16 = Integer<std::int16_t>;
+    export using I32 = Integer<std::int32_t>;
+    export using I64 = Integer<std::int64_t>;
+    export using U8 = Integer<std::uint8_t>;
+    export using U16 = Integer<std::uint16_t>;
+    export using U32 = Integer<std::uint32_t>;
+    export using U64 = Integer<std::uint64_t>;
+    export using Byte = U8;
+    export using F32 = Floating<float>;
+    export using F64 = Floating<double>;
+    export using F80 = Floating<long double>;
 
     export namespace literals
     {
-        constexpr i32 operator""_i32(const unsigned long long v)
+        constexpr I32 operator""_i32(const unsigned long long v)
         {
-            return i32{static_cast<std::int32_t>(v)};
+            return I32{static_cast<std::int32_t>(v)};
         }
 
-        constexpr i64 operator""_i64(const unsigned long long v)
+        constexpr I64 operator""_i64(const unsigned long long v)
         {
-            return i64{static_cast<std::int64_t>(v)};
+            return I64{static_cast<std::int64_t>(v)};
         }
 
-        constexpr u32 operator""_u32(const unsigned long long v)
+        constexpr U32 operator""_u32(const unsigned long long v)
         {
-            return u32{static_cast<std::uint32_t>(v)};
+            return U32{static_cast<std::uint32_t>(v)};
         }
 
-        constexpr u64 operator""_u64(const unsigned long long v)
+        constexpr U64 operator""_u64(const unsigned long long v)
         {
-            return u64{v};
+            return U64{v};
         }
 
-        constexpr f32 operator""_f32(const long double v)
+        constexpr F32 operator""_f32(const long double v)
         {
-            return f32{static_cast<float>(v)};
+            return F32{static_cast<float>(v)};
         }
 
-        constexpr f64 operator""_f64(const long double v)
+        constexpr F64 operator""_f64(const long double v)
         {
-            return f64{static_cast<double>(v)};
+            return F64{static_cast<double>(v)};
         }
 
-        constexpr f80 operator""_f80(const long double v)
+        constexpr F80 operator""_f80(const long double v)
         {
-            return f80{v};
+            return F80{v};
         }
     }
 
@@ -580,12 +580,12 @@ namespace original
     }
 
     export [[nodiscard]]
-    constexpr u64 fromStdSize(const std::size_t n) noexcept
+    constexpr U64 fromStdSize(const std::size_t n) noexcept
     {
-        return u64{static_cast<std::uint64_t>(n)};
+        return U64{static_cast<std::uint64_t>(n)};
     }
 
-    export constexpr std::size_t toStdSize(const u64& u)
+    export constexpr std::size_t toStdSize(const U64& u)
     {
         return u.value();
     }
