@@ -25,7 +25,7 @@ TEST_F(MetaInfoTest, RepoPageIsCorrect) {
     EXPECT_EQ(std::string_view(info::REPO_PAGE), "https://github.com/Original-org/original");
     EXPECT_NE(std::string_view(info::REPO_PAGE), "");
 
-    std::string_view repo(info::REPO_PAGE);
+    constexpr std::string_view repo(info::REPO_PAGE);
     EXPECT_TRUE(repo.find("github.com") != std::string_view::npos);
     EXPECT_TRUE(repo.find("Original-org") != std::string_view::npos);
 }
