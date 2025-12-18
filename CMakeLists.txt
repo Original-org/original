@@ -46,6 +46,10 @@ target_sources(original
         src/original.ixx
         src/basic/metaInfo.ixx
         src/basic/basic.ixx
+        src/basic/types/types.ixx
+        src/basic/number/number.ixx
+        src/basic/number/traits.ixx
+        src/basic/number/numberImpl.ixx
         PRIVATE
         src/original.cpp
 )
