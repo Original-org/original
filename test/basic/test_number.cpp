@@ -1,3 +1,4 @@
+#include <cmath>
 #include <gtest/gtest.h>
 #include <cstdint>
 #include <limits>
@@ -56,7 +57,7 @@ TEST(NumberTest, ConversionOperators) {
     constexpr i32 int_val{123};
     
     // 显式转换到基础类型
-    constexpr std::int32_t val = static_cast<std::int32_t>(int_val);
+    constexpr auto val = static_cast<std::int32_t>(int_val);
     EXPECT_EQ(val, 123);
     
     // bool转换
@@ -67,7 +68,7 @@ TEST(NumberTest, ConversionOperators) {
     
     // 浮点数转换
     constexpr f32 float_val{1.5f};
-    constexpr float f = static_cast<float>(float_val);
+    constexpr auto f = static_cast<float>(float_val);
     EXPECT_FLOAT_EQ(f, 1.5f);
 }
 
