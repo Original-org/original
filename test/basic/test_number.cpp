@@ -286,17 +286,17 @@ TEST(NumberTest, NumberTraits) {
     static_assert(std::is_same_v<NumberTrait<f64>::Type, double>);
     
     // IsNumber测试
-    EXPECT_TRUE(IsNumber<i32>);
-    EXPECT_TRUE(IsNumber<f64>);
-    EXPECT_FALSE(IsNumber<int>);
-    EXPECT_FALSE(IsNumber<float>);
+    EXPECT_TRUE(IS_NUMBER<i32>);
+    EXPECT_TRUE(IS_NUMBER<f64>);
+    EXPECT_FALSE(IS_NUMBER<int>);
+    EXPECT_FALSE(IS_NUMBER<float>);
     
     // IsNumberLike测试
-    EXPECT_TRUE(IsNumberLike<i32>);
-    EXPECT_TRUE(IsNumberLike<f32>);
-    EXPECT_TRUE(IsNumberLike<int>);
-    EXPECT_TRUE(IsNumberLike<float>);
-    EXPECT_FALSE(IsNumberLike<std::string>);
+    EXPECT_TRUE(IS_NUMBER_LIKE<i32>);
+    EXPECT_TRUE(IS_NUMBER_LIKE<f32>);
+    EXPECT_TRUE(IS_NUMBER_LIKE<int>);
+    EXPECT_TRUE(IS_NUMBER_LIKE<float>);
+    EXPECT_FALSE(IS_NUMBER_LIKE<std::string>);
     
     // 概念测试
     static_assert(Number<i32>);

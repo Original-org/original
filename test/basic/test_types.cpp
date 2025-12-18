@@ -55,24 +55,24 @@ TEST(TypeTraitsTest, StdFloatingConcept) {
 }
 
 TEST(TypeTraitsTest, IsStdArithmeticConstant) {
-    EXPECT_TRUE(original::IsStdArithmetic<int>);
-    EXPECT_TRUE(original::IsStdArithmetic<double>);
-    EXPECT_FALSE(original::IsStdArithmetic<std::string>);
-    EXPECT_FALSE(original::IsStdArithmetic<void*>);
+    EXPECT_TRUE(original::IS_STD_ARITHMETIC<int>);
+    EXPECT_TRUE(original::IS_STD_ARITHMETIC<double>);
+    EXPECT_FALSE(original::IS_STD_ARITHMETIC<std::string>);
+    EXPECT_FALSE(original::IS_STD_ARITHMETIC<void*>);
 }
 
 TEST(TypeTraitsTest, IsStdIntegralConstant) {
-    EXPECT_TRUE(original::IsStdIntegral<int>);
-    EXPECT_TRUE(original::IsStdIntegral<unsigned long>);
-    EXPECT_FALSE(original::IsStdIntegral<float>);
-    EXPECT_FALSE(original::IsStdIntegral<void>);
+    EXPECT_TRUE(original::IS_STD_INTEGRAL<int>);
+    EXPECT_TRUE(original::IS_STD_INTEGRAL<unsigned long>);
+    EXPECT_FALSE(original::IS_STD_INTEGRAL<float>);
+    EXPECT_FALSE(original::IS_STD_INTEGRAL<void>);
 }
 
 TEST(TypeTraitsTest, IsStdFloatingConstant) {
-    EXPECT_TRUE(original::IsStdFloating<float>);
-    EXPECT_TRUE(original::IsStdFloating<long double>);
-    EXPECT_FALSE(original::IsStdFloating<int>);
-    EXPECT_FALSE(original::IsStdFloating<char>);
+    EXPECT_TRUE(original::IS_STD_FLOATING<float>);
+    EXPECT_TRUE(original::IS_STD_FLOATING<long double>);
+    EXPECT_FALSE(original::IS_STD_FLOATING<int>);
+    EXPECT_FALSE(original::IS_STD_FLOATING<char>);
 }
 
 TEST(TypeTraitsTest, ConceptRelationships) {

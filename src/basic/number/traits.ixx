@@ -23,16 +23,16 @@ export namespace original
     };
 
     template<typename T>
-    constexpr bool IsNumber = NumberTrait<T>::value;
+    constexpr bool IS_NUMBER = NumberTrait<T>::value;
 
     template<typename T>
-    constexpr bool IsNumberLike = IsNumber<T> || IsStdArithmetic<T>;
+    constexpr bool IS_NUMBER_LIKE = IS_NUMBER<T> || IS_STD_ARITHMETIC<T>;
 
     template<typename T>
-    concept Number = IsNumber<T>;
+    concept Number = IS_NUMBER<T>;
 
     template<typename T>
-    concept NumberLike = IsNumberLike<T>;
+    concept NumberLike = IS_NUMBER_LIKE<T>;
 
     template<Number T>
     using NumberType = NumberTrait<T>::Type;
