@@ -4,54 +4,99 @@ export module original.basic.number.traits;
 import original.basic.types;
 import original.basic.number.numberImpl;
 
-
+/**
+ * @brief Namespace containing type traits for the strongly-typed number wrappers.
+ */
 export namespace original
 {
-    template<typename>
+    /**
+     * @struct NumberTrait
+     * @brief Trait to detect whether a type is one of the strongly-typed number wrappers.
+     * Specializations exist for Integer<T> and Floating<T>.
+     * @tparam T Type to test.
+     */
+    template<typename T>
     struct NumberTrait : std::false_type {};
 
+    /** @brief Specialization for Integer types. */
     template<StdIntegral T>
     struct NumberTrait<Integer<T>> : std::true_type
     {
         using Type = T;
     };
 
+    /** @brief Specialization for Floating types. */
     template<StdFloating T>
     struct NumberTrait<Floating<T>> : std::true_type
     {
         using Type = T;
     };
 
+    /**
+     * @brief Compile-time constant indicating whether T is a strongly-typed number wrapper.
+     * @tparam T The type to check.
+     */
     template<typename T>
     constexpr bool IS_NUMBER = NumberTrait<T>::value;
 
+    /**
+     * @brief Compile-time constant indicating whether T is either a strongly-typed number
+     * or a standard arithmetic type.
+     * @tparam T The type to check.
+     */
     template<typename T>
     constexpr bool IS_NUMBER_LIKE = IS_NUMBER<T> || IS_STD_ARITHMETIC<T>;
 
+    /**
+     * @brief Concept requiring T to be a strongly-typed number wrapper.
+     * @tparam T The type to constrain.
+     */
     template<typename T>
     concept Number = IS_NUMBER<T>;
 
+    /**
+     * @brief Concept requiring T to be either a strongly-typed number wrapper
+     * or a standard arithmetic type.
+     * @tparam T The type to constrain.
+     */
     template<typename T>
     concept NumberLike = IS_NUMBER_LIKE<T>;
 
+    /**
+     * @brief Extracts the underlying type from a strongly-typed number wrapper.
+     * @tparam T A type satisfying the Number concept.
+     */
     template<Number T>
     using NumberType = NumberTrait<T>::Type;
 
-    template<typename>
+    /**
+     * @struct NumberLikeTrait
+     * @brief Trait to obtain the underlying arithmetic type from Number
+     * or standard arithmetic types.
+     * @tparam T Type to query.
+     */
+    template<typename T>
     struct NumberLikeTrait {};
 
+    /** @brief Specialization for strongly-typed number wrappers. */
     template<Number T>
     struct NumberLikeTrait<T>
     {
         using Type = NumberType<T>;
     };
 
+    /** @brief Specialization for plain standard arithmetic types. */
     template<StdArithmetic T>
     struct NumberLikeTrait<T>
     {
         using Type = T;
     };
 
+    /**
+     * @brief Alias template to retrieve the underlying arithmetic type
+     * for NumberLike types.
+     * @tparam T A type satisfying the NumberLike concept.
+     */
     template<NumberLike T>
     using NumberLikeType = NumberLikeTrait<T>::Type;
 }
