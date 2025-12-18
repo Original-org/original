@@ -1081,6 +1081,15 @@ namespace original
         return Integer<To>{static_cast<To>(i.value())};
     }
 
+    /**
+     * @brief Casts between signed and unsigned integral types of the same size.
+     * @details Performs a bitwise reinterpretation of the value without changing its representation.
+     *          The source and destination types must have the same size.
+     * @tparam To   Target unsigned integral type.
+     * @tparam From Source signed integral type.
+     * @param v     Signed Integer to reinterpret.
+     * @return Integer<To> with the reinterpreted value.
+     */
     export template<StdUnsignedIntegral To, StdSignedIntegral From>
     requires (sizeof(To) == sizeof(From))
     [[nodiscard]]
@@ -1089,6 +1098,15 @@ namespace original
         return Integer<To>{static_cast<To>(v.value())};
     }
 
+    /**
+     * @brief Casts between unsigned and signed integral types of the same size.
+     * @details Performs a bitwise reinterpretation of the value without changing its representation.
+     *          The source and destination types must have the same size.
+     * @tparam To   Target signed integral type.
+     * @tparam From Source unsigned integral type.
+     * @param v     Unsigned Integer to reinterpret.
+     * @return Integer<To> with the reinterpreted value.
+     */
     export template<StdSignedIntegral To, StdUnsignedIntegral From>
     requires (sizeof(To) == sizeof(From))
     [[nodiscard]]
@@ -1097,6 +1115,16 @@ namespace original
         return Integer<To>{static_cast<To>(v.value())};
     }
 
+    /**
+     * @brief Performs a general numeric cast between integral types.
+     * @details Converts an Integer of one type to another integral type.
+     *          Supports both signed and unsigned conversions regardless of size.
+     *          Use with caution as this may involve sign changes or truncation.
+     * @tparam To   Target integral type.
+     * @tparam From Source integral type.
+     * @param v     Integer to cast.
+     * @return Integer<To> with the converted value.
+     */
     export template<StdIntegral To, StdIntegral From>
     [[nodiscard]]
     constexpr Integer<To> numericCast(const Integer<From>& v) noexcept
