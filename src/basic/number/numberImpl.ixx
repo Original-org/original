@@ -1048,14 +1048,32 @@ namespace original
     }
 
     /**
-     * @brief Performs a narrowing cast from a larger Integer to a smaller one.
-     * @details The cast is explicit and may truncate; use with caution.
-     * @tparam To   Target integral type (smaller than From).
-     * @tparam From Source integral type.
-     * @param i     Integer to cast.
+     * @brief Performs a narrowing cast between signed integral types.
+     * @details Converts a larger signed Integer to a smaller signed Integer.
+     *          The cast is explicit and may truncate; use with caution.
+     * @tparam To   Target signed integral type (must be smaller than From).
+     * @tparam From Source signed integral type.
+     * @param i     Signed Integer to cast.
      * @return Integer<To> with the narrowed value.
      */
-    export template<StdIntegral To, StdIntegral From>
+    export template<StdSignedIntegral To, StdSignedIntegral From>
+    requires (sizeof(To) < sizeof(From))
+    [[nodiscard]]
+    constexpr Integer<To> narrowCast(const Integer<From>& i) noexcept
+    {
+        return Integer<To>{static_cast<To>(i.value())};
+    }
+
+    /**
+     * @brief Performs a narrowing cast between unsigned integral types.
+     * @details Converts a larger unsigned Integer to a smaller unsigned Integer.
+     *          The cast is explicit and may truncate; use with caution.
+     * @tparam To   Target unsigned integral type (must be smaller than From).
+     * @tparam From Source unsigned integral type.
+     * @param i     Unsigned Integer to cast.
+     * @return Integer<To> with the narrowed value.
+     */
+    export template<StdUnsignedIntegral To, StdUnsignedIntegral From>
     requires (sizeof(To) < sizeof(From))
     [[nodiscard]]
     constexpr Integer<To> narrowCast(const Integer<From>& i) noexcept
