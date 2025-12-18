@@ -1081,6 +1081,29 @@ namespace original
         return Integer<To>{static_cast<To>(i.value())};
     }
 
+    export template<StdUnsignedIntegral To, StdSignedIntegral From>
+    requires (sizeof(To) == sizeof(From))
+    [[nodiscard]]
+    constexpr Integer<To> signCast(const Integer<From>& v) noexcept
+    {
+        return Integer<To>{static_cast<To>(v.value())};
+    }
+
+    export template<StdSignedIntegral To, StdUnsignedIntegral From>
+    requires (sizeof(To) == sizeof(From))
+    [[nodiscard]]
+    constexpr Integer<To> signCast(const Integer<From>& v) noexcept
+    {
+        return Integer<To>{static_cast<To>(v.value())};
+    }
+
+    export template<StdIntegral To, StdIntegral From>
+    [[nodiscard]]
+    constexpr Integer<To> numericCast(const Integer<From>& v) noexcept
+    {
+        return Integer<To>{static_cast<To>(v.value())};
+    }
+
     /**
      * @brief Converts a std::size_t to U64 safely.
      * @param n The std::size_t value.
