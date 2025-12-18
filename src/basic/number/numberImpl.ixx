@@ -1048,13 +1048,13 @@ namespace original
     }
 
     /**
-         * @brief Performs a narrowing cast from a larger Integer to a smaller one.
-         * @details The cast is explicit and may truncate; use with caution.
-         * @tparam To   Target integral type (smaller than From).
-         * @tparam From Source integral type.
-         * @param i     Integer to cast.
-         * @return Integer<To> with the narrowed value.
-         */
+     * @brief Performs a narrowing cast from a larger Integer to a smaller one.
+     * @details The cast is explicit and may truncate; use with caution.
+     * @tparam To   Target integral type (smaller than From).
+     * @tparam From Source integral type.
+     * @param i     Integer to cast.
+     * @return Integer<To> with the narrowed value.
+     */
     export template<StdIntegral To, StdIntegral From>
     requires (sizeof(To) < sizeof(From))
     [[nodiscard]]
