@@ -1,5 +1,6 @@
 module;
 #include <compare>
+#include <cstdint>
 export module original.basic.number.numberImpl;
 import original.basic.types;
 
@@ -22,7 +23,7 @@ namespace original
             constexpr Number& operator=(Number&&) noexcept = default;
 
         public:
-            constexpr T value() const noexcept { return this->value_; }
+            [[nodiscard]] constexpr T value() const noexcept { return this->value_; }
         };
     }
 
@@ -534,37 +535,37 @@ namespace original
 
     export namespace literals
     {
-        constexpr i32 operator"" _i32(const unsigned long long v)
+        constexpr i32 operator""_i32(const unsigned long long v)
         {
             return i32{static_cast<std::int32_t>(v)};
         }
 
-        constexpr i64 operator"" _i64(const unsigned long long v)
+        constexpr i64 operator""_i64(const unsigned long long v)
         {
             return i64{static_cast<std::int64_t>(v)};
         }
 
-        constexpr u32 operator"" _u32(const unsigned long long v)
+        constexpr u32 operator""_u32(const unsigned long long v)
         {
             return u32{static_cast<std::uint32_t>(v)};
         }
 
-        constexpr u64 operator"" _u64(const unsigned long long v)
+        constexpr u64 operator""_u64(const unsigned long long v)
         {
             return u64{v};
         }
 
-        constexpr f32 operator"" _f32(const long double v)
+        constexpr f32 operator""_f32(const long double v)
         {
             return f32{static_cast<float>(v)};
         }
 
-        constexpr f64 operator"" _f64(const long double v)
+        constexpr f64 operator""_f64(const long double v)
         {
             return f64{static_cast<double>(v)};
         }
 
-        constexpr f80 operator"" _f80(const long double v)
+        constexpr f80 operator""_f80(const long double v)
         {
             return f80{v};
         }
