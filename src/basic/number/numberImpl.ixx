@@ -35,7 +35,7 @@ namespace original
         explicit constexpr Integer(T value) noexcept : Base(value) {}
 
         template<StdIntegral U>
-        requires (sizeof(U) < sizeof(T))
+        requires (sizeof(U) <= sizeof(T))
         explicit constexpr Integer(U value) noexcept : Base(static_cast<T>(value)) {}
 
         explicit constexpr operator T() const noexcept
@@ -350,7 +350,7 @@ namespace original
         explicit constexpr Floating(T value) noexcept : Base(value) {}
 
         template<StdFloating U>
-        requires (sizeof(U) < sizeof(T))
+        requires (sizeof(U) <= sizeof(T))
         explicit constexpr Floating(U value) noexcept : Base(static_cast<T>(value)) {}
 
         explicit constexpr operator T() const noexcept
