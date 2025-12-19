@@ -1,5 +1,6 @@
 module;
 #include <compare>
+#include <cstdint>
 export module original.basic.number.numberImpl;
 import original.basic.types;
 
