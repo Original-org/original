@@ -51,6 +51,7 @@ target_sources(original
         src/basic/number/traits.ixx
         src/basic/number/numberImpl.ixx
         src/basic/number/algorithms.ixx
+        src/basic/number/casts.ixx
         PRIVATE
         src/original.cpp
 )
