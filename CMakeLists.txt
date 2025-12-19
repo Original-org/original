@@ -50,6 +50,7 @@ target_sources(original
         src/basic/number/number.ixx
         src/basic/number/traits.ixx
         src/basic/number/numberImpl.ixx
+        src/basic/number/algorithms.ixx
         PRIVATE
         src/original.cpp
 )
