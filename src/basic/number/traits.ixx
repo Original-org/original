@@ -99,4 +99,22 @@ export namespace original
      */
     template<NumberLike T>
     using NumberLikeType = NumberLikeTrait<T>::Type;
+
+    template<typename T>
+    constexpr bool IS_UNSIGNED_INTEGER = IS_NUMBER<T> && IS_STD_UNSIGNED_INTEGRAL<NumberType<T>>;
+
+    template<typename T>
+    constexpr bool IS_SIGNED_INTEGER = IS_NUMBER<T> && IS_STD_SIGNED_INTEGRAL<NumberType<T>>;
+
+    template<typename T>
+    constexpr bool IS_FLOATING_POINT = IS_NUMBER<T> && IS_STD_FLOATING<NumberType<T>>;
+
+    template<typename T>
+    concept UnsignedInteger = IS_UNSIGNED_INTEGER<T>;
+
+    template<typename T>
+    concept SignedInteger = IS_SIGNED_INTEGER<T>;
+
+    template<typename T>
+    concept FloatingPoint = IS_FLOATING_POINT<T>;
 }

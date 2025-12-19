@@ -49,6 +49,9 @@ export namespace original
     template<typename T>
     concept StdSignedIntegral = StdIntegral<T> && std::is_signed_v<T>;
 
+    template<typename T>
+    constexpr bool IS_STD_SIGNED_INTEGRAL = StdIntegral<T> && std::is_signed_v<T>;
+
     /**
      * @brief Concept that constrains a type to be an unsigned standard integral type.
      * Requires StdIntegral<T> and that T is unsigned.
@@ -56,6 +59,9 @@ export namespace original
      */
     template<typename T>
     concept StdUnsignedIntegral = StdIntegral<T> && std::is_unsigned_v<T>;
+
+    template<typename T>
+    constexpr bool IS_STD_UNSIGNED_INTEGRAL = StdIntegral<T> && std::is_unsigned_v<T>;
 
     /**
      * @brief Concept that constrains a type to be a standard floating-point type.
