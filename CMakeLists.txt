@@ -53,6 +53,7 @@ target_sources(original
         src/basic/number/algorithms.ixx
         src/basic/number/casts.ixx
         PRIVATE
+        src/macros.h
         src/original.cpp
 )
 
