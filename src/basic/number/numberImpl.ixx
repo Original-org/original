@@ -1087,6 +1087,14 @@ namespace original
         return Integer<To>{static_cast<To>(i.value())};
     }
 
+    export template<StdFloating To, StdFloating From>
+    requires (sizeof(To) < sizeof(From))
+    [[nodiscard]]
+    constexpr Floating<To> narrowCast(const Floating<From>& v) noexcept
+    {
+        return Floating<To>{static_cast<To>(v.value())};
+    }
+
     /**
      * @brief Casts between signed and unsigned integral types of the same size.
      * @details Performs a bitwise reinterpretation of the value without changing its representation.
@@ -1134,6 +1142,27 @@ namespace original
     export template<StdIntegral To, StdIntegral From>
     [[nodiscard]]
     constexpr Integer<To> numericCast(const Integer<From>& v) noexcept
+    {
+        return Integer<To>{static_cast<To>(v.value())};
+    }
+
+    export template<StdFloating To, StdFloating From>
+    [[nodiscard]]
+    constexpr Floating<To> numericCast(const Floating<From>& v) noexcept
+    {
+        return Floating<To>{static_cast<To>(v.value())};
+    }
+
+    export template<StdFloating To, StdIntegral From>
+    [[nodiscard]]
+    constexpr Floating<To> numericCast(const Integer<From>& v) noexcept
+    {
+        return Floating<To>{static_cast<To>(v.value())};
+    }
+
+    export template<StdIntegral To, StdFloating From>
+    [[nodiscard]]
+    constexpr Integer<To> numericCast(const Floating<From>& v) noexcept
     {
         return Integer<To>{static_cast<To>(v.value())};
     }
