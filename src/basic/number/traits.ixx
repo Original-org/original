@@ -337,4 +337,16 @@ export namespace original
      */
     template<typename T, typename U>
     concept SameSignIntegral = HAS_SAME_SIGN_INTEGRAL<T, U>;
+
+    template<typename T>
+    constexpr bool IS_UNSIGNED_INTEGRAL_LIKE = IS_STD_UNSIGNED_INTEGRAL<T> || IS_UNSIGNED_INTEGER<T>;
+
+    template<typename T>
+    concept UnsignedIntegralLike = IS_UNSIGNED_INTEGRAL_LIKE<T>;
+
+    template<typename T>
+    constexpr bool IS_SIGNED_INTEGRAL_LIKE = IS_STD_SIGNED_INTEGRAL<T> || IS_SIGNED_INTEGER<T>;
+
+    template<typename T>
+    concept SignedIntegralLike = IS_SIGNED_INTEGRAL_LIKE<T>;
 }

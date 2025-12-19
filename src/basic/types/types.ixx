@@ -7,6 +7,36 @@ export module original.basic.types;
  */
 export namespace original
 {
+    template<typename T>
+    constexpr bool IS_STD_OBJECT = std::is_object_v<T>;
+
+    template<typename T>
+    concept StdObject = IS_STD_OBJECT<T>;
+
+    template<typename T, typename = void>
+    struct DerefTraits : std::false_type {};
+
+    template<typename T>
+    struct DerefTraits<T, std::void_t<decltype(*std::declval<T>())>> : std::true_type {};
+
+    template<typename T>
+    constexpr bool IS_DEREFERENCEABLE = DerefTraits<T>::value;
+
+    template<typename T>
+    concept Dereferenceable = IS_DEREFERENCEABLE<T>;
+
+    template<typename T>
+    constexpr bool IS_STD_POINTER = std::is_pointer_v<T>;
+
+    template<typename T>
+    concept StdPointer = IS_STD_POINTER<T>;
+
+    template<typename T>
+    constexpr bool IS_STD_REFERENCE = std::is_reference_v<T>;
+
+    template<typename T>
+    concept StdReference = IS_STD_REFERENCE<T>;
+
     /**
      * @brief Concept that constrains a type to be a standard arithmetic type.
      * This concept is true for any type T where std::is_arithmetic_v<T> is true.
