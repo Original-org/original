@@ -44,8 +44,8 @@ TEST(NumberTest, ConstructionAndValue) {
     EXPECT_DOUBLE_EQ(float64.value(), 2.71828);
 
     // Construction via conversion from smaller types
-    constexpr I32 from_i16{I16{100}.value()};
-    EXPECT_EQ(from_i16.value(), 100);
+    constexpr U32 from_byte{100_byte .value()};
+    EXPECT_EQ(from_byte.value(), 100);
 
     constexpr F64 from_f32{F32{3.14f}.value()};
     EXPECT_FLOAT_EQ(from_f32.value(), 3.14f);
@@ -175,30 +175,30 @@ TEST(NumberTest, IncrementDecrementOperators) {
 
 // Test bitwise operators
 TEST(NumberTest, BitwiseOperators) {
-    U8 a{0b1100};  // 12
-    U8 b{0b1010};  // 10
+    constexpr auto a = 12_u8;  // 12
+    constexpr auto b = 10_u8;  // 10
 
     // Bitwise AND
-    U8 and_result = a & b;
+    constexpr U8 and_result = a & b;
     EXPECT_EQ(and_result.value(), 0b1000);  // 8
 
     // Bitwise OR
-    U8 or_result = a | b;
+    constexpr U8 or_result = a | b;
     EXPECT_EQ(or_result.value(), 0b1110);  // 14
 
     // Bitwise XOR
-    U8 xor_result = a ^ b;
+    constexpr U8 xor_result = a ^ b;
     EXPECT_EQ(xor_result.value(), 0b0110);  // 6
 
     // Bitwise NOT
-    U8 not_result = ~a;
+    constexpr U8 not_result = ~a;
     EXPECT_EQ(not_result.value(), static_cast<std::uint8_t>(~12));
 
     // Shift operations
-    U8 shift_left = a << 1;
+    constexpr U8 shift_left = a << 1;
     EXPECT_EQ(shift_left.value(), 0b11000);  // 24
 
-    U8 shift_right = a >> 1;
+    constexpr U8 shift_right = a >> 1;
     EXPECT_EQ(shift_right.value(), 0b0110);  // 6
 
     // Compound assignment
@@ -225,8 +225,8 @@ TEST(NumberTest, BitwiseOperators) {
 
 // Test floating-point operations
 TEST(NumberTest, FloatingPointOperations) {
-    F32 a{2.5f};
-    F32 b{1.5f};
+    constexpr F32 a{2.5f};
+    constexpr F32 b{1.5f};
 
     // Basic operations
     EXPECT_FLOAT_EQ((a + b).value(), 4.0f);
@@ -258,20 +258,76 @@ TEST(NumberTest, FloatingPointOperations) {
     EXPECT_FLOAT_EQ(c.value(), 2.5f / 1.5f);
 }
 
-// Test utility functions
-TEST(NumberTest, UtilityFunctions) {
-    // Test narrowCast
-    constexpr I64 big_num{1000};
-    constexpr I32 small_num = narrowCast<std::int32_t>(big_num);
-    EXPECT_EQ(small_num.value(), 1000);
+TEST(NumberTest, NarrowCastIntegralSameSign)
+{
+    constexpr I64 a{123};
+    constexpr I32 b = narrowCast<I32>(a);
 
-    // Test fromStdSize and toStdSize
-    constexpr std::size_t size = 100;
-    constexpr U64 u64_val = fromStdSize(size);
-    EXPECT_EQ(u64_val.value(), 100ULL);
+    EXPECT_EQ(b.value(), 123);
 
-    constexpr std::size_t back_to_size = toStdSize(u64_val);
-    EXPECT_EQ(back_to_size, 100ULL);
+    constexpr auto c = 456_u64;
+    constexpr auto d = narrowCast<U32>(c);
+
+    EXPECT_EQ(d.value(), 456);
+}
+
+TEST(NumberTest, NarrowCastFloating)
+{
+    constexpr F64 a{3.25};
+    constexpr F32 b = narrowCast<F32>(a);
+
+    EXPECT_FLOAT_EQ(b.value(), 3.25f);
+}
+
+TEST(NumberTest, SignCastSameWidth)
+{
+    constexpr I32 a{-1};
+    constexpr U32 b = signCast<U32>(a);
+
+    EXPECT_EQ(b.value(), static_cast<std::uint32_t>(-1));
+
+    constexpr U32 c{0xFFFFFFFFu};
+    constexpr I32 d = signCast<I32>(c);
+
+    EXPECT_EQ(d.value(), static_cast<std::int32_t>(0xFFFFFFFFu));
+}
+
+TEST(NumberTest, NumericCastIntegral)
+{
+    constexpr I64 a{-42};
+    constexpr auto b = numericCast<U32>(a);
+
+    EXPECT_EQ(b.value(), static_cast<std::uint32_t>(-42));
+
+    constexpr F32 c{1.5f};
+    constexpr auto d = numericCast<F64>(c);
+
+    EXPECT_DOUBLE_EQ(d.value(), 1.5);
+
+    constexpr I32 e{-10};
+    constexpr auto f = numericCast<F64>(e);
+
+    EXPECT_DOUBLE_EQ(f.value(), -10.0);
+
+    constexpr F64 g{3.9};
+    constexpr auto h = numericCast<I32>(g);
+
+    EXPECT_EQ(h.value(), 3);  // truncation
+}
+
+TEST(NumberTest, StdSizeBridge)
+{
+    using namespace original;
+
+    constexpr size_t n = 12345;
+    constexpr auto u = fromStdSize(n);
+
+    EXPECT_EQ(u.value(), 12345u);
+
+    constexpr size_t m = toStdSize(u);
+    EXPECT_EQ(m, n);
+    EXPECT_EQ(m, u);
+    EXPECT_EQ(n, u);
 }
 
 // Test traits
@@ -377,7 +433,7 @@ TEST(NumberUnaryOperator, UnaryPlus)
 
     // unsigned integer
     {
-        constexpr U32 a{42};
+        constexpr auto a = 42_u32;
         auto b = +a;
 
         EXPECT_EQ(b, 42u);
