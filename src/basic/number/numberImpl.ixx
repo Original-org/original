@@ -1033,12 +1033,22 @@ namespace original
      */
     export namespace literals
     {
+        constexpr I8 operator""_i8(const unsigned long long v) noexcept
+        {
+            return I8{static_cast<std::int8_t>(v)};
+        }
+
+        constexpr I16 operator""_i16(const unsigned long long v) noexcept
+        {
+            return I16{static_cast<std::int16_t>(v)};
+        }
+
         /**
          * @brief User-defined literal for creating I32 values.
          * @param v Unsigned long long literal value.
          * @return I32 instance with the given value.
          */
-        constexpr I32 operator""_i32(const unsigned long long v)
+        constexpr I32 operator""_i32(const unsigned long long v) noexcept
         {
             return I32{static_cast<std::int32_t>(v)};
         }
@@ -1048,9 +1058,24 @@ namespace original
          * @param v Unsigned long long literal value.
          * @return I64 instance with the given value.
          */
-        constexpr I64 operator""_i64(const unsigned long long v)
+        constexpr I64 operator""_i64(const unsigned long long v) noexcept
         {
             return I64{static_cast<std::int64_t>(v)};
+        }
+
+        constexpr Byte operator""_byte(const unsigned long long v) noexcept
+        {
+            return Byte{static_cast<std::uint8_t>(v)};
+        }
+
+        constexpr U8 operator""_u8(const unsigned long long v) noexcept
+        {
+            return U8{static_cast<std::uint8_t>(v)};
+        }
+
+        constexpr U16 operator""_u16(const unsigned long long v) noexcept
+        {
+            return U16{static_cast<std::uint16_t>(v)};
         }
 
         /**
@@ -1058,7 +1083,7 @@ namespace original
          * @param v Unsigned long long literal value.
          * @return U32 instance with the given value.
          */
-        constexpr U32 operator""_u32(const unsigned long long v)
+        constexpr U32 operator""_u32(const unsigned long long v) noexcept
         {
             return U32{static_cast<std::uint32_t>(v)};
         }
@@ -1068,7 +1093,7 @@ namespace original
          * @param v Unsigned long long literal value.
          * @return U64 instance with the given value.
          */
-        constexpr U64 operator""_u64(const unsigned long long v)
+        constexpr U64 operator""_u64(const unsigned long long v) noexcept
         {
             return U64{v};
         }
@@ -1078,7 +1103,7 @@ namespace original
          * @param v Long double literal value.
          * @return F32 instance with the given value.
          */
-        constexpr F32 operator""_f32(const long double v)
+        constexpr F32 operator""_f32(const long double v) noexcept
         {
             return F32{static_cast<float>(v)};
         }
@@ -1088,7 +1113,7 @@ namespace original
          * @param v Long double literal value.
          * @return F64 instance with the given value.
          */
-        constexpr F64 operator""_f64(const long double v)
+        constexpr F64 operator""_f64(const long double v) noexcept
         {
             return F64{static_cast<double>(v)};
         }
@@ -1099,7 +1124,7 @@ namespace original
          * @param v Long double literal value.
          * @return F80 instance with the given value.
          */
-        constexpr F80 operator""_f80(const long double v)
+        constexpr F80 operator""_f80(const long double v) noexcept
         {
             return F80{v};
         }
