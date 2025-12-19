@@ -19,6 +19,8 @@ namespace original
         protected:
             T value_{};
 
+            constexpr Number() noexcept = default;
+
             /**
              * @brief Constructs from an underlying value.
              */
@@ -51,6 +53,8 @@ namespace original
          * @brief The underlying integral type.
          */
         using Type = T;
+
+        constexpr Integer() noexcept = default;
 
         explicit constexpr Integer(T value) noexcept : Base(value) {}
 
@@ -624,6 +628,8 @@ namespace original
          * @brief The underlying floating-point type.
          */
         using Type = T;
+
+        constexpr Floating() noexcept = default;
 
         /**
          * @brief Constructs a Floating from a value of the underlying type.
