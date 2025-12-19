@@ -1,6 +1,5 @@
 #include <cmath>
 #include <gtest/gtest.h>
-#include <cstdint>
 #include <limits>
 #include <type_traits>
 import original.basic.number;
@@ -319,21 +318,33 @@ TEST(NumberTest, NumberTraits) {
     EXPECT_TRUE(true);
 }
 
-// Test edge cases
-TEST(NumberTest, EdgeCases) {
+// Test numeric algorithms
+TEST(NumberTest, NumericAlogorithms) {
     // Maximum value test
-    constexpr I32 max_int{std::numeric_limits<std::int32_t>::max()};
+    constexpr auto max_int = maximum<I32>();
     EXPECT_EQ(max_int.value(), std::numeric_limits<std::int32_t>::max());
 
-    constexpr I32 min_int{std::numeric_limits<std::int32_t>::min()};
+    constexpr auto min_int = minimum<I32>();
     EXPECT_EQ(min_int.value(), std::numeric_limits<std::int32_t>::min());
 
-    // Floating-point special values
-    constexpr F32 inf_val{std::numeric_limits<float>::infinity()};
-    EXPECT_TRUE(std::isinf(inf_val.value()));
+    constexpr auto max_uint = maximum<U32>();
+    EXPECT_EQ(max_uint.value(), std::numeric_limits<std::uint32_t>::max());
 
-    constexpr F32 nan_val{std::numeric_limits<float>::quiet_NaN()};
-    EXPECT_TRUE(std::isnan(nan_val.value()));
+    constexpr auto min_uint = minimum<U32>();
+    EXPECT_EQ(min_uint.value(), std::numeric_limits<std::uint32_t>::min());
+
+    // Floating-point special values
+    constexpr auto inf_val = infinity<F32>();
+    EXPECT_FALSE(isFinite(inf_val));
+
+    constexpr auto nan_val = nan<F64>();
+    EXPECT_TRUE(isNaN(nan_val));
+
+    constexpr auto neg_int = -1_i32;
+    EXPECT_EQ(abs(neg_int), 1_i32);
+
+    constexpr auto neg_float = -1.0_f32;
+    EXPECT_EQ(abs(neg_float), 1.0_f32);
 }
 
 // Test mixed-type operations
@@ -342,14 +353,14 @@ TEST(NumberTest, MixedTypeOperations) {
     constexpr I32 b{3};
 
     // These should all work normally
-    EXPECT_EQ((a + b).value(), 13);
-    EXPECT_EQ((a * b).value(), 30);
-    EXPECT_EQ((a / b).value(), 3);
+    EXPECT_EQ(a + b, 13);
+    EXPECT_EQ(a * b, 30);
+    EXPECT_EQ(a / b, 3);
 
     // Mixed operations with underlying types
-    EXPECT_EQ((a + 5).value(), 15);
-    EXPECT_EQ((a - 2).value(), 8);
-    EXPECT_EQ((a * 3).value(), 30);
+    EXPECT_EQ(a + 5, 15);
+    EXPECT_EQ(a - 2, 8);
+    EXPECT_EQ(a * 3, 30);
 }
 
 TEST(NumberUnaryOperator, UnaryPlus)
