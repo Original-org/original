@@ -1,5 +1,6 @@
 module;
 #include <compare>
+#include <cstddef>
 #include <cstdint>
 export module original.basic.number.numberImpl;
 import original.basic.types;
@@ -1011,6 +1012,8 @@ namespace original
     export using I32 = Integer<std::int32_t>;
     /** @brief Signed 64-bit integer wrapper. */
     export using I64 = Integer<std::int64_t>;
+
+    export using Diff = Integer<std::ptrdiff_t>;
     /** @brief Unsigned 8-bit integer wrapper. */
     export using U8 = Integer<std::uint8_t>;
     /** @brief Unsigned 16-bit integer wrapper. */
@@ -1062,6 +1065,11 @@ namespace original
         constexpr I64 operator""_i64(const unsigned long long v) noexcept
         {
             return I64{static_cast<std::int64_t>(v)};
+        }
+
+        constexpr Diff operator""_diff(const unsigned long long v) noexcept
+        {
+            return Diff{static_cast<std::ptrdiff_t>(v)};
         }
 
         constexpr Byte operator""_byte(const unsigned long long v) noexcept
