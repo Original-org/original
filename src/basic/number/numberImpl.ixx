@@ -1,6 +1,5 @@
 module;
 #include <compare>
-#include <cstdint>
 export module original.basic.number.numberImpl;
 import original.basic.types;
 
@@ -56,15 +55,13 @@ namespace original
 
         constexpr Integer() noexcept = default;
 
-        explicit constexpr Integer(T value) noexcept : Base(value) {}
-
         /**
          * @brief Converting constructor from a smaller integral type.
          * @tparam U Source integral type.
          * @param value The value to convert and wrap.
          */
         template<StdIntegral U>
-        requires (sizeof(U) <= sizeof(T))
+        requires (sizeof(U) <= sizeof(T) && StdSameSignIntegral<T, U>)
         explicit constexpr Integer(U value) noexcept : Base(static_cast<T>(value)) {}
 
         /**
@@ -108,7 +105,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Strong ordering result.
          */
-        constexpr std::strong_ordering operator<=>(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr std::strong_ordering operator<=>(U rhs) const noexcept
         {
             return this->value_ <=> rhs;
         }
@@ -118,7 +117,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return true if values are equal.
          */
-        constexpr bool operator==(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr bool operator==(U rhs) const noexcept
         {
             return this->value_ == rhs;
         }
@@ -139,9 +140,12 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator+=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator+=(U rhs) noexcept
         {
-            return *this += Integer{rhs};
+            this->value_ += rhs;
+            return *this;
         }
 
         /**
@@ -160,9 +164,12 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator-=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator-=(U rhs) noexcept
         {
-            return *this -= Integer{rhs};
+            this->value_ -= rhs;
+            return *this;
         }
 
         /**
@@ -181,9 +188,12 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator*=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator*=(U rhs) noexcept
         {
-            return *this *= Integer{rhs};
+            this->value_ *= rhs;
+            return *this;
         }
 
         /**
@@ -204,9 +214,12 @@ namespace original
          * @return Reference to this Integer.
          * @note Division by zero leads to undefined behavior.
          */
-        constexpr Integer& operator/=(T rhs)
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator/=(U rhs)
         {
-            return *this /= Integer{rhs};
+            this->value_ /= rhs;
+            return *this;
         }
 
         /**
@@ -227,9 +240,12 @@ namespace original
          * @return Reference to this Integer.
          * @note Modulo by zero leads to undefined behavior.
          */
-        constexpr Integer& operator%=(T rhs)
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator%=(U rhs)
         {
-            return *this %= Integer{rhs};
+            this->value_ %= rhs;
+            return *this;
         }
 
         /**
@@ -313,7 +329,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the sum.
          */
-        constexpr Integer operator+(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator+(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp += rhs;
@@ -337,7 +355,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the difference.
          */
-        constexpr Integer operator-(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator-(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp -= rhs;
@@ -361,7 +381,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the product.
          */
-        constexpr Integer operator*(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator*(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp *= rhs;
@@ -387,7 +409,9 @@ namespace original
          * @return New Integer containing the quotient.
          * @note Division by zero leads to undefined behavior.
          */
-        constexpr Integer operator/(T rhs) const
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator/(U rhs) const
         {
             Integer tmp{*this};
             tmp /= rhs;
@@ -413,7 +437,9 @@ namespace original
          * @return New Integer containing the remainder.
          * @note Modulo by zero leads to undefined behavior.
          */
-        constexpr Integer operator%(T rhs) const
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator%(U rhs) const
         {
             Integer tmp{*this};
             tmp %= rhs;
@@ -482,7 +508,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator&=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator&=(U rhs) noexcept
         {
             this->value_ &= rhs;
             return *this;
@@ -504,7 +532,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator|=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator|=(U rhs) noexcept
         {
             this->value_ |= rhs;
             return *this;
@@ -526,7 +556,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator^=(T rhs) noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer& operator^=(U rhs) noexcept
         {
             this->value_ ^= rhs;
             return *this;
@@ -549,7 +581,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the result.
          */
-        constexpr Integer operator&(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator&(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp &= rhs;
@@ -573,7 +607,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the result.
          */
-        constexpr Integer operator|(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator|(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp |= rhs;
@@ -597,7 +633,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Integer containing the result.
          */
-        constexpr Integer operator^(T rhs) const noexcept
+        template<StdIntegral U>
+        requires std::same_as<U, T>
+        constexpr Integer operator^(U rhs) const noexcept
         {
             Integer tmp{*this};
             tmp ^= rhs;
@@ -630,12 +668,6 @@ namespace original
         using Type = T;
 
         constexpr Floating() noexcept = default;
-
-        /**
-         * @brief Constructs a Floating from a value of the underlying type.
-         * @param value The value to wrap.
-         */
-        explicit constexpr Floating(T value) noexcept : Base(value) {}
 
         /**
          * @brief Converting constructor from a smaller floating-point type.
@@ -688,7 +720,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Partial ordering result.
          */
-        constexpr std::partial_ordering operator<=>(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr std::partial_ordering operator<=>(U rhs) const noexcept
         {
             return this->value_ <=> rhs;
         }
@@ -698,7 +732,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return true if values are equal.
          */
-        constexpr bool operator==(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr bool operator==(U rhs) const noexcept
         {
             return this->value_ == rhs;
         }
@@ -719,7 +755,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Floating.
          */
-        constexpr Floating& operator+=(T rhs) noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating& operator+=(U rhs) noexcept
         {
             this->value_ += rhs;
             return *this;
@@ -741,7 +779,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Floating.
          */
-        constexpr Floating& operator-=(T rhs) noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating& operator-=(U rhs) noexcept
         {
             this->value_ -= rhs;
             return *this;
@@ -763,7 +803,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Floating.
          */
-        constexpr Floating& operator*=(T rhs) noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating& operator*=(U rhs) noexcept
         {
             this->value_ *= rhs;
             return *this;
@@ -785,7 +827,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return Reference to this Floating.
          */
-        constexpr Floating& operator/=(T rhs)
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating& operator/=(U rhs)
         {
             this->value_ /= rhs;
             return *this;
@@ -870,7 +914,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Floating containing the sum.
          */
-        constexpr Floating operator+(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating operator+(U rhs) const noexcept
         {
             Floating tmp{*this};
             tmp += rhs;
@@ -894,7 +940,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Floating containing the difference.
          */
-        constexpr Floating operator-(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating operator-(U rhs) const noexcept
         {
             Floating tmp{*this};
             tmp -= rhs;
@@ -918,7 +966,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Floating containing the product.
          */
-        constexpr Floating operator*(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating operator*(U rhs) const noexcept
         {
             Floating tmp{*this};
             tmp *= rhs;
@@ -942,7 +992,9 @@ namespace original
          * @param rhs Value of underlying type.
          * @return New Floating containing the quotient.
          */
-        constexpr Floating operator/(T rhs) const noexcept
+        template<StdFloating U>
+        requires std::same_as<U, T>
+        constexpr Floating operator/(U rhs) const noexcept
         {
             Floating tmp{*this};
             tmp /= rhs;
