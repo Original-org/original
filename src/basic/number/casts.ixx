@@ -234,4 +234,10 @@ export namespace original
     {
         return v.value();
     }
+
+    template<NumberLike T>
+    constexpr NumberLikeType<T> numberLikeValue(const T& v) noexcept
+    {
+        return static_cast<NumberLikeType<T>>(v);
+    }
 }
