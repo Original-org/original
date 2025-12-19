@@ -63,6 +63,14 @@ export namespace original
     template<typename T>
     constexpr bool IS_STD_UNSIGNED_INTEGRAL = StdIntegral<T> && std::is_unsigned_v<T>;
 
+    template<typename T, typename U>
+    constexpr bool STD_HAS_SAME_SIGN_INTEGRAL
+        = (IS_STD_SIGNED_INTEGRAL<T> && IS_STD_SIGNED_INTEGRAL<U>) ||
+          (IS_STD_UNSIGNED_INTEGRAL<T> && IS_STD_UNSIGNED_INTEGRAL<U>);
+
+    template<typename T, typename U>
+    concept StdSameSignIntegral = STD_HAS_SAME_SIGN_INTEGRAL<T, U>;
+
     /**
      * @brief Concept that constrains a type to be a standard floating-point type.
      * This concept is true for any type T where std::is_floating_point_v<T> is true.

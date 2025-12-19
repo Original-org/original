@@ -117,4 +117,13 @@ export namespace original
 
     template<typename T>
     concept FloatingPoint = IS_FLOATING_POINT<T>;
+
+    template<typename T, typename U>
+    constexpr bool HAS_SAME_SIGN_INTEGRAL
+        = IS_NUMBER<T> &&
+          IS_NUMBER<U> &&
+          STD_HAS_SAME_SIGN_INTEGRAL<NumberType<T>, NumberType<U>>;
+
+    template<typename T, typename U>
+    concept SameSignIntegral = HAS_SAME_SIGN_INTEGRAL<T, U>;
 }
