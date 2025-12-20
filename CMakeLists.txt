@@ -47,7 +47,7 @@ target_sources(original
         src/metaInfo.ixx
         src/environment.ixx
         src/basic/basic.ixx
-        src/basic/types/types.ixx
+        src/basic/types.ixx
         src/basic/number/number.ixx
         src/basic/number/traits.ixx
         src/basic/number/numberImpl.ixx
