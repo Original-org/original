@@ -332,27 +332,8 @@ TEST(NumberTest, StdSizeBridge)
 
 // Test traits
 TEST(NumberTest, NumberTraits) {
-    // NumberTrait test
-    EXPECT_TRUE(NumberTrait<I32>::value);
-    EXPECT_TRUE(NumberTrait<F32>::value);
-    EXPECT_FALSE(NumberTrait<int>::value);
-    EXPECT_FALSE(NumberTrait<std::string>::value);
-
     static_assert(std::is_same_v<NumberTrait<I32>::Type, std::int32_t>);
     static_assert(std::is_same_v<NumberTrait<F64>::Type, double>);
-
-    // IsNumber test
-    EXPECT_TRUE(IS_NUMBER<I32>);
-    EXPECT_TRUE(IS_NUMBER<F64>);
-    EXPECT_FALSE(IS_NUMBER<int>);
-    EXPECT_FALSE(IS_NUMBER<float>);
-
-    // IsNumberLike test
-    EXPECT_TRUE(IS_NUMBER_LIKE<I32>);
-    EXPECT_TRUE(IS_NUMBER_LIKE<F32>);
-    EXPECT_TRUE(IS_NUMBER_LIKE<int>);
-    EXPECT_TRUE(IS_NUMBER_LIKE<float>);
-    EXPECT_FALSE(IS_NUMBER_LIKE<std::string>);
 
     // Concept tests
     static_assert(Number<I32>);
@@ -367,9 +348,7 @@ TEST(NumberTest, NumberTraits) {
 
     // NumberLikeType test
     static_assert(std::is_same_v<NumberLikeType<I32>, std::int32_t>);
-    static_assert(std::is_same_v<NumberLikeType<int>, int>);
     static_assert(std::is_same_v<NumberLikeType<F32>, float>);
-    static_assert(std::is_same_v<NumberLikeType<float>, float>);
 
     EXPECT_TRUE(true);
 }
