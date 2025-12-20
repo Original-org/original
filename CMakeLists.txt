@@ -45,6 +45,7 @@ target_sources(original
         FILE_SET cxx_modules TYPE CXX_MODULES FILES
         src/original.ixx
         src/basic/metaInfo.ixx
+        src/metaInfo.ixx
         src/basic/basic.ixx
         src/basic/types/types.ixx
         src/basic/number/number.ixx

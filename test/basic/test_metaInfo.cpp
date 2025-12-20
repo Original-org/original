@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <string_view>
 
-import original.basic.metaInfo;
+import original.metaInfo;
 
 using namespace original;
 
@@ -58,4 +58,9 @@ TEST_F(MetaInfoTest, ConstantsAreAccessible) {
         [[maybe_unused]] auto license = info::LICENSE;
         [[maybe_unused]] auto org = info::ORGANIZATION;
     });
+}
+
+TEST_F(MetaInfoTest, CurrentVerrrsionCorrect)
+{
+    EXPECT_EQ(std::string_view(info::VERSION), "0.1.0");
 }
