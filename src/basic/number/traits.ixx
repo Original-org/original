@@ -1,352 +1,166 @@
 module;
-#include <type_traits>
 export module original.basic.number.traits;
 import original.basic.types;
 import original.basic.number.numberImpl;
 
 /**
- * @brief Namespace containing type traits for the strongly-typed number wrappers.
+ * @brief Type traits and concepts for strongly-typed numeric wrappers.
  */
 export namespace original
 {
     /**
-     * @struct NumberTrait
-     * @brief Trait to detect whether a type is one of the strongly-typed number wrappers.
-     * Specializations exist for Integer<T> and Floating<T>.
+     * @brief Primary template: not a number wrapper.
      * @tparam T Type to test.
-     *
-     * @note Primary template returns false for all types
-     * @note Specializations provide value = true for number wrapper types
-     * @note Provides Type alias to underlying arithmetic type
-     *
-     * @example
-     * @code
-     * static_assert(NumberTrait<Integer<int>>::value);      // true
-     * static_assert(NumberTrait<Floating<double>>::value);  // true
-     * static_assert(!NumberTrait<int>::value);             // false
-     * static_assert(!NumberTrait<std::string>::value);     // false
-     *
-     * using Underlying = NumberTrait<Integer<long>>::Type;  // long
-     * @endcode
+     * @note Intentionally left incomplete to enforce explicit specializations.
      */
     template<typename T>
-    struct NumberTrait : std::false_type {};
+    struct NumberTrait;
 
     /**
-     * @brief Specialization for Integer types.
-     * @tparam T Standard integral type wrapped by Integer
+     * @brief Integer<T> specialization.
+     * @tparam T Underlying integral type.
+     * @note Provides Type alias to the underlying integral type.
      */
     template<StdIntegral T>
-    struct NumberTrait<Integer<T>> : std::true_type
+    struct NumberTrait<Integer<T>>
     {
-        using Type = T;  ///< Underlying integral type
+        using Type = T;  ///< Underlying integral type.
     };
 
     /**
-     * @brief Specialization for Floating types.
-     * @tparam T Standard floating-point type wrapped by Floating
+     * @brief Floating<T> specialization.
+     * @tparam T Underlying floating-point type.
+     * @note Provides Type alias to the underlying floating-point type.
      */
     template<StdFloating T>
-    struct NumberTrait<Floating<T>> : std::true_type
+    struct NumberTrait<Floating<T>>
     {
-        using Type = T;  ///< Underlying floating-point type
+        using Type = T;  ///< Underlying floating-point type.
     };
 
     /**
-     * @brief Compile-time constant indicating whether T is a strongly-typed number wrapper.
-     * @tparam T The type to check.
-     *
-     * @see NumberTrait
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = IS_NUMBER<Integer<short>>;     // true
-     * constexpr bool test2 = IS_NUMBER<Floating<float>>;    // true
-     * constexpr bool test3 = IS_NUMBER<double>;            // false
-     * constexpr bool test4 = IS_NUMBER<MyClass>;           // false
-     * @endcode
+     * @brief Strongly-typed number wrapper concept.
+     * @tparam T Type to test.
+     * @note True for Integer<T> and Floating<T> specializations of NumberTrait.
      */
     template<typename T>
-    constexpr bool IS_NUMBER = NumberTrait<T>::value;
+    concept Number =
+        requires
+        {
+            typename NumberTrait<T>::Type;
+        };
 
     /**
-     * @brief Compile-time constant indicating whether T is either a strongly-typed number
-     * or a standard arithmetic type.
-     * @tparam T The type to check.
-     *
-     * @note Useful for writing functions that accept both wrapped and unwrapped numbers
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = IS_NUMBER_LIKE<Integer<int>>;  // true
-     * constexpr bool test2 = IS_NUMBER_LIKE<double>;       // true
-     * constexpr bool test3 = IS_NUMBER_LIKE<std::string>;  // false
-     * constexpr bool test4 = IS_NUMBER_LIKE<void>;         // false
-     * @endcode
-     */
-    template<typename T>
-    constexpr bool IS_NUMBER_LIKE = IS_NUMBER<T> || IS_STD_ARITHMETIC<T>;
-
-    /**
-     * @brief Concept requiring T to be a strongly-typed number wrapper.
-     * @tparam T The type to constrain.
-     *
-     * @see IS_NUMBER
-     */
-    template<typename T>
-    concept Number = IS_NUMBER<T>;
-
-    /**
-     * @brief Concept requiring T to be either a strongly-typed number wrapper
-     * or a standard arithmetic type.
-     * @tparam T The type to constrain.
-     *
-     * @see IS_NUMBER_LIKE
-     *
-     * @example
-     * @code
-     * template<NumberLike T>
-     * auto add(T a, T b) { return a + b; }
-     *
-     * add(Integer<int>{1}, Integer<int>{2});  // OK
-     * add(1.0, 2.0);                         // OK
-     * add("hello", "world");                 // Error: strings not NumberLike
-     * @endcode
-     */
-    template<typename T>
-    concept NumberLike = IS_NUMBER_LIKE<T>;
-
-    /**
-     * @brief Extracts the underlying type from a strongly-typed number wrapper.
-     * @tparam T A type satisfying the Number concept.
-     *
-     * @note Returns the standard arithmetic type wrapped by Integer<T> or Floating<T>
-     *
-     * @example
-     * @code
-     * using T1 = NumberType<Integer<long>>;      // long
-     * using T2 = NumberType<Floating<float>>;    // float
-     *
-     * // template usage:
-     * template<Number T>
-     * void func(T value) {
-     *     using Underlying = NumberType<T>;      // Gets int, double, etc.
-     *     // ...
-     * }
-     * @endcode
+     * @brief Extract underlying arithmetic type from Number.
+     * @tparam T Type satisfying Number concept.
+     * @note Returns the standard arithmetic type wrapped by Integer<T> or Floating<T>.
      */
     template<Number T>
     using NumberType = NumberTrait<T>::Type;
 
     /**
-     * @struct NumberLikeTrait
-     * @brief Trait to obtain the underlying arithmetic type from Number
-     * or standard arithmetic types.
-     * @tparam T Type to query.
-     *
-     * @note Unspecialized template is incomplete (cannot be instantiated)
-     * @note Provides Type alias to the underlying arithmetic type
-     *
-     * @example
-     * @code
-     * using T1 = NumberLikeTrait<Integer<int>>::Type;    // int
-     * using T2 = NumberLikeTrait<double>::Type;          // double
-     * // using T3 = NumberLikeTrait<std::string>::Type; // Error: no specialization
-     * @endcode
+     * @brief Accepts either Number wrappers or standard arithmetic types.
+     * @tparam T Type to test.
+     * @note Useful for functions that should accept both wrapped and unwrapped numbers.
      */
     template<typename T>
-    struct NumberLikeTrait {};
+    concept NumberLike =
+        Number<T> || StdArithmetic<T>;
 
     /**
-     * @brief Specialization for strongly-typed number wrappers.
-     * @tparam T Type satisfying Number concept
+     * @brief Implementation helper for extracting arithmetic type from NumberLike.
+     * @tparam T Type to query.
+     * @tparam IsNumber Whether T is a Number wrapper.
      */
-    template<Number T>
-    struct NumberLikeTrait<T>
+    template<typename T, bool IsNumber = Number<T>>
+    struct NumberLikeTypeImpl;
+
+    /**
+     * @brief Specialization for Number wrappers.
+     * @tparam T Type satisfying Number concept.
+     */
+    template<typename T>
+    struct NumberLikeTypeImpl<T, true>
     {
-        using Type = NumberType<T>;  ///< Underlying type of the number wrapper
+        using type = NumberType<T>;  ///< Underlying type of the number wrapper.
     };
 
     /**
-     * @brief Specialization for plain standard arithmetic types.
-     * @tparam T Standard arithmetic type
+     * @brief Specialization for standard arithmetic types.
+     * @tparam T Standard arithmetic type.
      */
-    template<StdArithmetic T>
-    struct NumberLikeTrait<T>
+    template<typename T>
+    struct NumberLikeTypeImpl<T, false>
     {
-        using Type = T;  ///< The arithmetic type itself
+        using type = T;  ///< The arithmetic type itself.
     };
 
     /**
-     * @brief Alias template to retrieve the underlying arithmetic type
-     * for NumberLike types.
-     * @tparam T A type satisfying the NumberLike concept.
-     *
-     * @note Returns the standard arithmetic type, whether wrapped or unwrapped
-     *
-     * @example
-     * @code
-     * using T1 = NumberLikeType<Integer<long>>;   // long
-     * using T2 = NumberLikeType<float>;          // float
-     * using T3 = NumberLikeType<short>;          // short
-     *
-     * // In templates:
-     * template<NumberLike T>
-     * auto convert(T value) {
-     *     using ArithType = NumberLikeType<T>;   // Gets the arithmetic type
-     *     return static_cast<ArithType>(value);
-     * }
-     * @endcode
+     * @brief Extract arithmetic type from NumberLike.
+     * @tparam T Type satisfying NumberLike concept.
+     * @note Returns the standard arithmetic type, whether wrapped or unwrapped.
      */
     template<NumberLike T>
-    using NumberLikeType = NumberLikeTrait<T>::Type;
+    using NumberLikeType = NumberLikeTypeImpl<T>::type;
 
     /**
-     * @brief Compile-time constant indicating whether T is an unsigned integer wrapper.
-     * @tparam T Type to check
-     *
-     * @note Only true for Integer<U> where U is unsigned integral type
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = IS_UNSIGNED_INTEGER<Integer<unsigned>>;  // true
-     * constexpr bool test2 = IS_UNSIGNED_INTEGER<Integer<int>>;       // false
-     * constexpr bool test3 = IS_UNSIGNED_INTEGER<Floating<float>>;    // false
-     * constexpr bool test4 = IS_UNSIGNED_INTEGER<unsigned>;           // false (not wrapped)
-     * @endcode
+     * @brief Signed integer wrapper concept.
+     * @tparam T Type to test.
+     * @note True for Integer<T> where T is a signed integral type.
      */
     template<typename T>
-    constexpr bool IS_UNSIGNED_INTEGER = IS_NUMBER<T> && IS_STD_UNSIGNED_INTEGRAL<NumberType<T>>;
+    concept SignedInteger =
+        Number<T> &&
+        StdSignedIntegral<NumberType<T>>;
 
     /**
-     * @brief Compile-time constant indicating whether T is a signed integer wrapper.
-     * @tparam T Type to check
-     *
-     * @note Only true for Integer<T> where T is signed integral type
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = IS_SIGNED_INTEGER<Integer<int>>;        // true
-     * constexpr bool test2 = IS_SIGNED_INTEGER<Integer<long long>>;  // true
-     * constexpr bool test3 = IS_SIGNED_INTEGER<Integer<unsigned>>;   // false
-     * constexpr bool test4 = IS_SIGNED_INTEGER<Floating<double>>;    // false
-     * @endcode
+     * @brief Unsigned integer wrapper concept.
+     * @tparam T Type to test.
+     * @note True for Integer<T> where T is an unsigned integral type.
      */
     template<typename T>
-    constexpr bool IS_SIGNED_INTEGER = IS_NUMBER<T> && IS_STD_SIGNED_INTEGRAL<NumberType<T>>;
+    concept UnsignedInteger =
+        Number<T> &&
+        StdUnsignedIntegral<NumberType<T>>;
 
     /**
-     * @brief Compile-time constant indicating whether T is a floating-point wrapper.
-     * @tparam T Type to check
-     *
-     * @note Only true for Floating<T> where T is floating-point type
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = IS_FLOATING_POINT<Floating<float>>;     // true
-     * constexpr bool test2 = IS_FLOATING_POINT<Floating<double>>;    // true
-     * constexpr bool test3 = IS_FLOATING_POINT<Integer<int>>;        // false
-     * constexpr bool test4 = IS_FLOATING_POINT<long double>;         // false (not wrapped)
-     * @endcode
+     * @brief Floating-point wrapper concept.
+     * @tparam T Type to test.
+     * @note True for Floating<T> where T is a floating-point type.
      */
     template<typename T>
-    constexpr bool IS_FLOATING_POINT = IS_NUMBER<T> && IS_STD_FLOATING<NumberType<T>>;
+    concept FloatingPoint =
+        Number<T> &&
+        StdFloating<NumberType<T>>;
 
     /**
-     * @brief Concept requiring T to be an unsigned integer wrapper.
-     * @tparam T The type to constrain.
-     *
-     * @see IS_UNSIGNED_INTEGER
-     *
-     * @example
-     * @code
-     * template<UnsignedInteger T>
-     * T safeDecrement(T value) {
-     *     // Safe for unsigned, won't go negative
-     *     return value > T{0} ? value - T{1} : T{0};
-     * }
-     * @endcode
+     * @brief Signed integral-like concept.
+     * @tparam T Type to test.
+     * @note True for signed integral types or signed integer wrappers.
      */
     template<typename T>
-    concept UnsignedInteger = IS_UNSIGNED_INTEGER<T>;
+    concept SignedIntegralLike =
+        StdSignedIntegral<T> ||
+        SignedInteger<T>;
 
     /**
-     * @brief Concept requiring T to be a signed integer wrapper.
-     * @tparam T The type to constrain.
-     *
-     * @see IS_SIGNED_INTEGER
-     *
-     * @example
-     * @code
-     * template<SignedInteger T>
-     * T absoluteValue(T value) {
-     *     return value < T{0} ? -value : value;
-     * }
-     * @endcode
+     * @brief Unsigned integral-like concept.
+     * @tparam T Type to test.
+     * @note True for unsigned integral types or unsigned integer wrappers.
      */
     template<typename T>
-    concept SignedInteger = IS_SIGNED_INTEGER<T>;
+    concept UnsignedIntegralLike =
+        StdUnsignedIntegral<T> ||
+        UnsignedInteger<T>;
 
     /**
-     * @brief Concept requiring T to be a floating-point wrapper.
-     * @tparam T The type to constrain.
-     *
-     * @see IS_FLOATING_POINT
-     *
-     * @example
-     * @code
-     * template<FloatingPoint T>
-     * bool isApproximatelyZero(T value, T epsilon) {
-     *     return abs(value) < epsilon;
-     * }
-     * @endcode
-     */
-    template<typename T>
-    concept FloatingPoint = IS_FLOATING_POINT<T>;
-
-    /**
-     * @brief Compile-time constant indicating whether two number wrappers
-     * have the same integral signedness.
-     * @tparam T First number wrapper type
-     * @tparam U Second number wrapper type
-     *
-     * @note Both types must be Number wrappers
-     * @note Both underlying types must be integral
-     * @note Both must be signed or both must be unsigned
-     *
-     * @example
-     * @code
-     * constexpr bool test1 = HAS_SAME_SIGN_INTEGRAL<Integer<int>, Integer<long>>;   // true
-     * constexpr bool test2 = HAS_SAME_SIGN_INTEGRAL<Integer<unsigned>, Integer<size_t>>; // true
-     * constexpr bool test3 = HAS_SAME_SIGN_INTEGRAL<Integer<int>, Integer<unsigned>>; // false
-     * constexpr bool test4 = HAS_SAME_SIGN_INTEGRAL<Floating<float>, Integer<int>>; // false
-     * @endcode
+     * @brief Require two wrapped integers to have same signedness.
+     * @tparam T First integer wrapper type.
+     * @tparam U Second integer wrapper type.
+     * @note Both must be signed integer wrappers or both must be unsigned integer wrappers.
      */
     template<typename T, typename U>
-    constexpr bool HAS_SAME_SIGN_INTEGRAL
-        = IS_NUMBER<T> &&
-          IS_NUMBER<U> &&
-          STD_HAS_SAME_SIGN_INTEGRAL<NumberType<T>, NumberType<U>>;
-
-    /**
-     * @brief Concept requiring two number wrappers to have same integral signedness.
-     * @tparam T First number wrapper type
-     * @tparam U Second number wrapper type
-     *
-     * @see HAS_SAME_SIGN_INTEGRAL
-     */
-    template<typename T, typename U>
-    concept SameSignIntegral = HAS_SAME_SIGN_INTEGRAL<T, U>;
-
-    template<typename T>
-    constexpr bool IS_UNSIGNED_INTEGRAL_LIKE = IS_STD_UNSIGNED_INTEGRAL<T> || IS_UNSIGNED_INTEGER<T>;
-
-    template<typename T>
-    concept UnsignedIntegralLike = IS_UNSIGNED_INTEGRAL_LIKE<T>;
-
-    template<typename T>
-    constexpr bool IS_SIGNED_INTEGRAL_LIKE = IS_STD_SIGNED_INTEGRAL<T> || IS_SIGNED_INTEGER<T>;
-
-    template<typename T>
-    concept SignedIntegralLike = IS_SIGNED_INTEGRAL_LIKE<T>;
+    concept SameSignIntegral =
+        SignedInteger<T> && SignedInteger<U> ||
+        UnsignedInteger<T> && UnsignedInteger<U>;
 }
