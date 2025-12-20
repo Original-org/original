@@ -44,15 +44,19 @@ target_sources(original
         PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES FILES
         src/original.ixx
-        src/metaInfo.ixx
+        src/metaInfo/metaInfo.ixx
+        src/metaInfo/details/metaInfoDetails.ixx
         src/environment.ixx
         src/basic/basic.ixx
         src/basic/types.ixx
         src/basic/number/number.ixx
         src/basic/number/traits.ixx
+        src/basic/number/details/traitsDetails.ixx
         src/basic/number/numberImpl.ixx
+        src/basic/number/details/numberImplDetails.ixx
         src/basic/number/algorithms.ixx
         src/basic/number/casts.ixx
+        src/basic/number/details/castsDetails.ixx
         src/basic/iterator/iterator.ixx
         src/basic/iterator/traits.ixx
         src/basic/iterator/iteratorImpl.ixx
