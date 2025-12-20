@@ -55,6 +55,7 @@ target_sources(original
         src/basic/iterator/iterator.ixx
         src/basic/iterator/traits.ixx
         src/basic/iterator/iteratorImpl.ixx
+        src/basic/iterator/adaptor.ixx
         PRIVATE
         src/macros.h
         src/original.cpp
