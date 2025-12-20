@@ -25,9 +25,19 @@ export namespace original
     template<typename T>
     concept Dereferenceable = requires(T t) { *t; };
 
+    /**
+     * @brief Concept for convertible types.
+     * @tparam From Source type.
+     * @tparam To Target type.
+    */
     template<typename From, typename To>
     concept StdConvertible = std::is_convertible_v<From, To>;
 
+    /**
+     * @brief Concept for same types.
+     * @tparam T First type.
+     * @tparam U Second type.
+     */
     template<typename T, typename U>
     concept StdSame = std::same_as<T, U>;
 

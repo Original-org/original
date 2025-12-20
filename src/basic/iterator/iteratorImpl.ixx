@@ -221,6 +221,7 @@ export namespace original
          * @brief Compound addition assignment.
          * @param n Distance to move forward.
          * @return Reference to moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr DerivedType& operator+=(U n)
@@ -234,6 +235,7 @@ export namespace original
          * @brief Compound subtraction assignment.
          * @param n Distance to move backward.
          * @return Reference to moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr DerivedType& operator-=(U n)
@@ -256,6 +258,7 @@ export namespace original
          * @brief Subscript operator.
          * @param n Offset from current position.
          * @return Reference to element at offset.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n)
@@ -269,6 +272,7 @@ export namespace original
          * @brief Subscript operator (const).
          * @param n Offset from current position.
          * @return Reference to element at offset.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n) const
@@ -293,6 +297,7 @@ export namespace original
          * @param it Iterator to move.
          * @param n Distance to move.
          * @return Moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator+(DerivedType it, U n)
@@ -307,6 +312,7 @@ export namespace original
          * @param n Distance to move.
          * @param it Iterator to move.
          * @return Moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator+(U n, DerivedType it)
@@ -320,6 +326,7 @@ export namespace original
          * @param it Iterator to move.
          * @param n Distance to move backward.
          * @return Moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator-(DerivedType it, U n)
@@ -461,6 +468,7 @@ export namespace original
          * @brief Compound addition assignment.
          * @param n Distance to move.
          * @return Reference to moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr NormalIterator& operator+=(U n)
@@ -474,6 +482,7 @@ export namespace original
          * @brief Compound subtraction assignment.
          * @param n Distance to move.
          * @return Reference to moved iterator.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr NormalIterator& operator-=(U n)
@@ -496,6 +505,7 @@ export namespace original
          * @brief Subscript operator.
          * @param n Offset from current position.
          * @return Reference to element at offset.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n)
@@ -508,6 +518,7 @@ export namespace original
          * @brief Subscript operator (const).
          * @param n Offset from current position.
          * @return Reference to element at offset.
+         * @note Accepts NumberLike types, converted to DifferenceType's number-like type.
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n) const

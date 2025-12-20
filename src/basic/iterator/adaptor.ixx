@@ -117,6 +117,7 @@ export namespace original
          * @param n Distance to move forward.
          * @return Reference to moved adapter.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter& operator+=(const T n)
@@ -132,6 +133,7 @@ export namespace original
          * @param n Distance to move backward.
          * @return Reference to moved adapter.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter& operator-=(const T n)
@@ -146,6 +148,7 @@ export namespace original
          * @param n Distance to move forward.
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter operator+(const T n) const
@@ -160,6 +163,7 @@ export namespace original
          * @param rhs Other adapter.
          * @return Number of elements between adapters.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Returns standard difference type after NumberLike conversion.
          */
         constexpr difference_type operator-(const StdIteratorAdapter& rhs) const
         requires RandomAccessIterator<iterator_type, DifferenceType>
@@ -184,6 +188,7 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         constexpr reference operator[](T n)
@@ -198,6 +203,7 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         constexpr reference operator[](T n) const
@@ -213,6 +219,7 @@ export namespace original
          * @param it Adapter to move.
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         friend constexpr StdIteratorAdapter operator+(T n, StdIteratorAdapter it)
@@ -228,6 +235,7 @@ export namespace original
          * @param n Distance to move backward.
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
+         * @note Accepts NumberLike types, converted to DifferenceType.
          */
         template<SignedIntegralLike T>
         friend constexpr StdIteratorAdapter operator-(StdIteratorAdapter it, T n)
