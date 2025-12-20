@@ -68,7 +68,7 @@ TEST(NormalIteratorTest, CompoundAssignment)
     it += 3_diff;
     EXPECT_EQ(it.operator->(), arr + 5);
 
-    it -= 2_diff;
+    it -= static_cast<std::ptrdiff_t>(2);
     EXPECT_EQ(it.operator->(), arr + 3);
 }
 
@@ -77,7 +77,7 @@ TEST(NormalIteratorTest, AdditionAndSubtraction)
     constexpr int arr[10]{};
     DefaultIterator it(arr + 1);
 
-    auto it2 = it + 4_diff;
+    auto it2 = it + static_cast<std::ptrdiff_t>(4);
     EXPECT_EQ(it2.operator->(), arr + 5);
 
     auto it3 = 2_diff + it;
@@ -89,7 +89,7 @@ TEST(NormalIteratorTest, AdditionAndSubtraction)
     it += 5_diff;
     EXPECT_EQ(*it, arr[6]);
 
-    it -= 3_diff;
+    it -= static_cast<std::ptrdiff_t>(3);
     EXPECT_EQ(*it, arr[3]);
 }
 
@@ -103,6 +103,12 @@ TEST(NormalIteratorTest, SubscriptOperator)
     EXPECT_EQ(it[-1_diff], 200);
     EXPECT_EQ(it[2_diff], 500);
     EXPECT_EQ(it[-2_diff], 100);
+
+    EXPECT_EQ(it[static_cast<std::ptrdiff_t>(0)], 300);
+    EXPECT_EQ(it[static_cast<std::ptrdiff_t>(1)], 400);
+    EXPECT_EQ(it[static_cast<std::ptrdiff_t>(-1)], 200);
+    EXPECT_EQ(it[static_cast<std::ptrdiff_t>(2)], 500);
+    EXPECT_EQ(it[static_cast<std::ptrdiff_t>(-2)], 100);
 
     constexpr DefaultIterator cit(arr + 2);
     EXPECT_EQ(cit[0_diff], 300);
@@ -153,8 +159,11 @@ TEST(StdIteratorAdapterTest, BasicConstructionAndDereference)
     EXPECT_EQ(*it, 30);
     EXPECT_EQ(it.operator->(), &arr[2]);
     EXPECT_EQ(it[0], 30);
+    EXPECT_EQ(it[0_diff], 30);
     EXPECT_EQ(it[1], 40);
+    EXPECT_EQ(it[1_diff], 40);
     EXPECT_EQ(it[-1], 20);
+    EXPECT_EQ(it[-1_diff], 20);
 }
 
 TEST(StdIteratorAdapterTest, EqualityAndThreeWayComparison)
@@ -206,13 +215,13 @@ TEST(StdIteratorAdapterTest, CompoundAssignmentAndAdditionSubtraction)
     it += 3;
     EXPECT_EQ(it.operator->(), arr + 5);
 
-    it -= 2;
+    it -= 2_diff;
     EXPECT_EQ(it.operator->(), arr + 3);
 
     const auto it2 = it + 4;
     EXPECT_EQ(it2.operator->(), arr + 7);
 
-    const auto it3 = 2 + it;
+    const auto it3 = 2_diff + it;
     EXPECT_EQ(it3.operator->(), arr + 5);
 
     const auto it4 = it - 1;
@@ -243,6 +252,11 @@ TEST(StdIteratorAdapterTest, SubscriptOperator)
     EXPECT_EQ(it[-1], 200);
     EXPECT_EQ(it[2], 500);
     EXPECT_EQ(it[-2], 100);
+    EXPECT_EQ(it[0_diff], 300);
+    EXPECT_EQ(it[1_diff], 400);
+    EXPECT_EQ(it[-1_diff], 200);
+    EXPECT_EQ(it[2_diff], 500);
+    EXPECT_EQ(it[-2_diff], 100);
 }
 
 TEST(StdIteratorAdapterTest, CopyConstructionAndDefaultConstructor)
@@ -268,7 +282,7 @@ TEST(StdIteratorAdapterTest, WorksWithExplicitDifferenceType)
     StdIteratorAdapter<CustomIter> it(base);
 
     EXPECT_EQ(*it, 30);
-    it += 2;
+    it += 2_diff;
     EXPECT_EQ(*it, 50);
 
     const auto diff = it - StdIteratorAdapter<CustomIter>(base);
