@@ -1,5 +1,6 @@
 module;
 export module original.basic.iterator.adaptor;
+import original.basic.types;
 import original.basic.number;
 import original.basic.iterator.traits;
 
@@ -117,8 +118,10 @@ export namespace original
          * @return Reference to moved adapter.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        constexpr StdIteratorAdapter& operator+=(const difference_type n)
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        constexpr StdIteratorAdapter& operator+=(const T n)
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             this->it_ += DifferenceType{n};
             return *this;
@@ -130,8 +133,10 @@ export namespace original
          * @return Reference to moved adapter.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        constexpr StdIteratorAdapter& operator-=(const difference_type n)
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        constexpr StdIteratorAdapter& operator-=(const T n)
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return *this += -n;
         }
@@ -142,8 +147,10 @@ export namespace original
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        constexpr StdIteratorAdapter operator+(const difference_type n) const
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        constexpr StdIteratorAdapter operator+(const T n) const
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{ this->it_ + DifferenceType{n} };
         }
@@ -178,8 +185,10 @@ export namespace original
          * @return Reference to element at offset.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        constexpr reference operator[](difference_type n)
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        constexpr reference operator[](T n)
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return this->it_[DifferenceType{n}];
         }
@@ -190,8 +199,10 @@ export namespace original
          * @return Reference to element at offset.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        constexpr reference operator[](difference_type n) const
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        constexpr reference operator[](T n) const
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return this->it_[DifferenceType{n}];
         }
@@ -203,8 +214,10 @@ export namespace original
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        friend constexpr StdIteratorAdapter operator+(difference_type n, StdIteratorAdapter it)
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        friend constexpr StdIteratorAdapter operator+(T n, StdIteratorAdapter it)
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{it.it_ + DifferenceType{n}};
         }
@@ -216,8 +229,10 @@ export namespace original
          * @return New adapter at offset position.
          * @requires RandomAccessIterator<iterator_type, DifferenceType>
          */
-        friend constexpr StdIteratorAdapter operator-(StdIteratorAdapter it, difference_type n)
-        requires RandomAccessIterator<iterator_type, DifferenceType>
+        template<SignedIntegralLike T>
+        friend constexpr StdIteratorAdapter operator-(StdIteratorAdapter it, T n)
+        requires RandomAccessIterator<iterator_type, DifferenceType> &&
+        StdConvertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{it.it_ - DifferenceType{n}};
         }

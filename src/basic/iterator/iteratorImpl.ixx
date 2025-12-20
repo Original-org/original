@@ -222,7 +222,9 @@ export namespace original
          * @param n Distance to move forward.
          * @return Reference to moved iterator.
          */
-        constexpr DerivedType& operator+=(DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr DerivedType& operator+=(U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             static_cast<DerivedType&>(*this) += numberLikeValue(n);
             return static_cast<DerivedType&>(*this);
@@ -233,7 +235,9 @@ export namespace original
          * @param n Distance to move backward.
          * @return Reference to moved iterator.
          */
-        constexpr DerivedType& operator-=(DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr DerivedType& operator-=(U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return *this += -numberLikeValue(n);
         }
@@ -253,7 +257,9 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          */
-        constexpr ReferenceType operator[](DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr ReferenceType operator[](U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             DerivedType temp = static_cast<DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
@@ -264,7 +270,9 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          */
-        constexpr ReferenceType operator[](DifferenceType n) const
+        template<SignedIntegralLike U>
+        constexpr ReferenceType operator[](U n) const
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             DerivedType temp = static_cast<const DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
@@ -286,7 +294,9 @@ export namespace original
          * @param n Distance to move.
          * @return Moved iterator.
          */
-        friend constexpr DerivedType operator+(DerivedType it, DifferenceType n)
+        template<SignedIntegralLike U>
+        friend constexpr DerivedType operator+(DerivedType it, U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             it += n;
             return it;
@@ -298,7 +308,9 @@ export namespace original
          * @param it Iterator to move.
          * @return Moved iterator.
          */
-        friend constexpr DerivedType operator+(DifferenceType n, DerivedType it)
+        template<SignedIntegralLike U>
+        friend constexpr DerivedType operator+(U n, DerivedType it)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return it + n;
         }
@@ -309,7 +321,9 @@ export namespace original
          * @param n Distance to move backward.
          * @return Moved iterator.
          */
-        friend constexpr DerivedType operator-(DerivedType it, DifferenceType n)
+        template<SignedIntegralLike U>
+        friend constexpr DerivedType operator-(DerivedType it, U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             it -= n;
             return it;
@@ -448,7 +462,9 @@ export namespace original
          * @param n Distance to move.
          * @return Reference to moved iterator.
          */
-        constexpr NormalIterator& operator+=(DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr NormalIterator& operator+=(U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             this->ptr_ += numberLikeValue(n);
             return *this;
@@ -459,7 +475,9 @@ export namespace original
          * @param n Distance to move.
          * @return Reference to moved iterator.
          */
-        constexpr NormalIterator& operator-=(DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr NormalIterator& operator-=(U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return *this += -n;
         }
@@ -479,7 +497,9 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          */
-        constexpr ReferenceType operator[](DifferenceType n)
+        template<SignedIntegralLike U>
+        constexpr ReferenceType operator[](U n)
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return this->ptr_[numberLikeValue(n)];
         }
@@ -489,7 +509,9 @@ export namespace original
          * @param n Offset from current position.
          * @return Reference to element at offset.
          */
-        constexpr ReferenceType operator[](DifferenceType n) const
+        template<SignedIntegralLike U>
+        constexpr ReferenceType operator[](U n) const
+        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return this->ptr_[numberLikeValue(n)];
         }
