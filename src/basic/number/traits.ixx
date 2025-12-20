@@ -3,10 +3,8 @@ export module original.basic.number.traits;
 import original.basic.types;
 import original.basic.number.numberImpl;
 
-/**
- * @brief Type traits and concepts for strongly-typed numeric wrappers.
- */
-export namespace original
+
+namespace original::details
 {
     /**
      * @brief Primary template: not a number wrapper.
@@ -38,6 +36,24 @@ export namespace original
         using Type = T;  ///< Underlying floating-point type.
     };
 
+    template<typename T, bool IsNumber>
+    struct NumberLikeTypeImpl;
+
+    template<typename T>
+    struct NumberLikeTypeImpl<T, true>
+    {
+        using type = NumberTrait<T>::Type;  ///< Underlying type of the number wrapper.
+    };
+
+    template<typename T>
+    struct NumberLikeTypeImpl<T, false>
+    {
+        using type = T;  ///< The arithmetic type itself.
+    };
+}
+
+export namespace original
+{
     /**
      * @brief Strongly-typed number wrapper concept.
      * @tparam T Type to test.
@@ -47,7 +63,7 @@ export namespace original
     concept Number =
         requires
         {
-            typename NumberTrait<T>::Type;
+            typename details::NumberTrait<T>::Type;
         };
 
     /**
@@ -56,7 +72,7 @@ export namespace original
      * @note Returns the standard arithmetic type wrapped by Integer<T> or Floating<T>.
      */
     template<Number T>
-    using NumberType = NumberTrait<T>::Type;
+    using NumberType = details::NumberTrait<T>::Type;
 
     /**
      * @brief Accepts either Number wrappers or standard arithmetic types.
@@ -68,40 +84,12 @@ export namespace original
         Number<T> || StdArithmetic<T>;
 
     /**
-     * @brief Implementation helper for extracting arithmetic type from NumberLike.
-     * @tparam T Type to query.
-     * @tparam IsNumber Whether T is a Number wrapper.
-     */
-    template<typename T, bool IsNumber = Number<T>>
-    struct NumberLikeTypeImpl;
-
-    /**
-     * @brief Specialization for Number wrappers.
-     * @tparam T Type satisfying Number concept.
-     */
-    template<typename T>
-    struct NumberLikeTypeImpl<T, true>
-    {
-        using type = NumberType<T>;  ///< Underlying type of the number wrapper.
-    };
-
-    /**
-     * @brief Specialization for standard arithmetic types.
-     * @tparam T Standard arithmetic type.
-     */
-    template<typename T>
-    struct NumberLikeTypeImpl<T, false>
-    {
-        using type = T;  ///< The arithmetic type itself.
-    };
-
-    /**
      * @brief Extract arithmetic type from NumberLike.
      * @tparam T Type satisfying NumberLike concept.
      * @note Returns the standard arithmetic type, whether wrapped or unwrapped.
      */
     template<NumberLike T>
-    using NumberLikeType = NumberLikeTypeImpl<T>::type;
+    using NumberLikeType = details::NumberLikeTypeImpl<T, Number<T>>::type;
 
     /**
      * @brief Signed integer wrapper concept.
@@ -161,6 +149,6 @@ export namespace original
      */
     template<typename T, typename U>
     concept SameSignIntegral =
-        SignedInteger<T> && SignedInteger<U> ||
-        UnsignedInteger<T> && UnsignedInteger<U>;
+        (SignedInteger<T> && SignedInteger<U>) ||
+        (UnsignedInteger<T> && UnsignedInteger<U>);
 }

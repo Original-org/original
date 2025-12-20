@@ -5,10 +5,9 @@ module;
 export module original.basic.number.numberImpl;
 import original.basic.types;
 
-namespace original
+
+namespace original::details
 {
-    namespace details
-    {
         /**
          * @brief Base class providing common functionality for strongly-typed numbers.
          * This class is intended for internal use only and stores the underlying value.
@@ -38,15 +37,17 @@ namespace original
              */
             [[nodiscard]] constexpr T value() const noexcept { return this->value_; }
         };
-    }
+}
 
+export namespace original
+{
     /**
      * @class Integer
      * @brief Strongly-typed wrapper around integral types providing type safety and consistent interface.
      * Integer behaves like the underlying integral type but prevents implicit mixing with other integral types.
      * @tparam T Underlying integral type (must satisfy StdIntegral).
      */
-    export template<StdIntegral T>
+    template<StdIntegral T>
     class Integer final : public details::Number<T> {
         using Base = details::Number<T>;
     public:
@@ -660,7 +661,7 @@ namespace original
      * Floating behaves like the underlying floating-point type but prevents implicit mixing with other types.
      * @tparam T Underlying floating-point type (must satisfy StdFloating).
      */
-    export template<StdFloating T>
+    template<StdFloating T>
     class Floating final : public details::Number<T> {
         using Base = details::Number<T>;
     public:
@@ -1005,37 +1006,37 @@ namespace original
     };
 
     /** @brief Signed 8-bit integer wrapper. */
-    export using I8 = Integer<std::int8_t>;
+    using I8 = Integer<std::int8_t>;
     /** @brief Signed 16-bit integer wrapper. */
-    export using I16 = Integer<std::int16_t>;
+    using I16 = Integer<std::int16_t>;
     /** @brief Signed 32-bit integer wrapper. */
-    export using I32 = Integer<std::int32_t>;
+    using I32 = Integer<std::int32_t>;
     /** @brief Signed 64-bit integer wrapper. */
-    export using I64 = Integer<std::int64_t>;
+    using I64 = Integer<std::int64_t>;
     /** @brief Pointer difference type wrapper. */
-    export using Diff = Integer<std::ptrdiff_t>;
+    using Diff = Integer<std::ptrdiff_t>;
     /** @brief Unsigned 8-bit integer wrapper. */
-    export using U8 = Integer<std::uint8_t>;
+    using U8 = Integer<std::uint8_t>;
     /** @brief Unsigned 16-bit integer wrapper. */
-    export using U16 = Integer<std::uint16_t>;
+    using U16 = Integer<std::uint16_t>;
     /** @brief Unsigned 32-bit integer wrapper. */
-    export using U32 = Integer<std::uint32_t>;
+    using U32 = Integer<std::uint32_t>;
     /** @brief Unsigned 64-bit integer wrapper. */
-    export using U64 = Integer<std::uint64_t>;
+    using U64 = Integer<std::uint64_t>;
     /** @brief Alias for U8 representing a byte. */
-    export using Byte = U8;
+    using Byte = U8;
     /** @brief Single-precision floating-point wrapper. */
-    export using F32 = Floating<float>;
+    using F32 = Floating<float>;
     /** @brief Double-precision floating-point wrapper. */
-    export using F64 = Floating<double>;
+    using F64 = Floating<double>;
     /** @brief Extended-precision floating-point wrapper. */
-    export using F80 = Floating<long double>;
+    using F80 = Floating<long double>;
 
     /**
      * @brief Namespace containing user-defined literal operators
      * for convenient construction of strongly-typed numbers.
      */
-    export namespace literals
+    namespace literals
     {
         /**
          * @brief User-defined literal for creating I8 values.

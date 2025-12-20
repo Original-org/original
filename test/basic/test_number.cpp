@@ -332,8 +332,8 @@ TEST(NumberTest, StdSizeBridge)
 
 // Test traits
 TEST(NumberTest, NumberTraits) {
-    static_assert(std::is_same_v<NumberTrait<I32>::Type, std::int32_t>);
-    static_assert(std::is_same_v<NumberTrait<F64>::Type, double>);
+    static_assert(std::is_same_v<NumberType<I32>, std::int32_t>);
+    static_assert(std::is_same_v<NumberType<F64>, double>);
 
     // Concept tests
     static_assert(Number<I32>);
