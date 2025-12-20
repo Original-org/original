@@ -230,12 +230,28 @@ export namespace original
      * @note Useful for passing to standard library functions
      * @warning May truncate on platforms where size_t < 64 bits
      */
+    [[nodiscard]]
     constexpr std::size_t toStdSize(const U64& v) noexcept
     {
         return v.value();
     }
 
+    /**
+     * @brief Extracts the underlying arithmetic value from a NumberLike type.
+     * @details Safely converts both wrapped number types (Integer, Floating) and
+     *          standard arithmetic types to their underlying arithmetic value.
+     *          This function provides a uniform way to obtain the primitive value
+     *          regardless of whether the input is wrapped or unwrapped.
+     * @tparam T Type satisfying the NumberLike concept.
+     * @param v The value to extract the underlying arithmetic from.
+     * @return The underlying arithmetic value as NumberLikeType<T>.
+     *
+     * @note For Integer<T>/Floating<T>, returns T
+     * @note For standard arithmetic types, returns the type itself
+     * @note Always noexcept due to simple static_cast or conversion
+     */
     template<NumberLike T>
+    [[nodiscard]]
     constexpr NumberLikeType<T> numberLikeValue(const T& v) noexcept
     {
         return static_cast<NumberLikeType<T>>(v);

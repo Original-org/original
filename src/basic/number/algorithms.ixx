@@ -116,7 +116,7 @@ export namespace original
      *
      * @pre T must be a floating-point type
      * @note Only meaningful for floating-point types
-     * @note Returns +∞, not -∞
+     * @note Returns +INF, not -INF
      *
      * @example
      * @code

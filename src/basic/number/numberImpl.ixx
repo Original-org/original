@@ -1012,7 +1012,7 @@ namespace original
     export using I32 = Integer<std::int32_t>;
     /** @brief Signed 64-bit integer wrapper. */
     export using I64 = Integer<std::int64_t>;
-
+    /** @brief Pointer difference type wrapper. */
     export using Diff = Integer<std::ptrdiff_t>;
     /** @brief Unsigned 8-bit integer wrapper. */
     export using U8 = Integer<std::uint8_t>;
@@ -1033,15 +1033,27 @@ namespace original
 
     /**
      * @brief Namespace containing user-defined literal operators
-     * for convenient construction.
+     * for convenient construction of strongly-typed numbers.
      */
     export namespace literals
     {
+        /**
+         * @brief User-defined literal for creating I8 values.
+         * @param v Unsigned long long literal value.
+         * @return I8 instance with the given value.
+         * @note The value will be truncated to 8 bits.
+         */
         constexpr I8 operator""_i8(const unsigned long long v) noexcept
         {
             return I8{static_cast<std::int8_t>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating I16 values.
+         * @param v Unsigned long long literal value.
+         * @return I16 instance with the given value.
+         * @note The value will be truncated to 16 bits.
+         */
         constexpr I16 operator""_i16(const unsigned long long v) noexcept
         {
             return I16{static_cast<std::int16_t>(v)};
@@ -1067,21 +1079,46 @@ namespace original
             return I64{static_cast<std::int64_t>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating Diff values.
+         * @param v Unsigned long long literal value.
+         * @return Diff instance with the given value.
+         * @note Diff is a platform-dependent signed integer type for pointer differences.
+         */
         constexpr Diff operator""_diff(const unsigned long long v) noexcept
         {
             return Diff{static_cast<std::ptrdiff_t>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating Byte values.
+         * @param v Unsigned long long literal value.
+         * @return Byte instance with the given value.
+         * @note Byte is an alias for U8, representing a byte value.
+         * @note The value will be truncated to 8 bits.
+         */
         constexpr Byte operator""_byte(const unsigned long long v) noexcept
         {
             return Byte{static_cast<std::uint8_t>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating U8 values.
+         * @param v Unsigned long long literal value.
+         * @return U8 instance with the given value.
+         * @note The value will be truncated to 8 bits.
+         */
         constexpr U8 operator""_u8(const unsigned long long v) noexcept
         {
             return U8{static_cast<std::uint8_t>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating U16 values.
+         * @param v Unsigned long long literal value.
+         * @return U16 instance with the given value.
+         * @note The value will be truncated to 16 bits.
+         */
         constexpr U16 operator""_u16(const unsigned long long v) noexcept
         {
             return U16{static_cast<std::uint16_t>(v)};
@@ -1129,7 +1166,6 @@ namespace original
 
         /**
          * @brief User-defined literal for creating F80 values.
-         *
          * @param v Long double literal value.
          * @return F80 instance with the given value.
          */

@@ -8,6 +8,13 @@ import original.basic.number;
 
 export namespace original
 {
+    /**
+     * @brief Base class for iterator implementations.
+     * @tparam Derived CRTP derived class type.
+     * @tparam T Value type.
+     * @tparam Reference Reference type.
+     * @tparam Pointer Pointer type.
+     */
     template<
         typename Derived,
         StdObject T,
@@ -17,47 +24,85 @@ export namespace original
     class IteratorBase
     {
     public:
-        using DerivedType = Derived;
-        using ValueType = T;
-        using ReferenceType = Reference;
-        using PointerType = Pointer;
+        using DerivedType = Derived;      ///< CRTP derived type.
+        using ValueType = T;              ///< Element value type.
+        using ReferenceType = Reference;  ///< Element reference type.
+        using PointerType = Pointer;      ///< Element pointer type.
+
     protected:
+        /**
+         * @brief Get derived reference.
+         * @return Reference to derived object.
+         */
         constexpr DerivedType& derived()
         {
             return static_cast<DerivedType&>(*this);
         }
 
+        /**
+         * @brief Get const derived reference.
+         * @return Const reference to derived object.
+         */
         constexpr const DerivedType& derived() const
         {
             return static_cast<const DerivedType&>(*this);
         }
+
     public:
+        /**
+         * @brief Dereference operator.
+         * @return Reference to current element.
+         */
         constexpr ReferenceType operator*() const
         {
             return derived().operator*();
         }
 
+        /**
+         * @brief Dereference operator.
+         * @return Reference to current element.
+         */
         constexpr ReferenceType operator*()
         {
             return derived().operator*();
         }
 
+        /**
+         * @brief Member access operator.
+         * @return Pointer to current element.
+         */
         constexpr PointerType operator->() const
         {
             return std::addressof(**this);
         }
 
+        /**
+         * @brief Member access operator.
+         * @return Pointer to current element.
+         */
         constexpr PointerType operator->()
         {
             return std::addressof(**this);
         }
 
+        /**
+         * @brief Equality comparison.
+         * @param rhs Other iterator to compare.
+         * @return True if iterators are equal.
+         */
         constexpr bool operator==(const Derived& rhs) const
         {
             return derived() == rhs;
         }
     };
 
+    /**
+     * @brief Base class for forward iterators.
+     * @tparam Derived CRTP derived class type.
+     * @tparam T Value type.
+     * @tparam Reference Reference type.
+     * @tparam Pointer Pointer type.
+     */
     template<
         typename Derived,
         StdObject T,
@@ -75,12 +120,20 @@ export namespace original
         using ReferenceType = Reference;
         using PointerType = Pointer;
 
+        /**
+         * @brief Prefix increment.
+         * @return Reference to incremented iterator.
+         */
         constexpr DerivedType& operator++()
         {
             ++static_cast<DerivedType&>(*this);
             return static_cast<DerivedType&>(*this);
         }
 
+        /**
+         * @brief Postfix increment.
+         * @return Copy of iterator before increment.
+         */
         constexpr DerivedType operator++(int)
         {
             DerivedType tmp = static_cast<DerivedType&>(*this);
@@ -89,6 +142,13 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Base class for bidirectional iterators.
+     * @tparam Derived CRTP derived class type.
+     * @tparam T Value type.
+     * @tparam Reference Reference type.
+     * @tparam Pointer Pointer type.
+     */
     template<
         typename Derived,
         StdObject T,
@@ -107,12 +167,20 @@ export namespace original
         using ReferenceType = Reference;
         using PointerType = Pointer;
 
+        /**
+         * @brief Prefix decrement.
+         * @return Reference to decremented iterator.
+         */
         constexpr DerivedType& operator--()
         {
             --static_cast<DerivedType&>(*this);
             return static_cast<DerivedType&>(*this);
         }
 
+        /**
+         * @brief Postfix decrement.
+         * @return Copy of iterator before decrement.
+         */
         constexpr DerivedType operator--(int)
         {
             DerivedType tmp = static_cast<DerivedType&>(*this);
@@ -121,12 +189,20 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Base class for random access iterators.
+     * @tparam Derived CRTP derived class type.
+     * @tparam T Value type.
+     * @tparam Reference Reference type.
+     * @tparam Pointer Pointer type.
+     * @tparam Difference Signed integral difference type.
+     */
     template<
         typename Derived,
         StdObject T,
         StdReference Reference,
         StdPointer Pointer,
-        SignedIntegralLike Distance
+        SignedIntegralLike Difference
     >
     class RandomAccessIteratorBase
     : public BidirectionalIteratorBase<Derived, T, Reference, Pointer>
@@ -139,69 +215,125 @@ export namespace original
         using ValueType = T;
         using ReferenceType = Reference;
         using PointerType = Pointer;
+        using DifferenceType = Difference;
 
-        constexpr DerivedType& operator+=(Distance n)
+        /**
+         * @brief Compound addition assignment.
+         * @param n Distance to move forward.
+         * @return Reference to moved iterator.
+         */
+        constexpr DerivedType& operator+=(DifferenceType n)
         {
             static_cast<DerivedType&>(*this) += numberLikeValue(n);
             return static_cast<DerivedType&>(*this);
         }
 
-        constexpr DerivedType& operator-=(Distance n)
+        /**
+         * @brief Compound subtraction assignment.
+         * @param n Distance to move backward.
+         * @return Reference to moved iterator.
+         */
+        constexpr DerivedType& operator-=(DifferenceType n)
         {
             return *this += -numberLikeValue(n);
         }
 
-        constexpr Distance operator-(const RandomAccessIteratorBase& rhs) const
+        /**
+         * @brief Distance between iterators.
+         * @param rhs Other iterator.
+         * @return Number of elements between iterators.
+         */
+        constexpr DifferenceType operator-(const RandomAccessIteratorBase& rhs) const
         {
             return static_cast<const DerivedType&>(*this) - static_cast<const DerivedType&>(rhs);
         }
 
-        constexpr ReferenceType operator[](Distance n)
+        /**
+         * @brief Subscript operator.
+         * @param n Offset from current position.
+         * @return Reference to element at offset.
+         */
+        constexpr ReferenceType operator[](DifferenceType n)
         {
             DerivedType temp = static_cast<DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
         }
 
-        constexpr ReferenceType operator[](Distance n) const
+        /**
+         * @brief Subscript operator (const).
+         * @param n Offset from current position.
+         * @return Reference to element at offset.
+         */
+        constexpr ReferenceType operator[](DifferenceType n) const
         {
             DerivedType temp = static_cast<const DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
         }
 
+        /**
+         * @brief Three-way comparison.
+         * @param rhs Other iterator.
+         * @return Ordering relationship.
+         */
         constexpr auto operator<=>(const RandomAccessIteratorBase& rhs) const
         {
             return static_cast<const DerivedType&>(*this) <=> static_cast<const DerivedType&>(rhs);
         }
 
-        friend constexpr DerivedType operator+(DerivedType it, Distance n)
+        /**
+         * @brief Addition with iterator on left.
+         * @param it Iterator to move.
+         * @param n Distance to move.
+         * @return Moved iterator.
+         */
+        friend constexpr DerivedType operator+(DerivedType it, DifferenceType n)
         {
             it += n;
             return it;
         }
 
-        friend constexpr DerivedType operator+(Distance n, DerivedType it)
+        /**
+         * @brief Addition with iterator on right.
+         * @param n Distance to move.
+         * @param it Iterator to move.
+         * @return Moved iterator.
+         */
+        friend constexpr DerivedType operator+(DifferenceType n, DerivedType it)
         {
             return it + n;
         }
 
-        friend constexpr DerivedType operator-(DerivedType it, Distance n)
+        /**
+         * @brief Subtraction with iterator.
+         * @param it Iterator to move.
+         * @param n Distance to move backward.
+         * @return Moved iterator.
+         */
+        friend constexpr DerivedType operator-(DerivedType it, DifferenceType n)
         {
             it -= n;
             return it;
         }
     };
 
+    /**
+     * @brief Normal iterator implementation.
+     * @tparam T Value type.
+     * @tparam Reference Reference type.
+     * @tparam Pointer Pointer type.
+     * @tparam Difference Signed integral difference type.
+     */
     template<StdObject T,
         StdReference Reference,
         StdPointer Pointer,
-        SignedIntegralLike Distance>
+        SignedIntegralLike Difference>
     class NormalIterator
     : public RandomAccessIteratorBase<
-        NormalIterator<T, Reference, Pointer, Distance>,
+        NormalIterator<T, Reference, Pointer, Difference>,
         T,
         Reference,
         Pointer,
-        Distance
+        Difference
     >
     {
         Pointer ptr_{};
@@ -210,43 +342,79 @@ export namespace original
         using ValueType = T;
         using ReferenceType = Reference;
         using PointerType = Pointer;
-        using DistanceType = Distance;
+        using DifferenceType = Difference;
 
+        /**
+         * @brief Default constructor.
+         */
         constexpr NormalIterator() = default;
 
+        /**
+         * @brief Constructor from pointer.
+         * @param ptr Pointer to element.
+         */
         constexpr explicit NormalIterator(ValueType* ptr) : ptr_{ptr} {}
 
+        /**
+         * @brief Dereference operator (const).
+         * @return Reference to element.
+         */
         constexpr ReferenceType operator*() const
         {
             return *this->ptr_;
         }
 
+        /**
+         * @brief Dereference operator.
+         * @return Reference to element.
+         */
         constexpr ReferenceType operator*()
         {
             return *this->ptr_;
         }
 
+        /**
+         * @brief Member access operator (const).
+         * @return Pointer to element.
+         */
         constexpr PointerType operator->() const
         {
             return this->ptr_;
         }
 
+        /**
+         * @brief Member access operator.
+         * @return Pointer to element.
+         */
         constexpr PointerType operator->()
         {
             return this->ptr_;
         }
 
+        /**
+         * @brief Equality comparison.
+         * @param rhs Other iterator.
+         * @return True if pointers are equal.
+         */
         constexpr bool operator==(const NormalIterator& rhs) const
         {
             return this->ptr_ == rhs.ptr_;
         }
 
+        /**
+         * @brief Prefix increment.
+         * @return Reference to incremented iterator.
+         */
         constexpr NormalIterator& operator++()
         {
             ++this->ptr_;
             return *this;
         }
 
+        /**
+         * @brief Postfix increment.
+         * @return Copy of iterator before increment.
+         */
         constexpr NormalIterator operator++(int)
         {
             NormalIterator temp = *this;
@@ -254,12 +422,20 @@ export namespace original
             return temp;
         }
 
+        /**
+         * @brief Prefix decrement.
+         * @return Reference to decremented iterator.
+         */
         constexpr NormalIterator& operator--()
         {
             --this->ptr_;
             return *this;
         }
 
+        /**
+         * @brief Postfix decrement.
+         * @return Copy of iterator before decrement.
+         */
         constexpr NormalIterator operator--(int)
         {
             NormalIterator temp = *this;
@@ -267,38 +443,72 @@ export namespace original
             return temp;
         }
 
-        constexpr NormalIterator& operator+=(Distance n)
+        /**
+         * @brief Compound addition assignment.
+         * @param n Distance to move.
+         * @return Reference to moved iterator.
+         */
+        constexpr NormalIterator& operator+=(DifferenceType n)
         {
             this->ptr_ += numberLikeValue(n);
             return *this;
         }
 
-        constexpr NormalIterator& operator-=(Distance n)
+        /**
+         * @brief Compound subtraction assignment.
+         * @param n Distance to move.
+         * @return Reference to moved iterator.
+         */
+        constexpr NormalIterator& operator-=(DifferenceType n)
         {
             return *this += -n;
         }
 
-        constexpr DistanceType operator-(const NormalIterator& rhs) const
+        /**
+         * @brief Distance between iterators.
+         * @param rhs Other iterator.
+         * @return Number of elements between.
+         */
+        constexpr DifferenceType operator-(const NormalIterator& rhs) const
         {
-            return DistanceType{this->ptr_ - rhs.ptr_};
+            return DifferenceType{this->ptr_ - rhs.ptr_};
         }
 
-        constexpr ReferenceType operator[](Distance n)
+        /**
+         * @brief Subscript operator.
+         * @param n Offset from current position.
+         * @return Reference to element at offset.
+         */
+        constexpr ReferenceType operator[](DifferenceType n)
         {
             return this->ptr_[numberLikeValue(n)];
         }
 
-        constexpr ReferenceType operator[](Distance n) const
+        /**
+         * @brief Subscript operator (const).
+         * @param n Offset from current position.
+         * @return Reference to element at offset.
+         */
+        constexpr ReferenceType operator[](DifferenceType n) const
         {
             return this->ptr_[numberLikeValue(n)];
         }
 
+        /**
+         * @brief Three-way comparison.
+         * @param rhs Other iterator.
+         * @return Ordering of pointers.
+         */
         constexpr auto operator<=>(const NormalIterator& rhs) const
         {
             return this->ptr_ <=> rhs.ptr_;
         }
     };
 
+    /**
+     * @brief Default iterator type alias.
+     * @tparam T Value type.
+     */
     template<StdObject T>
     using DefaultIterator = NormalIterator<T, T&, T*, Diff>;
 }
