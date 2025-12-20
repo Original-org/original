@@ -25,8 +25,8 @@ export namespace original
         Dereferenceable<T> &&
         requires(T it)
     {
-        { *it } -> std::same_as<decltype(*std::declval<T>())>;
-        { it == it } -> std::convertible_to<bool>;
+        { *it } -> StdSame<decltype(*std::declval<T>())>;
+        { it == it } -> StdConvertible<bool>;
     };
 
     /**
@@ -37,8 +37,8 @@ export namespace original
     template<typename T>
     concept ForwardIterator = Iterator<T> && requires(T it)
     {
-        { ++it } -> std::same_as<T&>;
-        { it++ } -> std::same_as<T>;
+        { ++it } -> StdSame<T&>;
+        { it++ } -> StdSame<T>;
         requires std::default_initializable<T>;
     };
 
@@ -50,8 +50,8 @@ export namespace original
     template<typename T>
     concept BidirectionalIterator = ForwardIterator<T> && requires(T it)
     {
-        { --it } -> std::same_as<T&>;
-        { it-- } -> std::same_as<T>;
+        { --it } -> StdSame<T&>;
+        { it-- } -> StdSame<T>;
     };
 
     /**
@@ -66,13 +66,13 @@ export namespace original
           SignedIntegralLike<DifferenceType> &&
           requires(T it, DifferenceType dis)
     {
-        { it + dis } -> std::same_as<T>;
-        { dis + it } -> std::same_as<T>;
-        { it - dis } -> std::same_as<T>;
-        { it - it } -> std::same_as<DifferenceType>;
-        { it += dis } -> std::same_as<T&>;
-        { it -= dis } -> std::same_as<T&>;
-        { it[dis] } -> std::same_as<decltype(*it)>;
+        { it + dis } -> StdSame<T>;
+        { dis + it } -> StdSame<T>;
+        { it - dis } -> StdSame<T>;
+        { it - it } -> StdSame<DifferenceType>;
+        { it += dis } -> StdSame<T&>;
+        { it -= dis } -> StdSame<T&>;
+        { it[dis] } -> StdSame<decltype(*it)>;
         { it <=> it } -> StdThreeWayCompareResult;
     };
 
@@ -99,6 +99,10 @@ export namespace original
         using ReferenceType = Iter::ReferenceType; ///< Reference type returned by dereference.
         using PointerType = Iter::PointerType;  ///< Pointer type for the value.
         using DifferenceType
-            = std::conditional_t<HasDifferenceType<Iter>, typename Iter::DifferenceType, Diff>; ///< Distance type, defaults to Diff.
+            = std::conditional_t<
+                HasDifferenceType<Iter>,
+                typename Iter::DifferenceType,
+                Diff
+              >; ///< Distance type, defaults to Diff.
     };
 }

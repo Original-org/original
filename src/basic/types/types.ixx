@@ -25,6 +25,12 @@ export namespace original
     template<typename T>
     concept Dereferenceable = requires(T t) { *t; };
 
+    template<typename From, typename To>
+    concept StdConvertible = std::is_convertible_v<From, To>;
+
+    template<typename T, typename U>
+    concept StdSame = std::same_as<T, U>;
+
     /**
      * @brief Concept that constrains a type to be a raw pointer type.
      */
@@ -82,7 +88,7 @@ export namespace original
      */
     template<typename T>
     concept StdThreeWayCompareResult =
-        std::same_as<T, std::strong_ordering> ||
-        std::same_as<T, std::weak_ordering>   ||
-        std::same_as<T, std::partial_ordering>;
+        StdSame<T, std::strong_ordering> ||
+        StdSame<T, std::weak_ordering>   ||
+        StdSame<T, std::partial_ordering>;
 }
