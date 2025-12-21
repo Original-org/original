@@ -3,7 +3,7 @@ module;
 #include <limits>
 export module original.basic.number.algorithms;
 import original.basic.number.traits;
-import original.basic.number.numberImpl;
+import original.basic.number.impl;
 
 
 export namespace original

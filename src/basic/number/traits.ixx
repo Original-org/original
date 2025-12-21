@@ -1,7 +1,7 @@
 module;
 export module original.basic.number.traits;
 import original.basic.types;
-import original.basic.number.numberImpl;
+import original.basic.number.impl;
 
 
 namespace original::details

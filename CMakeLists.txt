@@ -50,12 +50,12 @@ target_sources(original
         src/basic/types.ixx
         src/basic/number/number.ixx
         src/basic/number/traits.ixx
-        src/basic/number/numberImpl.ixx
+        src/basic/number/impl.ixx
         src/basic/number/algorithms.ixx
         src/basic/number/casts.ixx
         src/basic/iterator/iterator.ixx
         src/basic/iterator/traits.ixx
-        src/basic/iterator/iteratorImpl.ixx
+        src/basic/iterator/impl.ixx
         src/basic/iterator/adaptor.ixx
         PRIVATE
         src/macros.h

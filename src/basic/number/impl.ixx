@@ -5,7 +5,7 @@ module;
 #include <limits>
 #include <string>
 #include <stdexcept>
-export module original.basic.number.numberImpl;
+export module original.basic.number.impl;
 import original.basic.types;
 
 
