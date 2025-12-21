@@ -4,7 +4,7 @@ module;
 export module original.metaInfo;
 
 
-namespace original::details
+export namespace original::info
 {
     struct Version
     {
@@ -12,13 +12,16 @@ namespace original::details
         const int minor;
         const int patch;
 
-        constexpr std::string str() const noexcept
+        constexpr Version(const int major, const int minor, const int patch)
+            : major(major), minor(minor), patch(patch) {}
+
+        constexpr auto operator<=>(const Version&) const noexcept = default;
+
+        std::string str() const noexcept
         {
             return std::format("{}.{}.{}", this->major, this->minor, this->patch);
         }
     };
-
-    constexpr Version CURRENT_VERSION{0, 1, 0};
 }
 
 export namespace original::info
@@ -33,5 +36,13 @@ export namespace original::info
 
     constexpr auto ORGANIZATION = "Original-org";
 
-    const auto VERSION = details::CURRENT_VERSION.str();
+    constexpr auto VERSION = Version{0, 1, 0};
+}
+
+export namespace original::info
+{
+    constexpr bool atLeastCurrentVersion(const Version version)
+    {
+        return version >= VERSION;
+    }
 }
