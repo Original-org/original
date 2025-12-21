@@ -53,6 +53,162 @@ namespace original::details
         {
         protected:
             T value_{};
+    template<StdArithmetic To, StdArithmetic From, From V>
+    consteval void rangeCheckLiterals()
+    {
+        static_assert(
+            V <= static_cast<From>(std::numeric_limits<To>::max()),
+            "Number literal out of range"
+        );
+    }
+
+    template<StdIntegral To>
+    consteval To parseIntegral(const char* str, const std::size_t n)
+    {
+        To v = 0;
+        for (std::size_t i = 0; i < n; ++i)
+        {
+            if (str[i] < '0' || str[i] > '9')
+                throw std::invalid_argument{"invalid integer literal"};
+
+            v = v * 10 + (str[i] - '0');
+        }
+        return v;
+    }
+
+    template<StdArithmetic To, char... Cs>
+    consteval Integer<To> literalIntegral()
+    {
+        constexpr char INPUT[] {Cs...};
+        constexpr auto PARSED_RESULT = parseIntegral<unsigned long long>(INPUT, sizeof...(Cs));
+        rangeCheckLiterals<To, unsigned long long, PARSED_RESULT>();
+        return Integer<To>{static_cast<To>(PARSED_RESULT)};
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedAdd(T a, T b)
+    {
+        T result;
+        if constexpr (USING_MSVC()) // NOLINT
+        {
+            if (_addcarry_u64(0, a, b, &result))
+                throw std::overflow_error{"Add operation overflows"};
+        }
+        else if constexpr (USING_GCC() || USING_CLANG()) // NOLINT
+        {
+            if (__builtin_add_overflow(a, b, &result))
+                throw std::overflow_error{"Add operation overflows"};
+        }
+        return result;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedSub(T a, T b)
+    {
+        if constexpr (StdSignedIntegral<T>)
+        {
+            if ((b > 0 && a < std::numeric_limits<T>::min() + b) ||
+                (b < 0 && a > std::numeric_limits<T>::max() + b))
+            {
+                throw std::overflow_error{"Sub operation overflows"};
+            }
+        }
+        else
+        {
+            if (a < b)
+                throw std::overflow_error{"Sub operation overflows"};
+        }
+        return a - b;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedMul(T a, T b)
+    {
+        if constexpr (StdUnsignedIntegral<T>)
+        {
+            if (b != 0 && a > std::numeric_limits<T>::max() / b)
+                throw std::overflow_error{"Mul overflow"};
+        }
+        else
+        {
+            if ((b > 0 && a > std::numeric_limits<T>::max() / b) ||
+                (b < 0 && a < std::numeric_limits<T>::min() / b))
+            {
+                throw std::overflow_error{"Mul operation overflow"};
+            }
+        }
+
+        return a * b;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedDiv(T a, T b)
+    {
+        if (b == 0)
+            throw std::logic_error{"division by zero"};
+
+        if constexpr (StdSignedIntegral<T>)
+        {
+            if (a == std::numeric_limits<T>::min() && b == T(-1))
+                throw std::overflow_error{"Div operation overflow"};
+        }
+
+        return a / b;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedMod(T a, T b)
+    {
+        if (b == 0)
+            throw std::logic_error{"modulo by zero"};
+
+        if constexpr (StdSignedIntegral<T>)
+        {
+            if (b == -1 && b == std::numeric_limits<T>::min())
+                throw std::overflow_error{"Mod operation overflow"};
+        }
+
+        return a % b;
+    }
+
+    template<StdSignedIntegral T>
+    constexpr T checkedNeg(T a)
+    {
+        if (a == std::numeric_limits<T>::min())
+            throw std::overflow_error{"Neg operation overflow"};
+
+        return -a;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedShiftLeft(T a, std::size_t shift)
+    {
+        if (constexpr std::size_t bits = std::numeric_limits<T>::digits;
+            shift > bits)
+            throw std::overflow_error{"Shift operation overflows"};
+
+        if constexpr (StdSignedIntegral<T>)
+        {
+            if (a < 0)
+                throw std::overflow_error{"Shift operation overflows"};
+        }
+
+        if (a > std::numeric_limits<std::size_t>::max() >> shift)
+            throw std::overflow_error{"Shift operation overflows"};
+
+        return a << shift;
+    }
+
+    template<StdArithmetic T>
+    constexpr T checkedShiftRight(T a, std::size_t shift)
+    {
+        if (constexpr std::size_t bits = std::numeric_limits<T>::digits;
+            shift >= bits)
+            throw std::overflow_error("right shift count out of range");
+
+        return a >> shift;
+    }
+
 
             constexpr Number() noexcept = default;
 
@@ -167,9 +323,9 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator+=(Integer rhs) noexcept
+        constexpr Integer& operator+=(Integer rhs)
         {
-            this->value_ += rhs.value();
+            this->value_ = details::checkedAdd<T>(this->value_, rhs.value());
             return *this;
         }
 
@@ -180,9 +336,9 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer& operator+=(U rhs) noexcept
+        constexpr Integer& operator+=(U rhs)
         {
-            this->value_ += rhs;
+            this->value_ = details::checkedAdd<T>(this->value_, rhs);
             return *this;
         }
 
@@ -191,9 +347,9 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator-=(Integer rhs) noexcept
+        constexpr Integer& operator-=(Integer rhs)
         {
-            this->value_ -= rhs.value();
+            this->value_ = details::checkedSub<T>(this->value_, rhs.value());
             return *this;
         }
 
@@ -204,9 +360,9 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer& operator-=(U rhs) noexcept
+        constexpr Integer& operator-=(U rhs)
         {
-            this->value_ -= rhs;
+            this->value_ = details::checkedSub<T>(this->value_, rhs);
             return *this;
         }
 
@@ -215,9 +371,9 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator*=(Integer rhs) noexcept
+        constexpr Integer& operator*=(Integer rhs)
         {
-            this->value_ *= rhs.value();
+            this->value_ = details::checkedMul<T>(this->value_, rhs.value());
             return *this;
         }
 
@@ -228,9 +384,9 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer& operator*=(U rhs) noexcept
+        constexpr Integer& operator*=(U rhs)
         {
-            this->value_ *= rhs;
+            this->value_ = details::checkedMul<T>(this->value_, rhs);
             return *this;
         }
 
@@ -242,7 +398,7 @@ export namespace original
          */
         constexpr Integer& operator/=(Integer rhs)
         {
-            this->value_ /= rhs.value();
+            this->value_ = details::checkedDiv<T>(this->value_, rhs.value());
             return *this;
         }
 
@@ -256,7 +412,7 @@ export namespace original
         requires std::same_as<U, T>
         constexpr Integer& operator/=(U rhs)
         {
-            this->value_ /= rhs;
+            this->value_ = details::checkedDiv<T>(this->value_, rhs);
             return *this;
         }
 
@@ -268,7 +424,7 @@ export namespace original
          */
         constexpr Integer& operator%=(Integer rhs)
         {
-            this->value_ %= rhs.value();
+            this->value_ = details::checkedMod<T>(this->value_, rhs.value());
             return *this;
         }
 
@@ -282,7 +438,7 @@ export namespace original
         requires std::same_as<U, T>
         constexpr Integer& operator%=(U rhs)
         {
-            this->value_ %= rhs;
+            this->value_ = details::checkedMod<T>(this->value_, rhs);
             return *this;
         }
 
@@ -290,9 +446,9 @@ export namespace original
          * @brief Prefix increment.
          * @return Reference to this Integer after increment.
          */
-        constexpr Integer& operator++() noexcept
+        constexpr Integer& operator++()
         {
-            ++this->value_;
+            this->value_ = details::checkedAdd<T>(this->value_, 1);
             return *this;
         }
 
@@ -300,9 +456,9 @@ export namespace original
          * @brief Prefix decrement.
          * @return Reference to this Integer after decrement.
          */
-        constexpr Integer& operator--() noexcept
+        constexpr Integer& operator--()
         {
-            --this->value_;
+            this->value_ = details::checkedSub<T>(this->value_, 1);
             return *this;
         }
 
@@ -311,10 +467,10 @@ export namespace original
          * @param postfix Dummy parameter to distinguish from prefix increment.
          * @return Copy of this Integer before increment.
          */
-        constexpr Integer operator++(int postfix) noexcept
+        constexpr Integer operator++(int postfix)
         {
             Integer tmp{*this};
-            this->value_ += 1;
+            this->value_ = details::checkedAdd<T>(this->value_, 1);
             return tmp;
         }
 
@@ -323,10 +479,10 @@ export namespace original
          * @param postfix Dummy parameter to distinguish from prefix decrement.
          * @return Copy of this Integer before decrement.
          */
-        constexpr Integer operator--(int postfix) noexcept
+        constexpr Integer operator--(int postfix)
         {
             Integer tmp{*this};
-            this->value_ -= 1;
+            this->value_ = details::checkedSub<T>(this->value_, 1);
             return tmp;
         }
 
@@ -344,10 +500,10 @@ export namespace original
          * @return Integer with negated value.
          * @note Only available for signed integral types.
          */
-        constexpr Integer operator-() const noexcept
+        constexpr Integer operator-() const
         requires StdSignedIntegral<T>
         {
-            return Integer{static_cast<T>(-this->value_)};
+            return Integer{details::checkedNeg<T>(this->value_)};
         }
 
         /**
@@ -355,7 +511,7 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return New Integer containing the sum.
          */
-        constexpr Integer operator+(Integer rhs) const noexcept
+        constexpr Integer operator+(Integer rhs) const
         {
             Integer tmp{*this};
             tmp += rhs;
@@ -369,7 +525,7 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer operator+(U rhs) const noexcept
+        constexpr Integer operator+(U rhs) const
         {
             Integer tmp{*this};
             tmp += rhs;
@@ -381,7 +537,7 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return New Integer containing the difference.
          */
-        constexpr Integer operator-(Integer rhs) const noexcept
+        constexpr Integer operator-(Integer rhs) const
         {
             Integer tmp{*this};
             tmp -= rhs;
@@ -395,7 +551,7 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer operator-(U rhs) const noexcept
+        constexpr Integer operator-(U rhs) const
         {
             Integer tmp{*this};
             tmp -= rhs;
@@ -407,7 +563,7 @@ export namespace original
          * @param rhs Right-hand side operand.
          * @return New Integer containing the product.
          */
-        constexpr Integer operator*(Integer rhs) const noexcept
+        constexpr Integer operator*(Integer rhs) const
         {
             Integer tmp{*this};
             tmp *= rhs;
@@ -421,7 +577,7 @@ export namespace original
          */
         template<StdIntegral U>
         requires std::same_as<U, T>
-        constexpr Integer operator*(U rhs) const noexcept
+        constexpr Integer operator*(U rhs) const
         {
             Integer tmp{*this};
             tmp *= rhs;
@@ -489,9 +645,9 @@ export namespace original
          * @param shift Number of bits to shift left.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator<<=(std::size_t shift) noexcept
+        constexpr Integer& operator<<=(std::size_t shift)
         {
-            this->value_ <<= shift;
+            this->value_ = details::checkedShiftLeft(this->value_, shift);
             return *this;
         }
 
@@ -500,9 +656,9 @@ export namespace original
          * @param shift Number of bits to shift right.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator>>=(std::size_t shift) noexcept
+        constexpr Integer& operator>>=(std::size_t shift)
         {
-            this->value_ >>= shift;
+            this->value_ = details::checkedShiftRight(this->value_, shift);
             return *this;
         }
 
@@ -511,7 +667,7 @@ export namespace original
          * @param shift Number of bits to shift left.
          * @return New Integer containing the shifted value.
          */
-        constexpr Integer operator<<(std::size_t shift) const noexcept
+        constexpr Integer operator<<(std::size_t shift) const
         {
             Integer tmp{*this};
             tmp <<= shift;
@@ -523,7 +679,7 @@ export namespace original
          * @param shift Number of bits to shift right.
          * @return New Integer containing the shifted value.
          */
-        constexpr Integer operator>>(std::size_t shift) const noexcept
+        constexpr Integer operator>>(std::size_t shift) const
         {
             Integer tmp{*this};
             tmp >>= shift;
