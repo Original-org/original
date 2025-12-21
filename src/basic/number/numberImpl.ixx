@@ -1196,147 +1196,193 @@ export namespace original
         }
     };
 
-    /**
-     * @brief Namespace containing user-defined literal operators
-     * for convenient construction of strongly-typed numbers.
-     */
-    namespace literals
-    {
         /**
-         * @brief User-defined literal for creating I8 values.
-         * @param v Unsigned long long literal value.
-         * @return I8 instance with the given value.
-         * @note The value will be truncated to 8 bits.
+         * @brief Namespace containing user-defined literal operators
+         * for convenient construction of strongly-typed numbers.
+         * All operators are consteval, ensuring compile-time evaluation
+         * and range checking with zero runtime overhead.
          */
-        constexpr I8 operator""_i8(const unsigned long long v) noexcept
+        namespace literals
         {
-            return I8{static_cast<std::int8_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating I8 (8-bit signed integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return I8 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval I8 operator""_i8()
+            {
+                return details::literalIntegral<std::int8_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating I16 values.
-         * @param v Unsigned long long literal value.
-         * @return I16 instance with the given value.
-         * @note The value will be truncated to 16 bits.
-         */
-        constexpr I16 operator""_i16(const unsigned long long v) noexcept
-        {
-            return I16{static_cast<std::int16_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating I16 (16-bit signed integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return I16 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval I16 operator""_i16()
+            {
+                return details::literalIntegral<std::int16_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating I32 values.
-         * @param v Unsigned long long literal value.
-         * @return I32 instance with the given value.
-         */
-        constexpr I32 operator""_i32(const unsigned long long v) noexcept
-        {
-            return I32{static_cast<std::int32_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating I32 (32-bit signed integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return I32 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval I32 operator""_i32()
+            {
+                return details::literalIntegral<std::int32_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating I64 values.
-         * @param v Unsigned long long literal value.
-         * @return I64 instance with the given value.
-         */
-        constexpr I64 operator""_i64(const unsigned long long v) noexcept
-        {
-            return I64{static_cast<std::int64_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating I64 (64-bit signed integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return I64 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval I64 operator""_i64()
+            {
+                return details::literalIntegral<std::int64_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating Diff values.
-         * @param v Unsigned long long literal value.
-         * @return Diff instance with the given value.
-         * @note Diff is a platform-dependent signed integer type for pointer differences.
-         */
-        constexpr Diff operator""_diff(const unsigned long long v) noexcept
-        {
-            return Diff{static_cast<std::ptrdiff_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating Diff (pointer difference type) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return Diff instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval Diff operator""_diff()
+            {
+                return details::literalIntegral<std::ptrdiff_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating Byte values.
-         * @param v Unsigned long long literal value.
-         * @return Byte instance with the given value.
-         * @note Byte is an alias for U8, representing a byte value.
-         * @note The value will be truncated to 8 bits.
-         */
-        constexpr Byte operator""_byte(const unsigned long long v) noexcept
-        {
-            return Byte{static_cast<std::uint8_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating Byte (8-bit unsigned integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return Byte instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval Byte operator""_byte()
+            {
+                return details::literalIntegral<std::uint8_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating U8 values.
-         * @param v Unsigned long long literal value.
-         * @return U8 instance with the given value.
-         * @note The value will be truncated to 8 bits.
-         */
-        constexpr U8 operator""_u8(const unsigned long long v) noexcept
-        {
-            return U8{static_cast<std::uint8_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating U8 (8-bit unsigned integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return U8 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval U8 operator""_u8()
+            {
+                return details::literalIntegral<std::uint8_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating U16 values.
-         * @param v Unsigned long long literal value.
-         * @return U16 instance with the given value.
-         * @note The value will be truncated to 16 bits.
-         */
-        constexpr U16 operator""_u16(const unsigned long long v) noexcept
-        {
-            return U16{static_cast<std::uint16_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating U16 (16-bit unsigned integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return U16 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval U16 operator""_u16()
+            {
+                return details::literalIntegral<std::uint16_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating U32 values.
-         * @param v Unsigned long long literal value.
-         * @return U32 instance with the given value.
-         */
-        constexpr U32 operator""_u32(const unsigned long long v) noexcept
-        {
-            return U32{static_cast<std::uint32_t>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating U32 (32-bit unsigned integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return U32 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval U32 operator""_u32()
+            {
+                return details::literalIntegral<std::uint32_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating U64 values.
-         * @param v Unsigned long long literal value.
-         * @return U64 instance with the given value.
-         */
-        constexpr U64 operator""_u64(const unsigned long long v) noexcept
-        {
-            return U64{v};
-        }
+            /**
+             * @brief User-defined literal for creating U64 (64-bit unsigned integer) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return U64 instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval U64 operator""_u64()
+            {
+                return details::literalIntegral<std::uint64_t, Cs...>();
+            }
 
-        /**
-         * @brief User-defined literal for creating F32 values.
-         * @param v Long double literal value.
-         * @return F32 instance with the given value.
-         */
-        constexpr F32 operator""_f32(const long double v) noexcept
-        {
-            return F32{static_cast<float>(v)};
-        }
+            /**
+             * @brief User-defined literal for creating F32 (single-precision floating-point) values.
+             * @param v Long double literal value.
+             * @return F32 instance with the given value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Values out of range result in compilation errors.
+             */
+            consteval F32 operator""_f32(const long double v)
+            {
+                using Type = float;
+                if (v > std::numeric_limits<Type>::max() ||
+                    v < -std::numeric_limits<Type>::max())
+                    throw std::out_of_range{"F32 literal out of range"};
 
-        /**
-         * @brief User-defined literal for creating F64 values.
-         * @param v Long double literal value.
-         * @return F64 instance with the given value.
-         */
-        constexpr F64 operator""_f64(const long double v) noexcept
-        {
-            return F64{static_cast<double>(v)};
-        }
+                return F32{static_cast<float>(v)};
+            }
 
-        /**
-         * @brief User-defined literal for creating F80 values.
-         * @param v Long double literal value.
-         * @return F80 instance with the given value.
-         */
-        constexpr F80 operator""_f80(const long double v) noexcept
-        {
-            return F80{v};
+            /**
+             * @brief User-defined literal for creating F64 (double-precision floating-point) values.
+             * @param v Long double literal value.
+             * @return F64 instance with the given value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Values out of range result in compilation errors.
+             */
+            consteval F64 operator""_f64(const long double v)
+            {
+                using Type = double;
+                if (v > std::numeric_limits<Type>::max() ||
+                    v < -std::numeric_limits<Type>::max())
+                    throw std::out_of_range{"F64 literal out of range"};
+
+                return F64{static_cast<double>(v)};
+            }
+
+            /**
+             * @brief User-defined literal for creating F80 (extended-precision floating-point) values.
+             * @param v Long double literal value.
+             * @return F80 instance with the given value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Values out of range result in compilation errors.
+             */
+            consteval F80 operator""_f80(const long double v)
+            {
+                using Type = long double;
+                if (v > std::numeric_limits<Type>::max() ||
+                    v < -std::numeric_limits<Type>::max())
+                    throw std::out_of_range{"F80 literal out of range"};
+
+                return F80{v};
+            }
         }
-    }
 }
