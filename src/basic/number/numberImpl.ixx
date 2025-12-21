@@ -7,7 +7,6 @@ module;
 #include <stdexcept>
 export module original.basic.number.numberImpl;
 import original.basic.types;
-import original.environment;
 
 
 export namespace original
@@ -83,18 +82,20 @@ namespace original::details
     template<StdArithmetic T>
     constexpr T checkedAdd(T a, T b)
     {
-        T result;
-        if constexpr (USING_MSVC()) // NOLINT
+        if constexpr (StdSignedIntegral<T>)
         {
-            if (_addcarry_u64(0, a, b, &result))
+            if ((b > 0 && a > std::numeric_limits<T>::max() - b) ||
+                (b < 0 && a < std::numeric_limits<T>::min() - b))
+            {
+                throw std::overflow_error{"Add operation overflows"};
+            }
+        }
+        else
+        {
+            if (a > std::numeric_limits<T>::max() - b)
                 throw std::overflow_error{"Add operation overflows"};
         }
-        else if constexpr (USING_GCC() || USING_CLANG()) // NOLINT
-        {
-            if (__builtin_add_overflow(a, b, &result))
-                throw std::overflow_error{"Add operation overflows"};
-        }
-        return result;
+        return a + b;
     }
 
     template<StdArithmetic T>
