@@ -40,23 +40,15 @@ set(ORIGINAL_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 add_library(original STATIC)
 
+file(GLOB_RECURSE CXX_MODULES_FILES
+        src/*.ixx
+        src/basic/*.ixx
+)
+
 target_sources(original
         PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES FILES
-        src/original.ixx
-        src/metaInfo.ixx
-        src/environment.ixx
-        src/basic/basic.ixx
-        src/basic/types.ixx
-        src/basic/number/number.ixx
-        src/basic/number/traits.ixx
-        src/basic/number/impl.ixx
-        src/basic/number/algorithms.ixx
-        src/basic/number/casts.ixx
-        src/basic/iterator/iterator.ixx
-        src/basic/iterator/traits.ixx
-        src/basic/iterator/impl.ixx
-        src/basic/iterator/adaptor.ixx
+        ${CXX_MODULES_FILES}
         PRIVATE
         src/macros.h
         src/original.cpp
