@@ -62,5 +62,6 @@ TEST_F(MetaInfoTest, ConstantsAreAccessible) {
 
 TEST_F(MetaInfoTest, CurrentVerrrsionCorrect)
 {
-    EXPECT_EQ(std::string_view(info::VERSION), "0.1.0");
+    EXPECT_EQ(std::string_view(info::VERSION.str()), "0.1.0");
+    EXPECT_TRUE(info::atLeastCurrentVersion(info::Version{0, 1, 1}));
 }
