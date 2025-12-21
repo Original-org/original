@@ -1,9 +1,14 @@
 module;
 #include <compare>
-#include <cstddef>
+#include <cstddef> // NOLINT
 #include <cstdint>
+#include <limits>
+#include <string>
+#include <stdexcept>
 export module original.basic.number.numberImpl;
 import original.basic.types;
+import original.environment;
+
 
 export namespace original
 {
