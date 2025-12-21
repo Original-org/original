@@ -18,6 +18,9 @@ export namespace original
     template<typename T>
     concept StdObject = std::is_object_v<T>;
 
+    template<typename T>
+    concept StdEmpty = std::is_empty_v<T>;
+
     /**
      * @brief Concept that constrains a type to be dereferenceable.
      * A type satisfies this concept if `*t` is a valid expression.
