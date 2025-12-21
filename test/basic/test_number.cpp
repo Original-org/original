@@ -462,3 +462,58 @@ TEST(NumberUnaryOperator, UnaryMinusUnsignedIntegerNotAllowed)
     static_assert(!HasUnaryMinus<U32>);
     static_assert(!HasUnaryMinus<U64>);
 }
+
+TEST(NumberLiterals, NormalRangeIntegral) {
+    constexpr auto v1 = 42_i8;
+    static_assert(v1.value() == 42);
+    EXPECT_EQ(static_cast<int8_t>(v1), 42);
+
+    constexpr auto v2 = 1000_i16;
+    EXPECT_EQ(static_cast<int16_t>(v2), 1000);
+
+    constexpr auto v3 = 255_byte;
+    EXPECT_EQ(static_cast<uint8_t>(v3), 255);
+
+    constexpr auto v4 = 1234567890123_i64;
+    EXPECT_EQ(static_cast<int64_t>(v4), 1234567890123LL);
+}
+
+TEST(NumberLiterals, NormalRangeFloating) {
+    constexpr auto f32 = 3.14_f32;
+    EXPECT_FLOAT_EQ(static_cast<float>(f32), 3.14f);
+
+    constexpr auto f64 = 2.718281828459045_f64;
+    EXPECT_DOUBLE_EQ(static_cast<double>(f64), 2.718281828459045);
+
+    constexpr auto f80 = 1.4142135623730951_f80;
+    EXPECT_EQ(static_cast<long double>(f80), 1.4142135623730951L);
+}
+
+TEST(NumberLiteralsBoundaries, NormalBoundaries) {
+    // constexpr I8 i8_min = -128_i8;  // No allowed
+    // static_assert(i8_min.value() == minimum<I8>());
+    // EXPECT_EQ(static_cast<std::int8_t>(i8_min), -128);
+
+    constexpr auto i8_max = 127_i8;
+    static_assert(i8_max == maximum<I8>());
+    EXPECT_EQ(static_cast<std::int8_t>(i8_max), 127);
+
+    constexpr auto u8_max = 255_u8;
+    static_assert(u8_max == maximum<U8>());
+    EXPECT_EQ(static_cast<std::uint8_t>(u8_max), 255);
+
+    constexpr auto byte_max = 255_byte;
+    static_assert(byte_max.value() == 255);
+
+    constexpr auto i16_max = 32767_i16;
+    EXPECT_EQ(static_cast<std::int16_t>(i16_max),  32767);
+
+    constexpr auto i32_max = 2147483647_i32;
+    EXPECT_EQ(static_cast<std::int32_t>(i32_max),  2147483647);
+
+    constexpr auto i64_max = 9223372036854775807_i64;
+    EXPECT_EQ(static_cast<std::int64_t>(i64_max), INT64_MAX);
+
+    constexpr auto u64_max = 18446744073709551615_u64;
+    EXPECT_EQ(static_cast<std::uint64_t>(u64_max), UINT64_MAX);
+}
