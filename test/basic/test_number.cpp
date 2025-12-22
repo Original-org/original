@@ -195,10 +195,10 @@ TEST(NumberTest, BitwiseOperators) {
     EXPECT_EQ(not_result.value(), static_cast<std::uint8_t>(~12));
 
     // Shift operations
-    constexpr U8 shift_left = a << 1;
+    constexpr U8 shift_left = a << 1u;
     EXPECT_EQ(shift_left.value(), 0b11000);  // 24
 
-    constexpr U8 shift_right = a >> 1;
+    constexpr U8 shift_right = a >> 1_size;
     EXPECT_EQ(shift_right.value(), 0b0110);  // 6
 
     // Compound assignment
@@ -215,11 +215,11 @@ TEST(NumberTest, BitwiseOperators) {
     EXPECT_EQ(c.value(), 0b0110);
 
     c = a;
-    c <<= 1;
+    c <<= 1u;
     EXPECT_EQ(c.value(), 0b11000);
 
     c = a;
-    c >>= 1;
+    c >>= 1_u8;
     EXPECT_EQ(c.value(), 0b0110);
 }
 
@@ -334,6 +334,11 @@ TEST(NumberTest, NumberTraits) {
     // NumberLikeType test
     static_assert(std::is_same_v<NumberLikeType<I32>, std::int32_t>);
     static_assert(std::is_same_v<NumberLikeType<F32>, float>);
+
+    EXPECT_EQ(std::numeric_limits<I64>::digits, std::numeric_limits<std::int64_t>::digits);
+    EXPECT_EQ(std::numeric_limits<I64>::max(), std::numeric_limits<std::int64_t>::max());
+    EXPECT_EQ(std::numeric_limits<I64>::has_infinity,
+              std::numeric_limits<std::int64_t>::has_infinity);
 
     EXPECT_TRUE(true);
 }
