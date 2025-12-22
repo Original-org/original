@@ -1,4 +1,5 @@
 module;
+#include <limits>
 export module original.basic.number.traits;
 import original.basic.types;
 import original.basic.number.impl;
@@ -50,6 +51,17 @@ namespace original::details
     {
         using type = T;  ///< The arithmetic type itself.
     };
+}
+
+export namespace std
+{
+    template<original::StdIntegral T>
+    class numeric_limits<original::Integer<T>>
+        : public std::numeric_limits<T> {};
+
+    template<original::StdFloating T>
+    class numeric_limits<original::Floating<T>>
+        : public std::numeric_limits<T> {};
 }
 
 export namespace original
