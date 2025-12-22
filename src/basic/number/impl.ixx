@@ -37,6 +37,8 @@ export namespace original
     using U64 = Integer<std::uint64_t>;
     /** @brief Alias for U8 representing a byte. */
     using Byte = U8;
+    /** @brief Size type wrapper. */
+    using Size = Integer<std::size_t>;
     /** @brief Single-precision floating-point wrapper. */
     using F32 = Floating<float>;
     /** @brief Double-precision floating-point wrapper. */
@@ -1286,6 +1288,19 @@ export namespace original
             consteval Byte operator""_byte()
             {
                 return details::literalIntegral<std::uint8_t, Cs...>();
+            }
+
+            /**
+             * @brief User-defined literal for creating Size (size type) values.
+             * @tparam Cs Character sequence representing the integer literal.
+             * @return Size instance with the parsed value.
+             * @note This is a consteval function that performs compile-time validation.
+             *       Invalid literals or values out of range result in compilation errors.
+             */
+            template<char... Cs>
+            consteval Size operator""_size()
+            {
+                return details::literalIntegral<std::size_t, Cs...>();
             }
 
             /**

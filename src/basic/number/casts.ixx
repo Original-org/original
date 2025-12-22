@@ -208,35 +208,6 @@ export namespace original
     }
 
     /**
-     * @brief Convert standard size_t to U64.
-     *
-     * @param n Standard size_t value
-     * @return U64 Converted unsigned 64-bit integer
-     *
-     * @note Useful for interfacing with standard library functions
-     */
-    [[nodiscard]]
-    constexpr U64 fromStdSize(const std::size_t n) noexcept
-    {
-        return U64{n};
-    }
-
-    /**
-     * @brief Convert U64 to standard size_t.
-     *
-     * @param v U64 value to convert
-     * @return size_t Converted standard size type
-     *
-     * @note Useful for passing to standard library functions
-     * @warning May truncate on platforms where size_t < 64 bits
-     */
-    [[nodiscard]]
-    constexpr std::size_t toStdSize(const U64& v) noexcept
-    {
-        return v.value();
-    }
-
-    /**
      * @brief Extracts the underlying arithmetic value from a NumberLike type.
      * @details Safely converts both wrapped number types (Integer, Floating) and
      *          standard arithmetic types to their underlying arithmetic value.

@@ -315,21 +315,6 @@ TEST(NumberTest, NumericCastIntegral)
     EXPECT_EQ(h.value(), 3);  // truncation
 }
 
-TEST(NumberTest, StdSizeBridge)
-{
-    using namespace original;
-
-    constexpr size_t n = 12345;
-    constexpr auto u = fromStdSize(n);
-
-    EXPECT_EQ(u.value(), 12345u);
-
-    constexpr size_t m = toStdSize(u);
-    EXPECT_EQ(m, n);
-    EXPECT_EQ(m, u);
-    EXPECT_EQ(n, u);
-}
-
 // Test traits
 TEST(NumberTest, NumberTraits) {
     static_assert(std::is_same_v<NumberType<I32>, std::int32_t>);
