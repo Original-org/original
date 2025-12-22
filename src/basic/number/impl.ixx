@@ -653,9 +653,10 @@ export namespace original
          * @param shift Number of bits to shift left.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator<<=(std::size_t shift)
+        template<StdUnsignedIntegral U>
+        constexpr Integer& operator<<=(const U shift)
         {
-            this->value_ = details::checkedShiftLeft(this->value_, shift);
+            this->value_ = details::checkedShiftLeft(this->value_, static_cast<std::size_t>(shift));
             return *this;
         }
 
@@ -664,10 +665,23 @@ export namespace original
          * @param shift Number of bits to shift right.
          * @return Reference to this Integer.
          */
-        constexpr Integer& operator>>=(std::size_t shift)
+        template<StdUnsignedIntegral U>
+        constexpr Integer& operator>>=(const U shift)
         {
-            this->value_ = details::checkedShiftRight(this->value_, shift);
+            this->value_ = details::checkedShiftRight(this->value_, static_cast<std::size_t>(shift));
             return *this;
+        }
+
+        template<StdUnsignedIntegral U>
+        constexpr Integer& operator<<=(const Integer<U> shift)
+        {
+            return *this <<= shift.value();
+        }
+
+        template<StdUnsignedIntegral U>
+        constexpr Integer& operator>>=(const Integer<U> shift)
+        {
+            return *this >>= shift.value();
         }
 
         /**
@@ -675,7 +689,8 @@ export namespace original
          * @param shift Number of bits to shift left.
          * @return New Integer containing the shifted value.
          */
-        constexpr Integer operator<<(std::size_t shift) const
+        template<StdUnsignedIntegral U>
+        constexpr Integer operator<<(const U shift) const
         {
             Integer tmp{*this};
             tmp <<= shift;
@@ -687,11 +702,24 @@ export namespace original
          * @param shift Number of bits to shift right.
          * @return New Integer containing the shifted value.
          */
-        constexpr Integer operator>>(std::size_t shift) const
+        template<StdUnsignedIntegral U>
+        constexpr Integer operator>>(const U shift) const
         {
             Integer tmp{*this};
             tmp >>= shift;
             return tmp;
+        }
+
+        template<StdUnsignedIntegral U>
+        constexpr Integer operator<<(const Integer<U> shift) const
+        {
+            return *this << shift.value();
+        }
+
+        template<StdUnsignedIntegral U>
+        constexpr Integer operator>>(const Integer<U> shift) const
+        {
+            return *this >> shift.value();
         }
 
         /**
