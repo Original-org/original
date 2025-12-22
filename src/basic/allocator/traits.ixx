@@ -1,8 +1,10 @@
 module;
 #include <cstddef>
+#include <type_traits>
 export module original.basic.allocator.traits;
 import original.basic.types;
 import original.basic.number.traits;
+import original.basic.number.impl;
 
 
 export namespace original
@@ -72,5 +74,35 @@ export namespace original
         {
             a.deallocate(ptr, l.size(), l.align());
         }
+
+        template<StdObject T, typename... Args>
+        static void construct(T* ptr, Args&&... args)
+        {
+            new (ptr) T{ std::forward<Args>(args)... };
+        }
+
+        template<StdObject T>
+        static void destroy(T* ptr)
+        {
+            ptr->~T();
+        }
     };
+
+    template<typename A>
+    concept Allocator =
+        StdObject<A> &&
+        requires(A& a)
+    {
+        typename AllocatorTraits<A>;
+        requires CanAllocate<A>;
+        requires CanDeallocate<A>;
+    };
+
+    template<typename A>
+    concept StatelessAllocator =
+        Allocator<A> && !AllocatorTraits<A>::IS_STATEFUL;
+
+    template<typename A>
+    concept StatefulAllocator =
+        Allocator<A> && AllocatorTraits<A>::IS_STATEFUL;
 }
