@@ -12,59 +12,44 @@ export namespace original
         StdObject<L> &&
         requires(L l)
     {
-        typename L::SizeType;
-        typename L::AlignType;
-
-        requires UnsignedIntegralLike<typename L::SizeType>;
-        requires UnsignedIntegralLike<typename L::AlignType>;
-        { l.size() } -> StdSame<typename L::SizeType>;
-        { l.align() } -> StdSame<typename L::AlignType>;
-    };
-
-    template<typename>
-    struct AllocLayoutTraits;
-
-    template<AllocationLayout L>
-    struct AllocLayoutTraits<L>
-    {
-        using LayoutType = L;
-        using SizeType = L::SizeType;
-        using AlignType = L::AlignType;
+        { l.size() } -> StdSame<Size>;
+        { l.align() } -> StdSame<Size>;
     };
 
     struct DefaultLayout
     {
-        using SizeType  = std::size_t;
-        using AlignType = std::size_t;
+        Size size_;
+        Size align_;
 
-        SizeType size_;
-        AlignType align_;
+        explicit constexpr DefaultLayout(const Size size,
+                                         const Size align = Size{alignof(std::max_align_t)}) noexcept
+            : size_(size), align_(align) {}
 
-        [[nodiscard]] constexpr SizeType size() const noexcept
+        [[nodiscard]] constexpr Size size() const noexcept
         {
             return this->size_;
         }
 
-        [[nodiscard]] constexpr AlignType align() const noexcept
+        [[nodiscard]] constexpr Size align() const noexcept
         {
             return this->align_;
         }
     };
 
-    template<typename A, typename L>
+    template<typename A>
     concept CanAllocate =
-        StdObject<A> && AllocationLayout<L> &&
-        requires(A& a, L l)
+        StdObject<A> &&
+        requires(A& a, Size size, Size align)
     {
-        { a.allocate(l.size(), l.align()) } -> StdSame<void*>;
+        { a.allocate(size, align) } -> StdSame<void*>;
     };
 
-    template<typename A, typename L>
+    template<typename A>
     concept CanDeallocate =
-        StdObject<A> && AllocationLayout<L> &&
-        requires(A& a, void* ptr, L l)
+        StdObject<A> &&
+        requires(A& a, void* ptr, Size size, Size align)
     {
-        { a.deallocate(ptr, l.size(), l.align()) } -> StdSame<void>;
+        { a.deallocate(ptr, size, align) } -> StdSame<void>;
     };
 
     template<typename A>
