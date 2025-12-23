@@ -1313,206 +1313,208 @@ export namespace original
         return Floating<To>{result};
     }
 
+    /**
+     * @brief Namespace containing user-defined literal operators
+     * for convenient construction of strongly-typed numbers.
+     * All operators are consteval, ensuring compile-time evaluation
+     * and range checking with zero runtime overhead.
+     */
+    namespace literals
+    {
         /**
-         * @brief Namespace containing user-defined literal operators
-         * for convenient construction of strongly-typed numbers.
-         * All operators are consteval, ensuring compile-time evaluation
-         * and range checking with zero runtime overhead.
+         * @brief User-defined literal for creating I8 (8-bit signed integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return I8 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
          */
-        namespace literals
+        template<char... Cs>
+        consteval I8 operator""_i8()
         {
-            /**
-             * @brief User-defined literal for creating I8 (8-bit signed integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return I8 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval I8 operator""_i8()
-            {
-                return details::literalIntegral<std::int8_t, Cs...>();
-            }
+            return details::literalIntegral<std::int8_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating I16 (16-bit signed integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return I16 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval I16 operator""_i16()
-            {
-                return details::literalIntegral<std::int16_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating I16 (16-bit signed integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return I16 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval I16 operator""_i16()
+        {
+            return details::literalIntegral<std::int16_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating I32 (32-bit signed integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return I32 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval I32 operator""_i32()
-            {
-                return details::literalIntegral<std::int32_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating I32 (32-bit signed integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return I32 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval I32 operator""_i32()
+        {
+            return details::literalIntegral<std::int32_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating I64 (64-bit signed integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return I64 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval I64 operator""_i64()
-            {
-                return details::literalIntegral<std::int64_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating I64 (64-bit signed integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return I64 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval I64 operator""_i64()
+        {
+            return details::literalIntegral<std::int64_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating Diff (pointer difference type) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return Diff instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval Diff operator""_diff()
-            {
-                return details::literalIntegral<std::ptrdiff_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating Diff (pointer difference type) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return Diff instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval Diff operator""_diff()
+        {
+            return details::literalIntegral<std::ptrdiff_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating Byte (8-bit unsigned integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return Byte instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval Byte operator""_byte()
-            {
-                return details::literalIntegral<std::uint8_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating Byte (8-bit unsigned integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return Byte instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval Byte operator""_byte()
+        {
+            return details::literalIntegral<std::uint8_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating Size (size type) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return Size instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval Size operator""_size()
-            {
-                return details::literalIntegral<std::size_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating Size (size type) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return Size instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval Size operator""_size()
+        {
+            return details::literalIntegral<std::size_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating U8 (8-bit unsigned integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return U8 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval U8 operator""_u8()
-            {
-                return details::literalIntegral<std::uint8_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating U8 (8-bit unsigned integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return U8 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval U8 operator""_u8()
+        {
+            return details::literalIntegral<std::uint8_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating U16 (16-bit unsigned integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return U16 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval U16 operator""_u16()
-            {
-                return details::literalIntegral<std::uint16_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating U16 (16-bit unsigned integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return U16 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval U16 operator""_u16()
+        {
+            return details::literalIntegral<std::uint16_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating U32 (32-bit unsigned integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return U32 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval U32 operator""_u32()
-            {
-                return details::literalIntegral<std::uint32_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating U32 (32-bit unsigned integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return U32 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval U32 operator""_u32()
+        {
+            return details::literalIntegral<std::uint32_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating U64 (64-bit unsigned integer) values.
-             * @tparam Cs Character sequence representing the integer literal.
-             * @return U64 instance with the parsed value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Invalid literals or values out of range result in compilation errors.
-             */
-            template<char... Cs>
-            consteval U64 operator""_u64()
-            {
-                return details::literalIntegral<std::uint64_t, Cs...>();
-            }
+        /**
+         * @brief User-defined literal for creating U64 (64-bit unsigned integer) values.
+         * @tparam Cs Character sequence representing the integer literal.
+         * @return U64 instance with the parsed value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Invalid literals or values out of range result in compilation errors.
+         */
+        template<char... Cs>
+        consteval U64 operator""_u64()
+        {
+            return details::literalIntegral<std::uint64_t, Cs...>();
+        }
 
-            /**
-             * @brief User-defined literal for creating F32 (single-precision floating-point) values.
-             * @param v Long double literal value.
-             * @return F32 instance with the given value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Values out of range result in compilation errors.
-             */
-            consteval F32 operator""_f32(const long double v)
-            {
-                using Type = float;
-                if (v > std::numeric_limits<Type>::max() ||
-                    v < -std::numeric_limits<Type>::max())
-                    throw std::out_of_range{"F32 literal out of range"};
+        /**
+         * @brief User-defined literal for creating F32 (single-precision floating-point) values.
+         * @param v Long double literal value.
+         * @return F32 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range result in compilation errors.
+         */
+        consteval F32 operator""_f32(const long double v)
+        {
+            using Type = float;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F32 literal out of range"};
 
-                return F32{static_cast<float>(v)};
-            }
+            return F32{static_cast<Type>(v)};
+        }
 
-            /**
-             * @brief User-defined literal for creating F64 (double-precision floating-point) values.
-             * @param v Long double literal value.
-             * @return F64 instance with the given value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Values out of range result in compilation errors.
-             */
-            consteval F64 operator""_f64(const long double v)
-            {
-                using Type = double;
-                if (v > std::numeric_limits<Type>::max() ||
-                    v < -std::numeric_limits<Type>::max())
-                    throw std::out_of_range{"F64 literal out of range"};
+        /**
+         * @brief User-defined literal for creating F64 (double-precision floating-point) values.
+         * @param v Long double literal value.
+         * @return F64 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range result in compilation errors.
+         */
+        consteval F64 operator""_f64(const long double v)
+        {
+            using Type = double;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F64 literal out of range"};
 
-                return F64{static_cast<double>(v)};
-            }
+            return F64{static_cast<Type>(v)};
+        }
 
-            /**
-             * @brief User-defined literal for creating F80 (extended-precision floating-point) values.
-             * @param v Long double literal value.
-             * @return F80 instance with the given value.
-             * @note This is a consteval function that performs compile-time validation.
-             *       Values out of range result in compilation errors.
-             */
-            consteval F80 operator""_f80(const long double v)
-            {
-                using Type = long double;
-                if (v > std::numeric_limits<Type>::max() ||
-                    v < -std::numeric_limits<Type>::max())
-                    throw std::out_of_range{"F80 literal out of range"};
+        /**
+         * @brief User-defined literal for creating F80 (extended-precision floating-point) values.
+         * @param v Long double literal value.
+         * @return F80 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range result in compilation errors.
+         */
+        consteval F80 operator""_f80(const long double v)
+        {
+            using Type = long double;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F80 literal out of range"};
 
                 return F80{v};
             }
+        }
+            return F80{static_cast<Type>(v)};
         }
 }
