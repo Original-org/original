@@ -1,4 +1,6 @@
 module;
+#include <type_traits>
+#include <iterator>
 export module original.basic.iterator.adaptor;
 import original.basic.types;
 import original.basic.number;
@@ -21,6 +23,25 @@ export namespace original
         using reference     = IterTrait<iterator_type>::ReferenceType; ///< Element reference type.
         using pointer       = IterTrait<iterator_type>::PointerType;   ///< Element pointer type.
         using difference_type = NumberLikeType<DifferenceType>;        ///< Standard difference type.
+
+        /**
+         * @brief Iterator category tag for STL compatibility.
+         * Automatically selects the appropriate STL iterator category based on the
+         * capabilities of the underlying iterator type.
+         */
+        using iterator_category = std::conditional_t<
+            RandomAccessIterator<iterator_type, DifferenceType>,
+            std::random_access_iterator_tag,
+            std::conditional_t<
+                BidirectionalIterator<iterator_type>,
+                std::bidirectional_iterator_tag,
+                std::conditional_t<
+                    ForwardIterator<iterator_type>,
+                    std::forward_iterator_tag,
+                    std::input_iterator_tag
+                >
+            >
+        >;
 
     private:
         iterator_type it_;  ///< Underlying iterator.
