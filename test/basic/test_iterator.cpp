@@ -1,7 +1,7 @@
 #include <algorithm>
+#include <array>
 #include <gtest/gtest.h>
 #include <compare>
-#include <forward_list>
 #include <numeric>
 import original.basic.iterator;
 import original.basic.number;
@@ -294,24 +294,20 @@ TEST(StdIteratorAdapterTest, WorksWithExplicitDifferenceType)
 
 TEST(StdIteratorAdapterTest, STLCompatibility)
 {
-    // 测试STL算法兼容性
     int arr[5] = {5, 3, 1, 4, 2};
 
-    // 创建适配器迭代器
     const DefaultIterator begin(arr);
     const DefaultIterator end(arr + 5);
 
     const StdIteratorAdapter<DefaultIterator<int>> adapted_begin(begin);
     const StdIteratorAdapter<DefaultIterator<int>> adapted_end(end);
 
-    // 测试STL算法
     const auto min_it = std::min_element(adapted_begin, adapted_end);
     EXPECT_EQ(*min_it, 1);
 
     const auto max_it = std::max_element(adapted_begin, adapted_end);
     EXPECT_EQ(*max_it, 5);
 
-    // 测试排序
     std::sort(adapted_begin, adapted_end);
     EXPECT_EQ(arr[0], 1);
     EXPECT_EQ(arr[1], 2);
@@ -322,11 +318,9 @@ TEST(StdIteratorAdapterTest, STLCompatibility)
 
 TEST(StdIteratorAdapterTest, IteratorCategoryDetection)
 {
-    // 测试迭代器类别检测
     using DefaultIter = DefaultIterator<int>;
     using DefaultAdapter = StdIteratorAdapter<DefaultIter>;
 
-    // DefaultIterator应该是随机访问迭代器
     static_assert(std::random_access_iterator<DefaultAdapter>);
     static_assert(std::is_same_v<
         DefaultAdapter::iterator_category,
@@ -336,8 +330,6 @@ TEST(StdIteratorAdapterTest, IteratorCategoryDetection)
 TEST(StdIteratorAdapterTest, WorksWithSTLContainers)
 {
     std::vector src = {1, 2, 3, 4, 5};
-
-    // 创建适配器范围
     const DefaultIterator begin(src.data());
     const DefaultIterator end(src.data() + src.size());
     StdIteratorAdapter<DefaultIterator<int>> adapted_begin(begin);
@@ -359,8 +351,8 @@ TEST(StdIteratorAdapterTest, WorksWithStandardAlgorithms)
 {
     std::array arr = {6, 2, 8, 4, 1, 9};
 
-    const StdIteratorAdapter<DefaultIterator<int>> begin(DefaultIterator{arr.begin()});
-    const StdIteratorAdapter<DefaultIterator<int>> end(DefaultIterator{arr.end()});
+    const StdIteratorAdapter<DefaultIterator<int>> begin(DefaultIterator{arr.data()});
+    const StdIteratorAdapter<DefaultIterator<int>> end(DefaultIterator{arr.data() + arr.size()});
 
     std::sort(begin, end);
     EXPECT_TRUE(std::is_sorted(begin, end));
