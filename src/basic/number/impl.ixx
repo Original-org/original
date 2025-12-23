@@ -1512,9 +1512,43 @@ export namespace original
                 v < -std::numeric_limits<Type>::max())
                 throw std::out_of_range{"F80 literal out of range"};
 
-                return F80{v};
-            }
-        }
             return F80{static_cast<Type>(v)};
         }
+
+        consteval F32 operator""_f32e(const long double v)
+        {
+            using Type = float;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F32 literal out of range"};
+            if (v != static_cast<Type>(v))
+                throw std::invalid_argument{"F32 loss precision"};
+
+            return F32{static_cast<Type>(v)};
+        }
+
+        consteval F64 operator""_f64e(const long double v)
+        {
+            using Type = double;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F64 literal out of range"};
+            if (v != static_cast<Type>(v))
+                throw std::invalid_argument{"F64 loss precision"};
+
+            return F64{static_cast<Type>(v)};
+        }
+
+        consteval F80 operator""_f80e(const long double v)
+        {
+            using Type = long double;
+            if (v > std::numeric_limits<Type>::max() ||
+                v < -std::numeric_limits<Type>::max())
+                throw std::out_of_range{"F80 literal out of range"};
+            if (v != static_cast<Type>(v))
+                throw std::invalid_argument{"F80 loss precision"};
+
+            return F80{static_cast<Type>(v)};
+        }
+    }
 }
