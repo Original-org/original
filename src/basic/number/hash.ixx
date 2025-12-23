@@ -1,4 +1,6 @@
 module;
+#include <cstddef>
+#include <functional>
 export module original.basic.number.hash;
 import original.basic.number.traits;
 import original.basic.number.casts;
@@ -11,7 +13,8 @@ export namespace std // NOLINT
     {
         constexpr size_t operator()(N const& n) const noexcept
         {
-            return static_cast<size_t>(original::numberLikeValue(n));
+            std::hash<original::NumberLikeType<N>> hash;
+            return hash(original::numberLikeValue(n));
         }
     };
 }
