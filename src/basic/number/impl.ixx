@@ -882,6 +882,51 @@ export namespace original
         }
     };
 
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    constexpr auto operator+(Integer<U> lhs, Integer<V> rhs)
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = details::checkedAdd<To>(static_cast<To>(lhs.value()), static_cast<To>(rhs.value()));
+        return Integer<To>(result);
+    }
+
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    constexpr auto operator-(Integer<U> lhs, Integer<V> rhs)
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = details::checkedSub<To>(static_cast<To>(lhs.value()), static_cast<To>(rhs.value()));
+        return Integer<To>(result);
+    }
+
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    constexpr auto operator*(Integer<U> lhs, Integer<V> rhs)
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = details::checkedMul<To>(static_cast<To>(lhs.value()), static_cast<To>(rhs.value()));
+        return Integer<To>(result);
+    }
+
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    constexpr auto operator/(Integer<U> lhs, Integer<V> rhs)
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = details::checkedDiv<To>(static_cast<To>(lhs.value()), static_cast<To>(rhs.value()));
+        return Integer<To>(result);
+    }
+
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    constexpr auto operator%(Integer<U> lhs, Integer<V> rhs)
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = details::checkedMod<To>(static_cast<To>(lhs.value()), static_cast<To>(rhs.value()));
+        return Integer<To>(result);
+    }
+
     /**
      * @class Floating
      * @brief Strongly-typed wrapper around floating-point types providing type safety and consistent interface.
@@ -1231,6 +1276,42 @@ export namespace original
             return tmp;
         }
     };
+
+    template<StdFloating U, StdFloating V>
+    requires (!StdSame<U, V>)
+    constexpr auto operator+(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = static_cast<To>(lhs.value()) + static_cast<To>(rhs.value());
+        return Floating<To>{result};
+    }
+
+    template<StdFloating U, StdFloating V>
+    requires (!StdSame<U, V>)
+    constexpr auto operator-(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = static_cast<To>(lhs.value()) - static_cast<To>(rhs.value());
+        return Floating<To>{result};
+    }
+
+    template<StdFloating U, StdFloating V>
+    requires (!StdSame<U, V>)
+    constexpr auto operator*(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = static_cast<To>(lhs.value()) * static_cast<To>(rhs.value());
+        return Floating<To>{result};
+    }
+
+    template<StdFloating U, StdFloating V>
+    requires (!StdSame<U, V>)
+    constexpr auto operator/(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        To result = static_cast<To>(lhs.value()) / static_cast<To>(rhs.value());
+        return Floating<To>{result};
+    }
 
         /**
          * @brief Namespace containing user-defined literal operators
