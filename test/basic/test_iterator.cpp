@@ -1,5 +1,8 @@
+#include <algorithm>
 #include <gtest/gtest.h>
 #include <compare>
+#include <forward_list>
+#include <numeric>
 import original.basic.iterator;
 import original.basic.number;
 
@@ -287,4 +290,125 @@ TEST(StdIteratorAdapterTest, WorksWithExplicitDifferenceType)
 
     const auto diff = it - StdIteratorAdapter<CustomIter>(base);
     EXPECT_EQ(diff, 2_diff);
+}
+
+TEST(StdIteratorAdapterTest, STLCompatibility)
+{
+    // 测试STL算法兼容性
+    int arr[5] = {5, 3, 1, 4, 2};
+
+    // 创建适配器迭代器
+    const DefaultIterator begin(arr);
+    const DefaultIterator end(arr + 5);
+
+    const StdIteratorAdapter<DefaultIterator<int>> adapted_begin(begin);
+    const StdIteratorAdapter<DefaultIterator<int>> adapted_end(end);
+
+    // 测试STL算法
+    const auto min_it = std::min_element(adapted_begin, adapted_end);
+    EXPECT_EQ(*min_it, 1);
+
+    const auto max_it = std::max_element(adapted_begin, adapted_end);
+    EXPECT_EQ(*max_it, 5);
+
+    // 测试排序
+    std::sort(adapted_begin, adapted_end);
+    EXPECT_EQ(arr[0], 1);
+    EXPECT_EQ(arr[1], 2);
+    EXPECT_EQ(arr[2], 3);
+    EXPECT_EQ(arr[3], 4);
+    EXPECT_EQ(arr[4], 5);
+}
+
+TEST(StdIteratorAdapterTest, IteratorCategoryDetection)
+{
+    // 测试迭代器类别检测
+    using DefaultIter = DefaultIterator<int>;
+    using DefaultAdapter = StdIteratorAdapter<DefaultIter>;
+
+    // DefaultIterator应该是随机访问迭代器
+    static_assert(std::random_access_iterator<DefaultAdapter>);
+    static_assert(std::is_same_v<
+        DefaultAdapter::iterator_category,
+        std::random_access_iterator_tag>);
+}
+
+TEST(StdIteratorAdapterTest, WorksWithSTLContainers)
+{
+    std::vector src = {1, 2, 3, 4, 5};
+
+    // 创建适配器范围
+    const DefaultIterator begin(src.data());
+    const DefaultIterator end(src.data() + src.size());
+    StdIteratorAdapter<DefaultIterator<int>> adapted_begin(begin);
+    const StdIteratorAdapter<DefaultIterator<int>> adapted_end(end);
+
+    int sum = 0;
+    std::for_each(adapted_begin, adapted_end, [&sum](const int x) { sum += x; });
+    EXPECT_EQ(sum, 15);
+
+    const auto it = std::find(adapted_begin, adapted_end, 3);
+    EXPECT_NE(it, adapted_end);
+    EXPECT_EQ(*it, 3);
+
+    const int count = std::count(adapted_begin, adapted_end, 2);
+    EXPECT_EQ(count, 1);
+}
+
+TEST(StdIteratorAdapterTest, WorksWithStandardAlgorithms)
+{
+    std::array arr = {6, 2, 8, 4, 1, 9};
+
+    const StdIteratorAdapter<DefaultIterator<int>> begin(DefaultIterator{arr.begin()});
+    const StdIteratorAdapter<DefaultIterator<int>> end(DefaultIterator{arr.end()});
+
+    std::sort(begin, end);
+    EXPECT_TRUE(std::is_sorted(begin, end));
+    EXPECT_EQ(begin[0], 1);
+    EXPECT_EQ(begin[1], 2);
+    EXPECT_EQ(end[-1], 9);
+
+    EXPECT_TRUE(std::binary_search(begin, end, 4));
+    EXPECT_FALSE(std::binary_search(begin, end, 7));
+
+    const auto lower = std::lower_bound(begin, end, 5);
+    EXPECT_EQ(*lower, 6);
+
+    const auto upper = std::upper_bound(begin, end, 5);
+    EXPECT_EQ(*upper, 6);
+
+    EXPECT_EQ(std::accumulate(begin, end, 0), 30); // 1+2+4+6+8+9
+}
+
+TEST(StdIteratorAdapterTest, IteratorTraitsCompleteness)
+{
+    using Iter = StdIteratorAdapter<DefaultIterator<int>>;
+    using Traits = std::iterator_traits<Iter>;
+
+    static_assert(std::is_same_v<Traits::value_type, int>);
+    static_assert(std::is_same_v<Traits::reference, int&>);
+    static_assert(std::is_same_v<Traits::pointer, int*>);
+    static_assert(std::is_same_v<Traits::difference_type, std::ptrdiff_t>);
+    static_assert(std::is_same_v<Traits::iterator_category,
+                  std::random_access_iterator_tag>);
+
+    using ConstIter = StdIteratorAdapter<DefaultIterator<const int>>;
+    using ConstTraits = std::iterator_traits<ConstIter>;
+
+    static_assert(std::is_same_v<ConstTraits::value_type, const int>);
+    static_assert(std::is_same_v<ConstTraits::reference, const int&>);
+    static_assert(std::is_same_v<ConstTraits::pointer, const int*>);
+}
+
+TEST(StdIteratorAdapterTest, MoveSemantics)
+{
+    std::vector vec = {1, 2, 3};
+
+    StdIteratorAdapter<DefaultIterator<int>> it1(DefaultIterator{vec.data()});
+    StdIteratorAdapter it2(std::move(it1));
+
+    EXPECT_EQ(*it2, 1);
+
+    it1 = std::move(it2);
+    EXPECT_EQ(*it1, 1);
 }
