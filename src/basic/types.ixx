@@ -18,6 +18,12 @@ export namespace original
     template<typename T>
     concept StdObject = std::is_object_v<T>;
 
+    /**
+     * @brief Concept that constrains a type to be an empty class type.
+     *
+     * @note True for classes with no non-static data members and no virtual functions.
+     * Useful for optimizing empty base class storage in EBO (Empty Base Optimization).
+     */
     template<typename T>
     concept StdEmpty = std::is_empty_v<T>;
 

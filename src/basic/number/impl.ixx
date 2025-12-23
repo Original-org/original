@@ -49,6 +49,13 @@ export namespace original
 
 namespace original::details
 {
+    /**
+     * @brief Compile-time range check for numeric literal conversions.
+     * @tparam To Destination arithmetic type.
+     * @tparam From Source arithmetic type.
+     * @tparam V Value to check.
+     * @note Triggers static assertion if value exceeds destination type's range.
+     */
     template<StdArithmetic To, StdArithmetic From, From V>
     consteval void rangeCheckLiterals()
     {
@@ -58,6 +65,14 @@ namespace original::details
         );
     }
 
+    /**
+     * @brief Parse decimal string to integral value at compile time.
+     * @tparam To Destination integral type.
+     * @param str Character array to parse.
+     * @param n Number of characters to parse.
+     * @return Parsed integral value.
+     * @throw std::invalid_argument If string contains non-digit characters.
+     */
     template<StdIntegral To>
     consteval To parseIntegral(const char* str, const std::size_t n)
     {
@@ -72,6 +87,13 @@ namespace original::details
         return v;
     }
 
+    /**
+     * @brief Create Integer instance from character sequence literal.
+     * @tparam To Destination arithmetic type.
+     * @tparam Cs Character sequence representing the integer.
+     * @return Integer instance with parsed and range-checked value.
+     * @note Performs compile-time parsing and range checking.
+     */
     template<StdArithmetic To, char... Cs>
     consteval Integer<To> literalIntegral()
     {
@@ -81,6 +103,14 @@ namespace original::details
         return Integer<To>{static_cast<To>(PARSED_RESULT)};
     }
 
+    /**
+     * @brief Checked addition with overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Left operand.
+     * @param b Right operand.
+     * @return Sum of a and b.
+     * @throw std::overflow_error If addition would overflow.
+     */
     template<StdArithmetic T>
     constexpr T checkedAdd(T a, T b)
     {
@@ -100,6 +130,14 @@ namespace original::details
         return a + b;
     }
 
+    /**
+     * @brief Checked subtraction with overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Left operand.
+     * @param b Right operand.
+     * @return Difference of a and b.
+     * @throw std::overflow_error If subtraction would overflow.
+     */
     template<StdArithmetic T>
     constexpr T checkedSub(T a, T b)
     {
@@ -119,6 +157,14 @@ namespace original::details
         return a - b;
     }
 
+    /**
+     * @brief Checked multiplication with overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Left operand.
+     * @param b Right operand.
+     * @return Product of a and b.
+     * @throw std::overflow_error If multiplication would overflow.
+     */
     template<StdArithmetic T>
     constexpr T checkedMul(T a, T b)
     {
@@ -139,6 +185,15 @@ namespace original::details
         return a * b;
     }
 
+    /**
+     * @brief Checked division with zero and overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Left operand.
+     * @param b Right operand.
+     * @return Quotient of a divided by b.
+     * @throw std::logic_error If dividing by zero.
+     * @throw std::overflow_error If division would overflow (signed min / -1).
+     */
     template<StdArithmetic T>
     constexpr T checkedDiv(T a, T b)
     {
@@ -154,6 +209,15 @@ namespace original::details
         return a / b;
     }
 
+    /**
+     * @brief Checked modulo with zero and overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Left operand.
+     * @param b Right operand.
+     * @return Remainder of a modulo b.
+     * @throw std::logic_error If modulo by zero.
+     * @throw std::overflow_error If modulo would overflow.
+     */
     template<StdArithmetic T>
     constexpr T checkedMod(T a, T b)
     {
@@ -169,6 +233,13 @@ namespace original::details
         return a % b;
     }
 
+    /**
+     * @brief Checked negation with overflow detection.
+     * @tparam T Signed integral type.
+     * @param a Operand to negate.
+     * @return Negated value.
+     * @throw std::overflow_error If negation would overflow (signed min).
+     */
     template<StdSignedIntegral T>
     constexpr T checkedNeg(T a)
     {
@@ -178,6 +249,14 @@ namespace original::details
         return -a;
     }
 
+    /**
+     * @brief Checked left shift with overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Value to shift.
+     * @param shift Number of bits to shift.
+     * @return Left-shifted value.
+     * @throw std::overflow_error If shift would overflow.
+     */
     template<StdArithmetic T>
     constexpr T checkedShiftLeft(T a, std::size_t shift)
     {
@@ -197,6 +276,14 @@ namespace original::details
         return a << shift;
     }
 
+    /**
+     * @brief Checked right shift with overflow detection.
+     * @tparam T Arithmetic type.
+     * @param a Value to shift.
+     * @param shift Number of bits to shift.
+     * @return Right-shifted value.
+     * @throw std::overflow_error If shift count exceeds bit width.
+     */
     template<StdArithmetic T>
     constexpr T checkedShiftRight(T a, std::size_t shift)
     {
@@ -218,6 +305,7 @@ namespace original::details
     protected:
         T value_{};
 
+        /** @brief Default constructor. */
         constexpr Number() noexcept = default;
 
         /**
@@ -225,9 +313,13 @@ namespace original::details
          */
         explicit constexpr Number(T value) noexcept : value_(value) {}
 
+        /** @brief Copy constructor. */
         constexpr Number(const Number&) noexcept = default;
+        /** @brief Copy assignment operator. */
         constexpr Number& operator=(const Number&) noexcept = default;
+        /** @brief Move constructor. */
         constexpr Number(Number&&) noexcept = default;
+        /** @brief Move assignment operator. */
         constexpr Number& operator=(Number&&) noexcept = default;
 
     public:
@@ -255,6 +347,7 @@ export namespace original
          */
         using Type = T;
 
+        /** @brief Default constructor. */
         constexpr Integer() noexcept = default;
 
         /**
@@ -672,12 +765,22 @@ export namespace original
             return *this;
         }
 
+        /**
+         * @brief Left shift compound assignment with Integer shift operand.
+         * @param shift Number of bits to shift left.
+         * @return Reference to this Integer.
+         */
         template<StdUnsignedIntegral U>
         constexpr Integer& operator<<=(const Integer<U> shift)
         {
             return *this <<= shift.value();
         }
 
+        /**
+         * @brief Right shift compound assignment with Integer shift operand.
+         * @param shift Number of bits to shift right.
+         * @return Reference to this Integer.
+         */
         template<StdUnsignedIntegral U>
         constexpr Integer& operator>>=(const Integer<U> shift)
         {
@@ -710,12 +813,22 @@ export namespace original
             return tmp;
         }
 
+        /**
+         * @brief Left shift operator with Integer shift operand.
+         * @param shift Number of bits to shift left.
+         * @return New Integer containing the shifted value.
+         */
         template<StdUnsignedIntegral U>
         constexpr Integer operator<<(const Integer<U> shift) const
         {
             return *this << shift.value();
         }
 
+        /**
+         * @brief Right shift operator with Integer shift operand.
+         * @param shift Number of bits to shift right.
+         * @return New Integer containing the shifted value.
+         */
         template<StdUnsignedIntegral U>
         constexpr Integer operator>>(const Integer<U> shift) const
         {
@@ -882,6 +995,15 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Addition operator for mixed Integer types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Integer of appropriate size containing the sum.
+     * @note Both types must have same signedness.
+     */
     template<StdIntegral U, StdIntegral V>
     requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
     constexpr auto operator+(Integer<U> lhs, Integer<V> rhs)
@@ -891,6 +1013,15 @@ export namespace original
         return Integer<To>(result);
     }
 
+    /**
+     * @brief Subtraction operator for mixed Integer types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Integer of appropriate size containing the difference.
+     * @note Both types must have same signedness.
+     */
     template<StdIntegral U, StdIntegral V>
     requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
     constexpr auto operator-(Integer<U> lhs, Integer<V> rhs)
@@ -900,6 +1031,15 @@ export namespace original
         return Integer<To>(result);
     }
 
+    /**
+     * @brief Multiplication operator for mixed Integer types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Integer of appropriate size containing the product.
+     * @note Both types must have same signedness.
+     */
     template<StdIntegral U, StdIntegral V>
     requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
     constexpr auto operator*(Integer<U> lhs, Integer<V> rhs)
@@ -909,6 +1049,15 @@ export namespace original
         return Integer<To>(result);
     }
 
+    /**
+     * @brief Division operator for mixed Integer types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Integer of appropriate size containing the quotient.
+     * @note Both types must have same signedness.
+     */
     template<StdIntegral U, StdIntegral V>
     requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
     constexpr auto operator/(Integer<U> lhs, Integer<V> rhs)
@@ -918,6 +1067,15 @@ export namespace original
         return Integer<To>(result);
     }
 
+    /**
+     * @brief Modulo operator for mixed Integer types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Integer of appropriate size containing the remainder.
+     * @note Both types must have same signedness.
+     */
     template<StdIntegral U, StdIntegral V>
     requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
     constexpr auto operator%(Integer<U> lhs, Integer<V> rhs)
@@ -942,6 +1100,7 @@ export namespace original
          */
         using Type = T;
 
+        /** @brief Default constructor. */
         constexpr Floating() noexcept = default;
 
         /**
@@ -1277,6 +1436,14 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Addition operator for mixed Floating types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Floating of appropriate size containing the sum.
+     */
     template<StdFloating U, StdFloating V>
     requires (!StdSame<U, V>)
     constexpr auto operator+(Floating<U> lhs, Floating<V> rhs) noexcept
@@ -1286,6 +1453,14 @@ export namespace original
         return Floating<To>{result};
     }
 
+    /**
+     * @brief Subtraction operator for mixed Floating types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Floating of appropriate size containing the difference.
+     */
     template<StdFloating U, StdFloating V>
     requires (!StdSame<U, V>)
     constexpr auto operator-(Floating<U> lhs, Floating<V> rhs) noexcept
@@ -1295,6 +1470,14 @@ export namespace original
         return Floating<To>{result};
     }
 
+    /**
+     * @brief Multiplication operator for mixed Floating types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Floating of appropriate size containing the product.
+     */
     template<StdFloating U, StdFloating V>
     requires (!StdSame<U, V>)
     constexpr auto operator*(Floating<U> lhs, Floating<V> rhs) noexcept
@@ -1304,6 +1487,14 @@ export namespace original
         return Floating<To>{result};
     }
 
+    /**
+     * @brief Division operator for mixed Floating types.
+     * @tparam U Left operand type.
+     * @tparam V Right operand type.
+     * @param lhs Left operand.
+     * @param rhs Right operand.
+     * @return Floating of appropriate size containing the quotient.
+     */
     template<StdFloating U, StdFloating V>
     requires (!StdSame<U, V>)
     constexpr auto operator/(Floating<U> lhs, Floating<V> rhs) noexcept
@@ -1515,6 +1706,13 @@ export namespace original
             return F80{static_cast<Type>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating exact F32 values with precision checking.
+         * @param v Long double literal value.
+         * @return F32 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range or loses precision result in compilation errors.
+         */
         consteval F32 operator""_f32e(const long double v)
         {
             using Type = float;
@@ -1527,6 +1725,13 @@ export namespace original
             return F32{static_cast<Type>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating exact F64 values with precision checking.
+         * @param v Long double literal value.
+         * @return F64 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range or loses precision result in compilation errors.
+         */
         consteval F64 operator""_f64e(const long double v)
         {
             using Type = double;
@@ -1539,6 +1744,13 @@ export namespace original
             return F64{static_cast<Type>(v)};
         }
 
+        /**
+         * @brief User-defined literal for creating exact F80 values with precision checking.
+         * @param v Long double literal value.
+         * @return F80 instance with the given value.
+         * @note This is a consteval function that performs compile-time validation.
+         *       Values out of range or loses precision result in compilation errors.
+         */
         consteval F80 operator""_f80e(const long double v)
         {
             using Type = long double;

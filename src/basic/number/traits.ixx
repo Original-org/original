@@ -37,15 +37,28 @@ namespace original::details
         using Type = T;  ///< Underlying floating-point type.
     };
 
+    /**
+     * @brief Implementation helper for NumberLikeType.
+     * @tparam T Type to convert.
+     * @tparam IsNumber Whether T is a number wrapper.
+     */
     template<typename T, bool IsNumber>
     struct NumberLikeTypeImpl;
 
+    /**
+     * @brief Number wrapper specialization.
+     * @tparam T Number wrapper type.
+     */
     template<typename T>
     struct NumberLikeTypeImpl<T, true>
     {
         using type = NumberTrait<T>::Type;  ///< Underlying type of the number wrapper.
     };
 
+    /**
+     * @brief Arithmetic type specialization.
+     * @tparam T Standard arithmetic type.
+     */
     template<typename T>
     struct NumberLikeTypeImpl<T, false>
     {
@@ -55,10 +68,20 @@ namespace original::details
 
 export namespace std
 {
+    /**
+     * @brief Numeric limits for Integer wrapper types.
+     * @tparam T Underlying integral type.
+     * @note Inherits all properties from the underlying type's numeric_limits.
+     */
     template<original::StdIntegral T>
     class numeric_limits<original::Integer<T>>
         : public std::numeric_limits<T> {};
 
+    /**
+     * @brief Numeric limits for Floating wrapper types.
+     * @tparam T Underlying floating-point type.
+     * @note Inherits all properties from the underlying type's numeric_limits.
+     */
     template<original::StdFloating T>
     class numeric_limits<original::Floating<T>>
         : public std::numeric_limits<T> {};
