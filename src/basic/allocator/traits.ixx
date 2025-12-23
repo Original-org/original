@@ -57,12 +57,6 @@ export namespace original
     template<typename A>
     struct AllocatorTraits
     {
-        static constexpr bool IS_STATEFUL =
-            !StdEmpty<A>;
-
-        static constexpr bool IS_ALWAYS_EQUAL =
-            StdEmpty<A>;
-
         template<AllocationLayout L>
         static void* allocate(A& a, L l)
         {
@@ -93,16 +87,16 @@ export namespace original
         StdObject<A> &&
         requires(A& a)
     {
-        typename AllocatorTraits<A>;
         requires CanAllocate<A>;
         requires CanDeallocate<A>;
+        typename AllocatorTraits<A>;
     };
 
     template<typename A>
     concept StatelessAllocator =
-        Allocator<A> && !AllocatorTraits<A>::IS_STATEFUL;
+        Allocator<A> && StdEmpty<A>;
 
     template<typename A>
     concept StatefulAllocator =
-        Allocator<A> && AllocatorTraits<A>::IS_STATEFUL;
+        Allocator<A> && !StdEmpty<A>;
 }
