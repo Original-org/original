@@ -507,3 +507,113 @@ TEST(NumberLiteralsBoundaries, NormalBoundaries) {
     constexpr auto u64_max = 18446744073709551615_u64;
     EXPECT_EQ(static_cast<std::uint64_t>(u64_max), UINT64_MAX);
 }
+
+// Additional tests for width-promoting binary operator free functions
+TEST(NumberTest, WidthPromotionBinaryOperators) {
+    // Same signedness, different widths: result is the wider type
+    constexpr auto a8  = 42_i8;
+    constexpr auto a16 = 100_i16;
+    auto sum1 = a8 + a16;
+    static_assert(std::is_same_v<decltype(sum1), I16>);
+    EXPECT_EQ(sum1, 142_i16);
+
+    auto prod1 = a8 * a16;
+    static_assert(std::is_same_v<decltype(prod1), I16>);
+    EXPECT_EQ(prod1, 4200_i16);
+
+    // Wider on left
+    constexpr auto a32 = 200000_i32;
+    auto sum2 = a32 + a16;
+    static_assert(std::is_same_v<decltype(sum2), I32>);
+    EXPECT_EQ(sum2, 200100_i32);
+
+    // Wider on right
+    auto sum3 = a16 + a32;
+    static_assert(std::is_same_v<decltype(sum3), I32>);
+    EXPECT_EQ(sum3, 200100_i32);
+
+    // Unsigned examples
+    constexpr auto u8_val  = 200_u8;
+    constexpr auto u32_val = 100000_u32;
+    auto diff_u = u32_val - u8_val;
+    static_assert(std::is_same_v<decltype(diff_u), U32>);
+    EXPECT_EQ(diff_u.value(), 99800u);
+
+    // Floating-point promotion
+    constexpr auto f32_val = 3.14_f32;
+    constexpr auto f64_val = 2.71828_f64;
+    auto float_sum = f32_val + f64_val;
+    static_assert(std::is_same_v<decltype(float_sum), F64>);
+    EXPECT_NEAR(float_sum.value(), (3.14_f64 + 2.71828_f64).value(), 1e-6);
+
+    auto float_prod = f64_val * f32_val;
+    static_assert(std::is_same_v<decltype(float_prod), F64>);
+    EXPECT_NEAR(float_prod.value(), 2.71828 * 3.14, 1e-6);
+}
+
+// Additional tests for std::numeric_limits specializations
+TEST(NumberTest, NumericLimitsSpecializations) {
+    // Integer limits
+    static_assert(std::numeric_limits<I8>::min() == std::numeric_limits<std::int8_t>::min());
+    static_assert(std::numeric_limits<I8>::max() == std::numeric_limits<std::int8_t>::max());
+    static_assert(std::numeric_limits<I8>::digits == std::numeric_limits<std::int8_t>::digits);  // NOLINT
+    static_assert(std::numeric_limits<I8>::is_signed == std::numeric_limits<std::int8_t>::is_signed);  // NOLINT
+    static_assert(std::numeric_limits<I8>::is_integer == std::numeric_limits<std::int8_t>::is_integer);  // NOLINT
+
+    static_assert(std::numeric_limits<U64>::min() == std::numeric_limits<std::uint64_t>::min());
+    static_assert(std::numeric_limits<U64>::max() == std::numeric_limits<std::uint64_t>::max());
+    static_assert(std::numeric_limits<U64>::digits == std::numeric_limits<std::uint64_t>::digits);  // NOLINT
+    static_assert(std::numeric_limits<U64>::is_signed == std::numeric_limits<std::uint64_t>::is_signed);  // NOLINT
+
+    // Floating-point limits
+    static_assert(std::numeric_limits<F32>::min() == std::numeric_limits<float>::min());
+    static_assert(std::numeric_limits<F32>::max() == std::numeric_limits<float>::max());
+    static_assert(std::numeric_limits<F32>::digits == std::numeric_limits<float>::digits);  // NOLINT
+    static_assert(std::numeric_limits<F32>::is_signed == std::numeric_limits<float>::is_signed);  // NOLINT
+    static_assert(std::numeric_limits<F32>::has_infinity == std::numeric_limits<float>::has_infinity);  // NOLINT
+    static_assert(std::numeric_limits<F32>::has_quiet_NaN == std::numeric_limits<float>::has_quiet_NaN);  // NOLINT
+
+    static_assert(std::numeric_limits<F80>::min() == std::numeric_limits<long double>::min());
+    static_assert(std::numeric_limits<F80>::max() == std::numeric_limits<long double>::max());
+    static_assert(std::numeric_limits<F80>::digits == std::numeric_limits<long double>::digits);  // NOLINT
+
+    // Runtime checks for epsilon and infinity
+    EXPECT_EQ(std::numeric_limits<F64>::epsilon(), std::numeric_limits<double>::epsilon());
+    EXPECT_EQ(std::numeric_limits<F64>::infinity(), std::numeric_limits<double>::infinity());
+    EXPECT_TRUE(std::numeric_limits<I32>::has_infinity == false);  // Integers have no infinity
+}
+
+// Additional tests for std::hash specializations
+TEST(NumberTest, HashSpecializations) {
+    // Hash for integers should match underlying type
+    constexpr std::hash<I32> hash_int{};
+    constexpr I32 int_val{42};
+    EXPECT_EQ(hash_int(int_val), std::hash<std::int32_t>{}(42));
+
+    constexpr std::hash<U64> hash_uint{};
+    constexpr auto uint_val = 123456789_u64;
+    EXPECT_EQ(hash_uint(uint_val), std::hash<std::uint64_t>{}(123456789ULL));
+
+    // Hash for floating-point should match underlying type
+    constexpr std::hash<F32> hash_float{};
+    constexpr auto float_val = 3.14_f32;
+    EXPECT_EQ(hash_float(float_val), std::hash<float>{}(3.14f));
+
+    constexpr std::hash<F64> hash_double{};
+    constexpr auto double_val = 2.718_f64;
+    EXPECT_EQ(hash_double(double_val), std::hash<double>{}(2.718));
+
+    // Ensure different values produce different hashes (probabilistically)
+    constexpr I32 int_val2{43};
+    EXPECT_NE(hash_int(int_val), hash_int(int_val2));
+
+    // Edge cases: zero, min, max
+    constexpr I32 zero{0};
+    EXPECT_EQ(hash_int(zero), std::hash<std::int32_t>{}(0));
+
+    constexpr I32 min_val{std::numeric_limits<std::int32_t>::min()};
+    EXPECT_EQ(hash_int(min_val), std::hash<std::int32_t>{}(std::numeric_limits<std::int32_t>::min()));
+
+    constexpr F32 inf_val{std::numeric_limits<float>::infinity()};
+    EXPECT_EQ(hash_float(inf_val), std::hash<float>{}(std::numeric_limits<float>::infinity()));
+}
