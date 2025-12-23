@@ -44,8 +44,8 @@ export namespace std // NOLINT
          */
         constexpr size_t operator()(N const& n) const noexcept
         {
-            std::hash<original::NumberLikeType<N>> hash;
-            return hash(original::numberLikeValue(n));
+            using Hash = std::hash<original::NumberLikeType<N>>;
+            return Hash{}(original::numberLikeValue(n));
         }
     };
 }
