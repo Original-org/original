@@ -1,6 +1,5 @@
 module;
-#include <cstddef>
-#include <type_traits>
+#include <utility>
 export module original.basic.allocator.traits;
 import original.basic.types;
 import original.basic.number.traits;
@@ -9,6 +8,8 @@ import original.basic.number.impl;
 
 export namespace original
 {
+    using namespace literals;
+
     template<typename L>
     concept AllocationLayout =
         StdObject<L> &&
@@ -18,25 +19,10 @@ export namespace original
         { l.align() } -> StdSame<Size>;
     };
 
-    struct DefaultLayout
+    constexpr bool validAlign(const Size align) noexcept
     {
-        Size size_;
-        Size align_;
-
-        explicit constexpr DefaultLayout(const Size size,
-                                         const Size align = Size{alignof(std::max_align_t)}) noexcept
-            : size_(size), align_(align) {}
-
-        [[nodiscard]] constexpr Size size() const noexcept
-        {
-            return this->size_;
-        }
-
-        [[nodiscard]] constexpr Size align() const noexcept
-        {
-            return this->align_;
-        }
-    };
+        return align != 0_size && (align & (align - 1_size)) == 0_size;
+    }
 
     template<typename A>
     concept CanAllocate =
