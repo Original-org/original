@@ -62,6 +62,9 @@ export namespace original
     template<typename T>
     concept StdReference = std::is_reference_v<T>;
 
+    template<typename T>
+    using RemoveCVRefType = std::remove_cvref_t<T>;
+
     /**
      * @brief Concept that constrains a type to be a standard arithmetic type.
      */
