@@ -579,7 +579,7 @@ template<
     original::StdPointer Pointer,
     original::SignedIntegralLike Difference
 >
-struct std::pointer_traits<original::NormalIterator<T, Reference, Pointer, Difference>> {
+struct std::pointer_traits<original::NormalIterator<T, Reference, Pointer, Difference>> {  // NOLINT
     using pointer = original::NormalIterator<T, Reference, Pointer, Difference>;
     using element_type = T;
     using difference_type = original::NumberLikeType<Difference>;
