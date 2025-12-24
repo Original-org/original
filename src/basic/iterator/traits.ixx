@@ -148,6 +148,13 @@ export namespace original
         using DifferenceType = details::DifferenceType<Iter>; ///< Distance type, defaults to Diff.
     };
 
+    template<StdObject T>
+    concept HasIterator = requires
+    {
+        typename T::IterType;
+        typename T::ConstIterType;
+    };
+
     template<typename T>
     concept Range = requires(T& t) {
             { t.begin() } -> Iterator;
@@ -155,5 +162,12 @@ export namespace original
     } || requires(T& t) {
             { begin(t) } -> Iterator;
             { end(t) };
+    };
+
+    template<typename T>
+    concept IterRange = Range<T> &&
+    requires(T& t)
+    {
+        { t.end() } -> StdSame<decltype(begin(t))>;
     };
 }
