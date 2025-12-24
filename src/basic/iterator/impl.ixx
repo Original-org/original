@@ -337,6 +337,32 @@ export namespace original
         }
     };
 
+    template<
+        typename Derived,
+        StdObject T,
+        StdReference Reference,
+        StdPointer Pointer,
+        SignedIntegralLike Difference
+    >
+    class ContiguousIteratorBase
+    : public RandomAccessIteratorBase<Derived, T, Reference, Pointer, Difference>
+    {
+        static_assert(
+            StdSame<NumberLikeType<Difference>, std::ptrdiff_t>,
+            "Contiguous iterators require difference type compatible with std::ptrdiff_t"
+        );
+
+    protected:
+        constexpr ContiguousIteratorBase() = default;
+
+    public:
+        using DerivedType = Derived;
+        using ValueType = T;
+        using ReferenceType = Reference;
+        using PointerType = Pointer;
+        using DifferenceType = Difference;
+    };
+
     /**
      * @brief Normal iterator implementation.
      * @tparam T Value type.
@@ -349,7 +375,7 @@ export namespace original
         StdPointer Pointer,
         SignedIntegralLike Difference>
     class NormalIterator
-    : public RandomAccessIteratorBase<
+    : public ContiguousIteratorBase<
         NormalIterator<T, Reference, Pointer, Difference>,
         T,
         Reference,
@@ -545,3 +571,24 @@ export namespace original
     template<StdObject T>
     using DefaultIterator = NormalIterator<T, T&, T*, Diff>;
 }
+
+export
+template<
+    original::StdObject T,
+    original::StdReference Reference,
+    original::StdPointer Pointer,
+    original::SignedIntegralLike Difference
+>
+struct std::pointer_traits<original::NormalIterator<T, Reference, Pointer, Difference>> {
+    using pointer = original::NormalIterator<T, Reference, Pointer, Difference>;
+    using element_type = T;
+    using difference_type = original::NumberLikeType<Difference>;
+
+    static constexpr pointer pointer_to(element_type& r) noexcept {
+        return pointer{&r};
+    }
+
+    static constexpr element_type* to_address(const pointer& p) noexcept {
+        return p.to_address();
+    }
+};
