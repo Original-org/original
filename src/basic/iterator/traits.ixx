@@ -126,9 +126,11 @@ export namespace original
     };
 
     template<typename T>
-    concept HasDifferenceType = requires
+    concept ContiguousIterator = RandomAccessIterator<T> &&
+    requires(T it)
     {
-        typename T::DifferenceType;
+        requires StdSame<NumberLikeType<details::DifferenceType<T>>, std::ptrdiff_t>;
+        { std::to_address(it) } -> StdConvertible<RemoveCVRefType<decltype(*it)>*>;
     };
 
     /**
@@ -143,13 +145,15 @@ export namespace original
         using ValueType = Iter::ValueType;      ///< Type of the dereferenced value.
         using ReferenceType = Iter::ReferenceType; ///< Reference type returned by dereference.
         using PointerType = Iter::PointerType;  ///< Pointer type for the value.
-        using DifferenceType
-            = std::conditional_t<
-                HasDifferenceType<Iter>,
-                typename Iter::DifferenceType,
-                Diff
-              >; ///< Distance type, defaults to Diff.
         using DifferenceType = details::DifferenceType<Iter>; ///< Distance type, defaults to Diff.
     };
+
+    template<typename T>
+    concept Range = requires(T& t) {
+            { t.begin() } -> Iterator;
+            { t.end() };
+    } || requires(T& t) {
+            { begin(t) } -> Iterator;
+            { end(t) };
     };
 }
