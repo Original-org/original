@@ -30,15 +30,19 @@ export namespace original
          * capabilities of the underlying iterator type.
          */
         using iterator_category = std::conditional_t<
-            RandomAccessIterator<iterator_type>,
-            std::random_access_iterator_tag,
+            ContiguousIterator<iterator_type>,
+            std::contiguous_iterator_tag,
             std::conditional_t<
-                BidirectionalIterator<iterator_type>,
-                std::bidirectional_iterator_tag,
+                RandomAccessIterator<iterator_type>,
+                std::random_access_iterator_tag,
                 std::conditional_t<
-                    ForwardIterator<iterator_type>,
-                    std::forward_iterator_tag,
-                    std::input_iterator_tag
+                    BidirectionalIterator<iterator_type>,
+                    std::bidirectional_iterator_tag,
+                    std::conditional_t<
+                        ForwardIterator<iterator_type>,
+                        std::forward_iterator_tag,
+                        std::input_iterator_tag
+                    >
                 >
             >
         >;
