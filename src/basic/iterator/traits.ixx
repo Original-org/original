@@ -1,9 +1,59 @@
 module;
 #include <concepts>
+#include <memory>
 export module original.basic.iterator.traits;
 import original.basic.types;
 import original.basic.number;
 
+
+namespace original::details
+{
+    /**
+     * @brief Concept for types that have a DifferenceType member.
+     * @tparam T Type to test.
+     */
+    template<typename T>
+    concept HasDifferenceType = requires
+    {
+        typename T::DifferenceType;
+    };
+
+    template<typename T>
+    concept HasCRTPDerived = requires
+    {
+        typename T::DerivedType;
+    };
+
+    template<typename T>
+    struct IterCRTPTrait
+    {
+        using DerivedType = T;
+    };
+
+    template<HasCRTPDerived T>
+    struct IterCRTPTrait<T>
+    {
+        using DerivedType = T::DerivedType;
+    };
+
+    template<typename>
+    struct DifferenceTrait
+    {
+        using DifferenceType = Diff::Type;
+    };
+
+    template<HasDifferenceType T>
+    struct DifferenceTrait<T>
+    {
+        using DifferenceType = T::DifferenceType;
+    };
+
+    template<typename T>
+    using DifferenceType = DifferenceTrait<T>::DifferenceType;
+
+    template<typename T>
+    using IterCRTPDerivedType = IterCRTPTrait<T>::DerivedType;
+}
 
 export namespace original
 {
@@ -57,29 +107,24 @@ export namespace original
     /**
      * @brief Random access iterator concept.
      * @tparam T Iterator type.
-     * @tparam DifferenceType Signed integral-like type for distance operations.
      * @note Requires BidirectionalIterator plus arithmetic and subscript operations.
      */
-    template<typename T, typename DifferenceType>
+    template<typename T>
     concept RandomAccessIterator
         = BidirectionalIterator<T> &&
-          SignedIntegralLike<DifferenceType> &&
-          requires(T it, DifferenceType dis)
+          requires(T it,
+          details::DifferenceType<T> dis)
     {
         { it + dis } -> StdSame<T>;
         { dis + it } -> StdSame<T>;
         { it - dis } -> StdSame<T>;
-        { it - it } -> StdSame<DifferenceType>;
+        { it - it } -> StdSame<details::DifferenceType<T>>;
         { it += dis } -> StdSame<T&>;
         { it -= dis } -> StdSame<T&>;
         { it[dis] } -> StdSame<decltype(*it)>;
         { it <=> it } -> StdThreeWayCompareResult;
     };
 
-    /**
-     * @brief Concept for types that have a DifferenceType member.
-     * @tparam T Type to test.
-     */
     template<typename T>
     concept HasDifferenceType = requires
     {
@@ -94,7 +139,7 @@ export namespace original
     struct IterTrait<Iter>
     {
         using IterType = Iter;                  ///< The iterator type itself.
-        using DerivedType = Iter::DerivedType;  ///< Type derived from the iterator.
+        using DerivedType = details::IterCRTPDerivedType<Iter>;  ///< Type derived from the iterator.
         using ValueType = Iter::ValueType;      ///< Type of the dereferenced value.
         using ReferenceType = Iter::ReferenceType; ///< Reference type returned by dereference.
         using PointerType = Iter::PointerType;  ///< Pointer type for the value.
@@ -104,5 +149,7 @@ export namespace original
                 typename Iter::DifferenceType,
                 Diff
               >; ///< Distance type, defaults to Diff.
+        using DifferenceType = details::DifferenceType<Iter>; ///< Distance type, defaults to Diff.
+    };
     };
 }
