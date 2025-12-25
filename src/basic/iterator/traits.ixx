@@ -57,6 +57,24 @@ namespace original::details
 
 export namespace original
 {
+    template<typename T>
+    concept SourceTag = StdObject<T> &&
+    requires
+    {
+        typename T::SourceType;
+    };
+
+    struct NoSource
+    {
+        using SourceType = void;
+    };
+
+    template<StdObject T>
+    struct SpecifiedSource
+    {
+        using SourceType = T;
+    };
+
     /**
      * @brief Primary template for iterator traits.
      * @tparam T Iterator type.

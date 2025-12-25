@@ -64,8 +64,8 @@ export namespace original
     {
         using Base = details::ArrayImpl<T, N>;
     public:
-        using IterType      = DefaultIterator<T>;
-        using ConstIterType = DefaultIterator<const T>;
+        using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
+        using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = std::size_t;
 
@@ -117,8 +117,8 @@ export namespace original
     {
         using Base = details::ArrayImpl<T, 0>;
     public:
-        using IterType      = DefaultIterator<T>;
-        using ConstIterType = DefaultIterator<const T>;
+        using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
+        using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = std::size_t;
 

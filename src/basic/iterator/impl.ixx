@@ -568,8 +568,8 @@ export namespace original
      * @brief Default iterator type alias.
      * @tparam T Value type.
      */
-    template<StdObject T>
-    using DefaultIterator = NormalIterator<T, T&, T*, Diff>;
+    template<StdObject T, SourceTag SourceTag = NoSource>
+    using DefaultIterator = NormalIterator<T, T&, T*, Diff, SourceTag>;
 }
 
 export
