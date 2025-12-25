@@ -10,21 +10,23 @@ import original.basic.iterator.traits;
 
 namespace original::details
 {
+    using namespace original::literals;
+
     template<StdObject T, std::size_t N>
     class ArrayImpl
     {
     protected:
-        using SizeType = std::size_t;
+        using SizeType = Size;
         using ValueType = T;
 
-        static constexpr SizeType CAPACITY = N == 0 ? 1 : N;
-        T data_[CAPACITY]{};
+        static constexpr SizeType CAPACITY = N == 0 ? 1_size : SizeType{N};
+        T data_[numberLikeValue(CAPACITY)]{};
 
         constexpr ArrayImpl() = default;
     public:
         constexpr SizeType size() const noexcept // NOLINT
         {
-            return N;
+            return SizeType{N};
         }
 
         constexpr bool empty() const noexcept // NOLINT
@@ -68,7 +70,7 @@ export namespace original
         using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
-        using SizeType      = std::size_t;
+        using SizeType      = Size;
 
         constexpr Array() = default;
 
@@ -121,7 +123,7 @@ export namespace original
         using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
-        using SizeType      = std::size_t;
+        using SizeType      = Size;
 
         constexpr Array() = default;
 
