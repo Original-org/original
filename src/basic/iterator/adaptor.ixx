@@ -16,12 +16,18 @@ export namespace original
      */
     template<Iterator Iter>
     class StdIteratorAdapter {
-        using DifferenceType = IterTrait<Iter>::DifferenceType;
     public:
-        using iterator_type = IterTrait<Iter>::IterType;       ///< Original iterator type.
-        using value_type    = IterTrait<iterator_type>::ValueType;     ///< Element value type.
-        using reference     = IterTrait<iterator_type>::ReferenceType; ///< Element reference type.
-        using pointer       = IterTrait<iterator_type>::PointerType;   ///< Element pointer type.
+        using IterType        = Iter;
+        using DerivedType     = StdIteratorAdapter;
+        using ValueType       = Iter::ValueType;
+        using ReferenceType   = Iter::ReferenceType;
+        using PointerType     = Iter::PointerType;
+        using DifferenceType  = IterTrait<Iter>::DifferenceType;
+
+        using iterator_type   = IterTrait<Iter>::IterType;       ///< Original iterator type.
+        using value_type      = IterTrait<iterator_type>::ValueType;     ///< Element value type.
+        using reference       = IterTrait<iterator_type>::ReferenceType; ///< Element reference type.
+        using pointer         = IterTrait<iterator_type>::PointerType;   ///< Element pointer type.
         using difference_type = NumberLikeType<DifferenceType>;        ///< Standard difference type.
 
         /**
