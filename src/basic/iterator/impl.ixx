@@ -374,11 +374,11 @@ export namespace original
         StdReference Reference,
         StdPointer Pointer,
         SignedIntegralLike Difference,
-        SourceTag SourceTag = NoSource
+        SourceTag Source = NoSource
     >
     class NormalIterator
     : public ContiguousIteratorBase<
-        NormalIterator<T, Reference, Pointer, Difference, SourceTag>,
+        NormalIterator<T, Reference, Pointer, Difference, Source>,
         T,
         Reference,
         Pointer,
@@ -570,6 +570,6 @@ export namespace original
      * @brief Default iterator type alias.
      * @tparam T Value type.
      */
-    template<StdObject T, SourceTag SourceTag = NoSource>
-    using DefaultIterator = NormalIterator<T, T&, T*, Diff, SourceTag>;
+    template<StdObject T, SourceTag Source = NoSource>
+    using DefaultIterator = NormalIterator<T, T&, T*, Diff, Source>;
 }
