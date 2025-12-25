@@ -1,18 +1,29 @@
 module;
+#include <type_traits>
 export module orginal.basic.container.traits;
 import original.basic.types;
 import original.basic.iterator.traits;
 import original.basic.number.traits;
+import original.basic.number.casts;
 
 
 export namespace original
 {
-    template<typename>
-    struct ContainerTraits;
+    template<typename C>
+    concept Container =
+    StdObject<C> &&
+    requires(C c) {
+        typename C::IterType;
+        typename C::ConstIterType;
+        typename C::ValueType;
+        typename C::SizeType;
+        c.begin();
+        c.end();
+        c.size();
+    };
 
-    template<StdObject C>
-    requires HasIterator<C> && IterRange<C> && details::HasSize<C>
-    struct ContainerTraits<C>
+    template<Container C>
+    struct ContainerTraits
     {
         using IterType      = C::IterType;
         using ConstIterType = C::ConstIterType;
@@ -21,24 +32,19 @@ export namespace original
 
         static IterType begin(C& c) { return c.begin(); }
         static IterType end(C& c)   { return c.end(); }
+        static ConstIterType cBegin(const C& c) { return c.begin(); }
+        static ConstIterType cEnd(const C& c) { return c.end(); }
         static SizeType size(const C& c) { return c.size(); }
         static bool empty(const C& c) { return numberLikeValue(c.size()) == 0; }
     };
 
-    template<StdObject C>
-    concept Container =
-    requires(C container)
-    {
-        typename ContainerTraits<C>;
-    };
-
-    template<StdObject C>
+    template<typename C>
     concept ContiguousContainer = Container<C> &&
     requires(C container)
     {
         requires ContiguousIterator<typename ContainerTraits<C>::IterType>;
         requires ContiguousIterator<typename ContainerTraits<C>::ConstIterType>;
 
-        { container.data() } -> StdSame<ContainerTraits<C>::ValueType*>;
+        { container.data() } -> StdSame<std::add_pointer_t<typename ContainerTraits<C>::ValueType>>;
     };
 }

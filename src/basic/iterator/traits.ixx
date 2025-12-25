@@ -148,7 +148,7 @@ export namespace original
     requires(T it)
     {
         requires StdSame<NumberLikeType<details::DifferenceType<T>>, std::ptrdiff_t>;
-        { std::to_address(it) } -> StdConvertible<RemoveCVRefType<decltype(*it)>*>;
+        { std::to_address(it) } -> StdConvertible<const RemoveCVRefType<decltype(*it)>*>;
     };
 
     /**
@@ -166,8 +166,8 @@ export namespace original
         using DifferenceType = details::DifferenceType<Iter>; ///< Distance type, defaults to Diff.
     };
 
-    template<StdObject T>
-    concept HasIterator = requires
+    template<typename T>
+    concept HasIterator = StdObject<T> && requires
     {
         typename T::IterType;
         typename T::ConstIterType;
