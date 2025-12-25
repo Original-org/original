@@ -16,7 +16,7 @@ TEST(ArrayTest, BasicOperationsNonEmpty) {
         EXPECT_EQ(arr.data()[i], 0);
     }
 
-    EXPECT_EQ(arr.size(), 5);
+    EXPECT_EQ(arr.size(), 5_size);
     EXPECT_FALSE(arr.empty());
 
     EXPECT_NE(arr.data(), nullptr);
@@ -30,7 +30,7 @@ TEST(ArrayTest, BasicOperationsNonEmpty) {
     const Array<int, 5>& carr = arr;
     EXPECT_EQ(carr[0_size], 10);
     EXPECT_EQ(carr[1_size], 20);
-    EXPECT_EQ(carr.size(), 5);
+    EXPECT_EQ(carr.size(), 5_size);
     EXPECT_NE(carr.data(), nullptr);
 }
 
@@ -80,7 +80,7 @@ TEST(ArrayTest, EmptyArray) {
     using ArrayType = Array<int, 0>;
     ArrayType empty_arr;
 
-    EXPECT_EQ(empty_arr.size(), 0);
+    EXPECT_EQ(empty_arr.size(), 0_size);
     EXPECT_TRUE(empty_arr.empty());
     EXPECT_EQ(empty_arr.data(), nullptr);
 
@@ -172,7 +172,7 @@ TEST(ContainerTraitsTest, ContainerTraitsAccess) {
     static_assert(std::same_as<ContainerTraits<Arr5>::IterType, Arr5::IterType>);
     static_assert(std::same_as<ContainerTraits<Arr5>::ConstIterType, Arr5::ConstIterType>);
     static_assert(std::same_as<ContainerTraits<Arr5>::ValueType, int>);
-    static_assert(std::same_as<ContainerTraits<Arr5>::SizeType, std::size_t>);
+    static_assert(std::same_as<ContainerTraits<Arr5>::SizeType, Size>);
 
     Arr5 arr;
     const Arr5::IterType b = ContainerTraits<Arr5>::begin(arr);
@@ -185,11 +185,11 @@ TEST(ContainerTraitsTest, ContainerTraitsAccess) {
     EXPECT_EQ(f, cref.begin());
     EXPECT_EQ(g, cref.end());
 
-    EXPECT_EQ(ContainerTraits<Arr5>::size(arr), 5);
+    EXPECT_EQ(ContainerTraits<Arr5>::size(arr), 5_size);
     EXPECT_FALSE(ContainerTraits<Arr5>::empty(arr));
 
     constexpr Arr0 empty;
-    EXPECT_EQ(ContainerTraits<Arr0>::size(empty), 0);
+    EXPECT_EQ(ContainerTraits<Arr0>::size(empty), 0_size);
     EXPECT_TRUE(ContainerTraits<Arr0>::empty(empty));
 
     EXPECT_NE(arr.data(), nullptr);
