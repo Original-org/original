@@ -2,6 +2,7 @@ module;
 #include <type_traits>
 #include <iterator>
 export module original.basic.iterator.adaptor;
+import orginal.basic.iterator.impl;
 import original.basic.types;
 import original.basic.number;
 import original.basic.iterator.traits;
@@ -276,4 +277,19 @@ export namespace original
             return StdIteratorAdapter{it.it_ - DifferenceType{n}};
         }
     };
+}
+
+export namespace original::iterator
+{
+    template<StdObject T>
+    constexpr auto makeIterator(T* ptr)
+    {
+        return DefaultIterator<T>{ptr};
+    }
+
+    template<Iterator It>
+    constexpr auto toStd(It it)
+    {
+        return StdIteratorAdapter<It>{it};
+    }
 }
