@@ -324,7 +324,7 @@ TEST(StdIteratorAdapterTest, IteratorCategoryDetection)
     static_assert(std::random_access_iterator<DefaultAdapter>);
     static_assert(std::is_same_v<
         DefaultAdapter::iterator_category,
-        std::random_access_iterator_tag>);
+        std::contiguous_iterator_tag>);
 }
 
 TEST(StdIteratorAdapterTest, WorksWithSTLContainers)
@@ -343,7 +343,7 @@ TEST(StdIteratorAdapterTest, WorksWithSTLContainers)
     EXPECT_NE(it, adapted_end);
     EXPECT_EQ(*it, 3);
 
-    const int count = std::count(adapted_begin, adapted_end, 2);
+    const int count = std::count(adapted_begin, adapted_end, 2); // NOLINT
     EXPECT_EQ(count, 1);
 }
 
@@ -382,7 +382,7 @@ TEST(StdIteratorAdapterTest, IteratorTraitsCompleteness)
     static_assert(std::is_same_v<Traits::pointer, int*>);
     static_assert(std::is_same_v<Traits::difference_type, std::ptrdiff_t>);
     static_assert(std::is_same_v<Traits::iterator_category,
-                  std::random_access_iterator_tag>);
+                  std::contiguous_iterator_tag>);
 
     using ConstIter = StdIteratorAdapter<DefaultIterator<const int>>;
     using ConstTraits = std::iterator_traits<ConstIter>;
@@ -390,6 +390,10 @@ TEST(StdIteratorAdapterTest, IteratorTraitsCompleteness)
     static_assert(std::is_same_v<ConstTraits::value_type, const int>);
     static_assert(std::is_same_v<ConstTraits::reference, const int&>);
     static_assert(std::is_same_v<ConstTraits::pointer, const int*>);
+
+    using OriginalTraits = IterTrait<Iter>;
+
+    static_assert(std::is_same_v<OriginalTraits::IterType, Iter>);
 }
 
 TEST(StdIteratorAdapterTest, MoveSemantics)
@@ -397,10 +401,10 @@ TEST(StdIteratorAdapterTest, MoveSemantics)
     std::vector vec = {1, 2, 3};
 
     StdIteratorAdapter<DefaultIterator<int>> it1(DefaultIterator{vec.data()});
-    StdIteratorAdapter it2(std::move(it1));
+    StdIteratorAdapter it2(std::move(it1)); // NOLINT
 
     EXPECT_EQ(*it2, 1);
 
-    it1 = std::move(it2);
+    it1 = std::move(it2); // NOLINT
     EXPECT_EQ(*it1, 1);
 }

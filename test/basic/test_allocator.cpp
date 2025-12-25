@@ -70,6 +70,8 @@ TEST_F(AllocatorTest, Concepts_NormalAllocator) {
 
     static_assert(CanAllocate<NormalAllocator>, "NormalAllocator must support allocation");
     static_assert(CanDeallocate<NormalAllocator>, "NormalAllocator must support deallocation");
+
+    static_assert(!Allocator<int>);
 }
 
 TEST_F(AllocatorTest, Concepts_Layouts) {
@@ -86,7 +88,7 @@ TEST_F(AllocatorTest, NormalAllocator_AllocateAndDeallocate) {
     ASSERT_NE(ptr, nullptr);
 
     // Verify alignment
-    const std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(ptr);
+    const auto addr = reinterpret_cast<std::uintptr_t>(ptr);
     EXPECT_EQ(addr % align.value(), 0u);
 
     // Basic write/read test to ensure memory is usable
@@ -113,7 +115,7 @@ TEST_F(AllocatorTest, AllocatorTraits_AllocateDeallocate) {
     void* ptr = Traits::allocate(allocator, layout);
     ASSERT_NE(ptr, nullptr);
 
-    const std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(ptr);
+    const auto addr = reinterpret_cast<std::uintptr_t>(ptr);
     EXPECT_EQ(addr % layout.align().value(), 0u);
 
     Traits::deallocate(allocator, ptr, layout);
@@ -141,14 +143,14 @@ TEST_F(AllocatorTest, AllocatorTraits_ConstructDestroy) {
 TEST_F(AllocatorTest, NormalAllocator_OverAligned) {
     struct OverAligned { alignas(64) double data[8]; };
 
-    TypedLayout<OverAligned> layout;
-    void* ptr = NormalAllocator::allocate(layout.size(), layout.align());
+    using Layout = TypedLayout<OverAligned>;
+    void* ptr = NormalAllocator::allocate(Layout::size(), Layout::align());
     ASSERT_NE(ptr, nullptr);
 
-    const std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(ptr);
-    EXPECT_EQ(addr % layout.align().value(), 0u);
+    const auto addr = reinterpret_cast<std::uintptr_t>(ptr);
+    EXPECT_EQ(addr % Layout::align().value(), 0u);
 
-    NormalAllocator::deallocate(ptr, layout.size(), layout.align());
+    NormalAllocator::deallocate(ptr, Layout::size(), Layout::align());
 }
 
 TEST_F(AllocatorTest, AllocatorTraits_AllocateDeallocateViaLayout) {
@@ -161,7 +163,7 @@ TEST_F(AllocatorTest, AllocatorTraits_AllocateDeallocateViaLayout) {
     ASSERT_NE(ptr, nullptr);
 
 
-    const std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(ptr);
+    const auto addr = reinterpret_cast<std::uintptr_t>(ptr);
     EXPECT_EQ(addr % layout.align().value(), 0u);
 
     std::memset(ptr, 0x55, layout.size().value());
@@ -178,7 +180,7 @@ TEST_F(AllocatorTest, AllocatorTraits_AllocateDeallocateWithTypedLayout) {
     void* ptr = Traits::allocate(allocator, Layout{});
     ASSERT_NE(ptr, nullptr);
 
-    const std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(ptr);
+    const auto addr = reinterpret_cast<std::uintptr_t>(ptr);
     EXPECT_EQ(addr % Layout::align().value(), 0u);
 
     Traits::deallocate(allocator, ptr, Layout{});
