@@ -373,10 +373,12 @@ export namespace original
     template<StdObject T,
         StdReference Reference,
         StdPointer Pointer,
-        SignedIntegralLike Difference>
+        SignedIntegralLike Difference,
+        SourceTag SourceTag = NoSource
+    >
     class NormalIterator
     : public ContiguousIteratorBase<
-        NormalIterator<T, Reference, Pointer, Difference>,
+        NormalIterator<T, Reference, Pointer, Difference, SourceTag>,
         T,
         Reference,
         Pointer,
