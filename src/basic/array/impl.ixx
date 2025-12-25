@@ -3,8 +3,9 @@ module;
 #include <stdexcept>
 export module original.basic.array.impl;
 import original.basic.types;
-import original.basic.number.impl;
+import original.basic.number;
 import orginal.basic.iterator.impl;
+import original.basic.iterator.traits;
 
 
 namespace original::details
@@ -31,12 +32,12 @@ namespace original::details
             return N == 0;
         }
 
-        constexpr ValueType* data() noexcept
+        [[nodiscard]] constexpr ValueType* data() noexcept
         {
             return N != 0 ? this->data_ : nullptr;
         }
 
-        constexpr const ValueType* data() const noexcept
+        [[nodiscard]] constexpr const ValueType* data() const noexcept
         {
             return N != 0 ? this->data_ : nullptr;
         }
@@ -81,12 +82,12 @@ export namespace original
             return IterType{this->data_ + N};
         }
 
-        constexpr ConstIterType begin() const noexcept
+        [[nodiscard]] constexpr ConstIterType begin() const noexcept
         {
             return ConstIterType{this->data_};
         }
 
-        constexpr ConstIterType end() const noexcept
+        [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{this->data_ + N};
         }
@@ -134,12 +135,12 @@ export namespace original
             return IterType{};
         }
 
-        constexpr ConstIterType begin() const noexcept
+        [[nodiscard]] constexpr ConstIterType begin() const noexcept
         {
             return ConstIterType{};
         }
 
-        constexpr ConstIterType end() const noexcept
+        [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{};
         }
