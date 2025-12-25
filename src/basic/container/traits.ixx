@@ -5,18 +5,6 @@ import original.basic.iterator.traits;
 import original.basic.number.traits;
 
 
-namespace original::details
-{
-    template<typename T>
-    concept HasSize =
-    requires(const T& t) {
-        { t.size() } -> UnsignedIntegralLike;
-    } ||
-    requires(const T& t) {
-        { size(t) } -> UnsignedIntegralLike;
-    };
-}
-
 export namespace original
 {
     template<typename>

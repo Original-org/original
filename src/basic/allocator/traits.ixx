@@ -75,7 +75,6 @@ export namespace original
     {
         requires CanAllocate<A>;
         requires CanDeallocate<A>;
-        typename AllocatorTraits<A>;
     };
 
     template<typename A>

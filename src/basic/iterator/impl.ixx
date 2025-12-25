@@ -573,24 +573,3 @@ export namespace original
     template<StdObject T, SourceTag SourceTag = NoSource>
     using DefaultIterator = NormalIterator<T, T&, T*, Diff, SourceTag>;
 }
-
-export
-template<
-    original::StdObject T,
-    original::StdReference Reference,
-    original::StdPointer Pointer,
-    original::SignedIntegralLike Difference
->
-struct std::pointer_traits<original::NormalIterator<T, Reference, Pointer, Difference>> {  // NOLINT
-    using pointer = original::NormalIterator<T, Reference, Pointer, Difference>;
-    using element_type = T;
-    using difference_type = original::NumberLikeType<Difference>;
-
-    static constexpr pointer pointer_to(element_type& r) noexcept {
-        return pointer{&r};
-    }
-
-    static constexpr element_type* to_address(const pointer& p) noexcept {
-        return p.to_address();
-    }
-};
