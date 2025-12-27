@@ -281,18 +281,6 @@ export namespace original
 
 export namespace original::iterator
 {
-    template<StdObject T>
-    constexpr auto makeIterator(T* ptr) noexcept
-    {
-        return DefaultIterator<T>{ptr};
-    }
-
-    template<StdObject T>
-    constexpr auto makeIterator(const T* ptr) noexcept
-    {
-        return DefaultIterator<const T>{ptr};
-    }
-
     template<Iterator It>
     constexpr auto toStd(It it) noexcept
     {

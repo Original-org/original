@@ -572,4 +572,19 @@ export namespace original
      */
     template<StdObject T, SourceTag Source = NoSource>
     using DefaultIterator = NormalIterator<T, T&, T*, Diff, Source>;
+
+    namespace iterator
+    {
+        template<StdObject T>
+        constexpr auto makeIterator(T* ptr) noexcept
+        {
+            return DefaultIterator<T>{ptr};
+        }
+
+        template<StdObject T>
+        constexpr auto makeIterator(const T* ptr) noexcept
+        {
+            return DefaultIterator<const T>{ptr};
+        }
+    }
 }
