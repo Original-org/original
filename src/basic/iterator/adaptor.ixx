@@ -18,11 +18,11 @@ export namespace original
     template<Iterator Iter>
     class StdIteratorAdapter {
     public:
-        using IterType        = Iter;
+        using IterType        = IterTrait<Iter>::IterType;
         using DerivedType     = StdIteratorAdapter;
-        using ValueType       = Iter::ValueType;
-        using ReferenceType   = Iter::ReferenceType;
-        using PointerType     = Iter::PointerType;
+        using ValueType       = IterTrait<Iter>::ValueType;
+        using ReferenceType   = IterTrait<Iter>::ReferenceType;
+        using PointerType     = IterTrait<Iter>::PointerType;
         using DifferenceType  = IterTrait<Iter>::DifferenceType;
 
         using iterator_type   = IterTrait<Iter>::IterType;       ///< Original iterator type.
