@@ -1,5 +1,4 @@
 module;
-#include <cstddef>
 #include <stdexcept>
 export module original.basic.array.impl;
 import original.basic.types;
@@ -12,7 +11,7 @@ namespace original::details
 {
     using namespace original::literals;
 
-    template<StdObject T, std::size_t N>
+    template<StdObject T, Size::Type N>
     class ArrayImpl
     {
     protected:
@@ -62,7 +61,7 @@ namespace original::details
 
 export namespace original
 {
-    template<StdObject T, std::size_t N>
+    template<StdObject T, Size::Type N>
     class Array : public details::ArrayImpl<T, N>
     {
         using Base = details::ArrayImpl<T, N>;
