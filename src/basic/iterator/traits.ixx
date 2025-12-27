@@ -151,6 +151,13 @@ export namespace original
         { std::to_address(it) } -> StdConvertible<const RemoveCVRefType<decltype(*it)>*>;
     };
 
+    template<typename It>
+    concept IteratorView =
+    Iterator<It> &&
+    requires(It it) {
+        { it.iterator() } -> Iterator;
+    };
+
     /**
      * @brief Iterator traits specialization.
      * @tparam Iter Iterator type satisfying Iterator concept.
