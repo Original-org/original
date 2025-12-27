@@ -10,8 +10,6 @@ import original.basic.number.impl;
 
 export namespace original
 {
-    using namespace literals;
-
     struct DefaultLayout
     {
         Size size_;
