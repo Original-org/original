@@ -1,5 +1,6 @@
 module;
 #include <stdexcept>
+#include <type_traits>
 export module original.basic.array.impl;
 import original.basic.types;
 import original.basic.number;
@@ -22,6 +23,11 @@ namespace original::details
         T data_[numberLikeValue(CAPACITY)]{};
 
         constexpr ArrayImpl() = default;
+
+        template<typename... Args>
+        requires (sizeof...(Args) <= N && (StdObject<Args> && ...))
+        explicit constexpr ArrayImpl(Args&&... args) noexcept
+        : data_{static_cast<T>(std::forward<Args>(args))...} {}
     public:
         constexpr SizeType size() const noexcept // NOLINT
         {
@@ -70,8 +76,15 @@ export namespace original
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = Size;
+        using BeginIterType = IterType;
+        using EndIterType   = IterType;
 
         constexpr Array() = default;
+
+        template<typename... Args>
+        requires (sizeof...(Args) <= N && (StdObject<Args> && ...))
+        explicit constexpr Array(Args&&... args) noexcept
+        : Base{static_cast<T>(std::forward<Args>(args))...} {}
 
         constexpr IterType begin() noexcept
         {
@@ -123,6 +136,8 @@ export namespace original
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = Size;
+        using BeginIterType = IterType;
+        using EndIterType   = IterType;
 
         constexpr Array() = default;
 
