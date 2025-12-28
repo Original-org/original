@@ -111,6 +111,12 @@ TEST_F(RangeTest, EnumeratePipelineCustomStart) {
 
     auto [i0, v0] = *it; EXPECT_EQ(i0, 10_size); EXPECT_EQ(v0, 1); ++it;
     auto [i1, v1] = *it; EXPECT_EQ(i1, 11_size); EXPECT_EQ(v1, 2); ++it;
+
+    auto i = 10_size;
+    for (const auto& cref = arr; const auto& [index, val]: cref | enumerate(10_size)) {
+        EXPECT_EQ(i, index);
+        ++i;
+    }
 }
 
 TEST_F(RangeTest, TakeZeroIsEmpty) {
