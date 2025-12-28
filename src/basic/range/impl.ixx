@@ -170,19 +170,19 @@ namespace original::details
     };
 
     template<StdInvokable F>
-    class RangePipline
+    class RangePipeline
     {
         using FuncType = std::decay_t<F>;
 
         FuncType func_;
     public:
-        explicit RangePipline(F&& func) noexcept
+        explicit RangePipeline(F&& func) noexcept
             : func_(std::forward<F>(func)) {}
 
         template<Range R>
-        friend auto operator|(R&& range, RangePipline pipline)
+        friend auto operator|(R&& range, RangePipeline pipeline)
         {
-            return pipline.func_(std::forward<R>(range));
+            return pipeline.func_(std::forward<R>(range));
         }
     };
 }
@@ -191,7 +191,7 @@ export namespace original::range
 {
     auto take(const Size n) noexcept
     {
-        return details::RangePipline{
+        return details::RangePipeline{
             [n]<Range R>(R&& r)
             {
                 using Iter = RangeTraits<R>::BeginIterType;
@@ -203,7 +203,7 @@ export namespace original::range
 
     auto skip(const Size n) noexcept
     {
-        return details::RangePipline{
+        return details::RangePipeline{
             [n]<Range R>(R&& r)
             {
                 using Iter = RangeTraits<R>::BeginIterType;
@@ -215,7 +215,7 @@ export namespace original::range
 
     auto enumerate(const Size start = Size{}) noexcept
     {
-        return details::RangePipline{
+        return details::RangePipeline{
             [start]<Range R>(R&& r)
             {
                 using Iter = RangeTraits<R>::BeginIterType;
