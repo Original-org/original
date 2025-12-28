@@ -16,11 +16,11 @@ namespace original::details
         Size remains_;
 
     public:
-        using IterType = IterTrait<Iter>::IterType;
-        using ValueType = IterTrait<Iter>::ValueType;
-        using ReferenceType = IterTrait<Iter>::ReferenceType;
-        using PointerType = IterTrait<Iter>::PointerType;
-        using DifferenceType = IterTrait<Iter>::DifferenceType;
+        using IterType = IterTraits<Iter>::IterType;
+        using ValueType = IterTraits<Iter>::ValueType;
+        using ReferenceType = IterTraits<Iter>::ReferenceType;
+        using PointerType = IterTraits<Iter>::PointerType;
+        using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         TakeIterator() noexcept = default;
 
@@ -62,11 +62,11 @@ namespace original::details
         Size index_;
 
     public:
-        using IterType = IterTrait<Iter>::IterType;
-        using ValueType = IterTrait<Iter>::ValueType;
-        using ReferenceType = std::pair<const Size, typename IterTrait<Iter>::ReferenceType>;
+        using IterType = IterTraits<Iter>::IterType;
+        using ValueType = IterTraits<Iter>::ValueType;
+        using ReferenceType = std::pair<const Size, typename IterTraits<Iter>::ReferenceType>;
         using PointerType = void;
-        using DifferenceType = IterTrait<Iter>::DifferenceType;
+        using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         EnumIterator() noexcept = default;
 

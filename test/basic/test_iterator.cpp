@@ -390,7 +390,7 @@ TEST(StdIteratorAdapterTest, IteratorTraitsCompleteness)
     static_assert(std::is_same_v<ConstTraits::reference, const int&>);
     static_assert(std::is_same_v<ConstTraits::pointer, const int*>);
 
-    using OriginalTraits = IterTrait<Iter>;
+    using OriginalTraits = IterTraits<Iter>;
 
     static_assert(std::is_same_v<OriginalTraits::IterType, Iter>);
 }

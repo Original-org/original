@@ -18,17 +18,17 @@ export namespace original
     template<Iterator Iter>
     class StdIteratorAdapter {
     public:
-        using IterType        = IterTrait<Iter>::IterType;
+        using IterType        = IterTraits<Iter>::IterType;
         using DerivedType     = StdIteratorAdapter;
-        using ValueType       = IterTrait<Iter>::ValueType;
-        using ReferenceType   = IterTrait<Iter>::ReferenceType;
-        using PointerType     = IterTrait<Iter>::PointerType;
-        using DifferenceType  = IterTrait<Iter>::DifferenceType;
+        using ValueType       = IterTraits<Iter>::ValueType;
+        using ReferenceType   = IterTraits<Iter>::ReferenceType;
+        using PointerType     = IterTraits<Iter>::PointerType;
+        using DifferenceType  = IterTraits<Iter>::DifferenceType;
 
-        using iterator_type   = IterTrait<Iter>::IterType;       ///< Original iterator type.
-        using value_type      = IterTrait<iterator_type>::ValueType;     ///< Element value type.
-        using reference       = IterTrait<iterator_type>::ReferenceType; ///< Element reference type.
-        using pointer         = IterTrait<iterator_type>::PointerType;   ///< Element pointer type.
+        using iterator_type   = IterTraits<Iter>::IterType;       ///< Original iterator type.
+        using value_type      = IterTraits<iterator_type>::ValueType;     ///< Element value type.
+        using reference       = IterTraits<iterator_type>::ReferenceType; ///< Element reference type.
+        using pointer         = IterTraits<iterator_type>::PointerType;   ///< Element pointer type.
         using difference_type = NumberLikeType<DifferenceType>;        ///< Standard difference type.
 
         /**
@@ -289,12 +289,12 @@ export namespace original
         Size index_{};
         It it_;
     public:
-        using IterType        = IterTrait<It>::IterType;
+        using IterType        = IterTraits<It>::IterType;
         using DerivedType     = EnumIterator;
-        using ValueType       = IterTrait<It>::ValueType;
-        using ReferenceType   = std::pair<const Size, typename IterTrait<It>::ReferenceType>;
-        using PointerType     = std::pair<const Size, typename IterTrait<It>::PointerType>;
-        using DifferenceType  = IterTrait<It>::DifferenceType;
+        using ValueType       = IterTraits<It>::ValueType;
+        using ReferenceType   = std::pair<const Size, typename IterTraits<It>::ReferenceType>;
+        using PointerType     = std::pair<const Size, typename IterTraits<It>::PointerType>;
+        using DifferenceType  = IterTraits<It>::DifferenceType;
 
         constexpr EnumIterator() = delete;
 
@@ -340,12 +340,12 @@ export namespace original
     {
         It it_;
     public:
-        using IterType        = IterTrait<It>::IterType;
+        using IterType        = IterTraits<It>::IterType;
         using DerivedType     = ReversedIterator;
-        using ValueType       = IterTrait<It>::ValueType;
-        using ReferenceType   = IterTrait<It>::ReferenceType;
-        using PointerType     = IterTrait<It>::PointerType;
-        using DifferenceType  = IterTrait<It>::DifferenceType;
+        using ValueType       = IterTraits<It>::ValueType;
+        using ReferenceType   = IterTraits<It>::ReferenceType;
+        using PointerType     = IterTraits<It>::PointerType;
+        using DifferenceType  = IterTraits<It>::DifferenceType;
 
         constexpr ReversedIterator() = delete;
 

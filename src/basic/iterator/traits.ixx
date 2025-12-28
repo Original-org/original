@@ -80,7 +80,7 @@ export namespace original
      * @tparam T Iterator type.
      */
     template<typename T>
-    struct IterTrait {};
+    struct IterTraits {};
 
     /**
      * @brief Basic iterator concept.
@@ -163,7 +163,7 @@ export namespace original
      * @tparam Iter Iterator type satisfying Iterator concept.
      */
     template<Iterator Iter>
-    struct IterTrait<Iter>
+    struct IterTraits<Iter>
     {
         using IterType = Iter;                  ///< The iterator type itself.
         using DerivedType = details::IterCRTPDerivedType<Iter>;  ///< Type derived from the iterator.
