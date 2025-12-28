@@ -113,4 +113,16 @@ export namespace original
         StdSame<T, std::strong_ordering> ||
         StdSame<T, std::weak_ordering>   ||
         StdSame<T, std::partial_ordering>;
+
+    template<typename T>
+    concept StdInvokable = requires {
+        std::is_function_v<std::remove_pointer_t<T>> ||
+        requires(T t) { t(); };
+    };
+
+    template<typename T, typename... Args>
+    concept StdInvokableWith = StdInvokable<T> && std::is_invocable_v<T, Args...>;
+
+    template<typename T, typename... Args>
+    using StdInvokeResult = std::invoke_result_t<T, Args...>;
 }
