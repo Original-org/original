@@ -179,20 +179,4 @@ export namespace original
         typename T::IterType;
         typename T::ConstIterType;
     };
-
-    template<typename T>
-    concept Range = requires(T& t) {
-            { t.begin() } -> Iterator;
-            { t.end() };
-    } || requires(T& t) {
-            { begin(t) } -> Iterator;
-            { end(t) };
-    };
-
-    template<typename T>
-    concept IterRange = Range<T> &&
-    requires(T& t)
-    {
-        { t.end() } -> StdSame<decltype(begin(t))>;
-    };
 }
