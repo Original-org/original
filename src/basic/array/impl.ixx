@@ -1,6 +1,6 @@
 module;
 #include <stdexcept>
-#include <type_traits>
+#include <type_traits> // NOLINT
 export module original.basic.array.impl;
 import original.basic.types;
 import original.basic.number;
@@ -76,8 +76,6 @@ export namespace original
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = Size;
-        using BeginIterType = IterType;
-        using EndIterType   = IterType;
 
         constexpr Array() = default;
 
@@ -136,8 +134,6 @@ export namespace original
         using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
         using ValueType     = T;
         using SizeType      = Size;
-        using BeginIterType = IterType;
-        using EndIterType   = IterType;
 
         constexpr Array() = default;
 
