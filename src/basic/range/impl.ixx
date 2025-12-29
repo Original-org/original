@@ -1,4 +1,5 @@
 module;
+#include <functional>
 #include <utility>
 #include <memory>
 export module original.basic.range.impl;
@@ -107,6 +108,54 @@ namespace original::details
         }
 
         bool operator==(const EnumIterator& rhs) const noexcept
+        {
+            return this->cur_ == rhs.cur_;
+        }
+    };
+
+    template<ForwardIterator Iter, StdInvokable F>
+    class TransformIterator
+        : public ForwardIteratorBase<
+            TransformIterator<Iter, F>,
+            RemoveCVRefType<StdInvokeResult<F&, typename IterTraits<Iter>::ReferenceType>>,
+            StdInvokeResult<F, typename IterTraits<Iter>::ReferenceType>,
+            void
+        >
+    {
+        Iter cur_;
+        F* func_;
+
+    public:
+        using IterType = IterTraits<Iter>::IterType;
+        using ReferenceType = StdInvokeResult<F, typename IterTraits<Iter>::ReferenceType>;
+        using ValueType = RemoveCVRefType<ReferenceType>;
+        using PointerType = void;
+        using DifferenceType = IterTraits<Iter>::DifferenceType;
+
+        TransformIterator() noexcept = default;
+
+        TransformIterator(IterType cur, F* func) noexcept
+            : cur_(cur), func_(func) {}
+
+        ReferenceType operator*() const
+        {
+            return std::invoke(*this->func_, *this->cur_);
+        }
+
+        TransformIterator& operator++()
+        {
+            ++this->cur_;
+            return *this;
+        }
+
+        TransformIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        bool operator==(const TransformIterator& rhs) const noexcept
         {
             return this->cur_ == rhs.cur_;
         }
@@ -280,6 +329,42 @@ namespace original::details
         }
     };
 
+    template<Range R, StdInvokable F>
+    class TransformRange : public IterRangeBase<R>
+    {
+        using Base = IterRangeBase<R>;
+        using Func = std::decay_t<F>;
+
+        Func func_;
+    public:
+        TransformRange(R base, F func) noexcept
+            : Base(std::move(base)), func_(std::move(func)) {}
+
+        auto begin()
+        {
+            using Iter = decltype(this->beginBase());
+            return TransformIterator<Iter, Func>{this->beginBase(), &this->func_};
+        }
+
+        auto end()
+        {
+            using Iter = decltype(this->endBase());
+            return TransformIterator<Iter, Func>{this->endBase(), &this->func_};
+        }
+
+        auto begin() const
+        {
+            using Iter = decltype(this->beginBase());
+            return TransformIterator<Iter, const Func>{this->beginBase(), &this->func_};
+        }
+
+        auto end() const
+        {
+            using Iter = decltype(this->endBase());
+            return TransformIterator<Iter, const Func>{this->endBase(), &this->func_};
+        }
+    };
+
     template<StdInvokable F>
     class RangePipeline
     {
@@ -335,6 +420,28 @@ export namespace original::range
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
                 return details::EnumRange<RangeType>{all, start};
+            }
+        };
+    }
+
+    template<StdInvokable F>
+    auto transform(F&& func) noexcept
+    {
+        return details::RangePipeline{
+            [func = std::forward<F>(func)]<Range R>(R&& r)
+            {
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+
+                using Iter = decltype(all.begin());
+                using Ref  = IterTraits<Iter>::ReferenceType;
+
+                static_assert(
+                    StdInvokableWith<std::decay_t<F>&, Ref>,
+                    "transform(F): F must be invocable with range element"
+                );
+
+                return details::TransformRange<RangeType, F>{all, func};
             }
         };
     }
