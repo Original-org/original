@@ -3,6 +3,7 @@ module;
 export module original.basic.range.impl;
 import original.basic.range.traits;
 import original.basic.iterator.traits;
+import orginal.basic.iterator.impl;
 import original.basic.types;
 import original.basic.number;
 
@@ -11,9 +12,15 @@ namespace original::details
 {
     template<ForwardIterator Iter>
     class TakeIterator
+        : public ForwardIteratorBase<
+            TakeIterator<Iter>,
+            typename IterTraits<Iter>::ValueType,
+            typename IterTraits<Iter>::ReferenceType,
+            typename IterTraits<Iter>::PointerType
+        >
     {
         Iter cur_;
-        Size remains_;
+        Size remains_{};
 
     public:
         using IterType = IterTraits<Iter>::IterType;
@@ -57,9 +64,15 @@ namespace original::details
 
     template<ForwardIterator Iter>
     class EnumIterator
+        : public ForwardIteratorBase<
+            EnumIterator<Iter>,
+            typename IterTraits<Iter>::ValueType,
+            std::pair<const Size, typename IterTraits<Iter>::ReferenceType>,
+            void
+        >
     {
         Iter cur_;
-        Size index_;
+        Size index_{};
 
     public:
         using IterType = IterTraits<Iter>::IterType;
