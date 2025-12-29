@@ -1,5 +1,6 @@
 module;
 #include <utility>
+#include <memory>
 export module original.basic.range.impl;
 import original.basic.range.traits;
 import original.basic.iterator.traits;
@@ -111,75 +112,172 @@ namespace original::details
         }
     };
 
-    template<Iterator Iter>
+    template<Range R>
+    class RefRange {
+        R* ptr_;
+    public:
+        explicit RefRange(R& r) noexcept : ptr_(std::addressof(r)) {}
+
+        decltype(auto) begin() const
+        {
+            const auto& r = *this->ptr_;
+            return r.begin();
+        }
+
+        decltype(auto) end() const
+        {
+            const auto& r = *this->ptr_;
+            return r.end();
+        }
+
+        decltype(auto) begin()
+        {
+            auto& r = *this->ptr_;
+            return r.begin();
+        }
+
+        decltype(auto) end()
+        {
+            auto& r = *this->ptr_;
+            return r.end();
+        }
+    };
+
+    template<Range R>
+    auto all(R& r) noexcept {
+        return RefRange<R>(r);
+    }
+
+    template<Range R>
+    auto all(R&& r) noexcept
+    {
+        return std::forward<R>(r);
+    }
+
+    template<Range R>
     class IterRangeBase
     {
     protected:
-        using BeginIterType = Iter;
-        using EndIterType = Iter;
+        R base_;
 
-        BeginIterType begin_;
-        EndIterType end_;
+        explicit IterRangeBase(R r) : base_(std::move(r)) {}
 
-        IterRangeBase(BeginIterType begin, EndIterType end) noexcept
-            : begin_(begin), end_(end) {}
-
-    public:
-        [[nodiscard]] BeginIterType begin() const noexcept
+        decltype(auto) beginBase()
         {
-            return this->begin_;
+            return this->base_.begin();
         }
 
-        [[nodiscard]] EndIterType end() const noexcept
+        decltype(auto) endBase()
         {
-            return this->end_;
+            return this->base_.end();
+        }
+
+        decltype(auto) beginBase() const
+        {
+            return this->base_.begin();
+        }
+
+        decltype(auto) endBase() const
+        {
+            return this->base_.end();
         }
     };
 
-    template<ForwardIterator Iter>
-    class TakeRange : public IterRangeBase<TakeIterator<Iter>>
-    {
-        using Base = IterRangeBase<TakeIterator<Iter>>;
-    public:
-        using BeginIterType = TakeIterator<Iter>;
-        using EndIterType = TakeIterator<Iter>;
+    template<Range R>
+    class TakeRange : public IterRangeBase<R> {
+        using Base = IterRangeBase<R>;
 
-        TakeRange(Iter begin, Iter end, const Size remains)
-            : Base(BeginIterType{begin, remains}, EndIterType{end, Size{}}) {}
+        Size n_{};
+    public:
+        TakeRange(R base, const Size n)
+            : Base(std::move(base)), n_(n) {}
+
+        auto begin() {
+            using Iter = decltype(this->beginBase());
+            return TakeIterator<Iter>{this->beginBase(), this->n_};
+        }
+
+        auto end() {
+            using Iter = decltype(this->endBase());
+            return TakeIterator<Iter>{this->endBase(), Size{}};
+        }
+
+        auto begin() const {
+            using Iter = decltype(this->beginBase());
+            return TakeIterator<Iter>{this->beginBase(), this->n_};
+        }
+
+        auto end() const {
+            using Iter = decltype(this->endBase());
+            return TakeIterator<Iter>{this->endBase(), Size{}};
+        }
     };
 
-    template<ForwardIterator Iter>
-    class SkipRange : public IterRangeBase<Iter>
-    {
-        static Iter skip(Iter cur, Iter end, Size n) noexcept
-        {
-            while (n > Size{} && cur != end)
-            {
-                ++cur;
+    template<Range R>
+    class SkipRange : public IterRangeBase<R> {
+        using Base = IterRangeBase<R>;
+        Size n_{};
+
+        template<ForwardIterator Iter>
+        static Iter skip(Iter it, Iter end, Size n) noexcept {
+            while (n > Size{} && it != end) {
+                ++it;
                 --n;
             }
-            return cur;
+            return it;
+        }
+    public:
+        SkipRange(R base, const Size n) noexcept
+            : Base(std::move(base)), n_(n) {}
+
+        auto begin() {
+            auto it  = this->beginBase();
+            auto end = this->endBase();
+            return skip(it, end, n_);
         }
 
-        using Base = IterRangeBase<Iter>;
-    public:
-        using BeginIterType = Iter;
-        using EndIterType = Iter;
+        auto end() {
+            return this->endBase();
+        }
 
-        SkipRange(Iter begin, Iter end, const Size skips) noexcept
-            : Base(skip(begin, end, skips), end) {}
+        auto begin() const {
+            auto it  = this->beginBase();
+            auto end = this->endBase();
+            return skip(it, end, n_);
+        }
+
+        auto end() const {
+            return this->endBase();
+        }
     };
 
-    template<ForwardIterator Iter>
-    class EnumRange : public IterRangeBase<EnumIterator<Iter>>
-    {
-        using Base = IterRangeBase<EnumIterator<Iter>>;
+    template<Range R>
+    class EnumRange : public IterRangeBase<R> {
+        using Base = IterRangeBase<R>;
+        Size start_{};
     public:
-        using BeginIterType = EnumIterator<Iter>;
-        using EndIterType = EnumIterator<Iter>;
+        EnumRange(R base, const Size start) noexcept
+            : Base(std::move(base)), start_(start) {}
 
-        EnumRange(Iter begin, Iter end, const Size start) noexcept
-            : Base(BeginIterType{begin, start}, EndIterType{end, Size{}}) {}
+        auto begin() {
+            using Iter = decltype(this->beginBase());
+            return EnumIterator<Iter>{this->beginBase(), this->start_};
+        }
+
+        auto end() {
+            using Iter = decltype(this->endBase());
+            return EnumIterator<Iter>{this->endBase(), Size{}};
+        }
+
+        auto begin() const {
+            using Iter = decltype(this->beginBase());
+            return EnumIterator<Iter>{this->beginBase(), this->start_};
+        }
+
+        auto end() const {
+            using Iter = decltype(this->endBase());
+            return EnumIterator<Iter>{this->endBase(), Size{}};
+        }
     };
 
     template<StdInvokable F>
@@ -204,36 +302,39 @@ export namespace original::range
 {
     auto take(const Size n) noexcept
     {
-        return details::RangePipeline{
+        return details::RangePipeline
+        {
             [n]<Range R>(R&& r)
             {
-                using Iter = RangeTraits<R>::BeginIterType;
-                using TakeRange = details::TakeRange<Iter>;
-                return TakeRange{r.begin(), r.end(), n};
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+                return details::TakeRange<RangeType>{all, n};
             }
         };
     }
 
     auto skip(const Size n) noexcept
     {
-        return details::RangePipeline{
+        return details::RangePipeline
+        {
             [n]<Range R>(R&& r)
             {
-                using Iter = RangeTraits<R>::BeginIterType;
-                using SkipRange = details::SkipRange<Iter>;
-                return SkipRange{r.begin(), r.end(), n};
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+                return details::SkipRange<RangeType>{all, n};
             }
         };
     }
 
     auto enumerate(const Size start = Size{}) noexcept
     {
-        return details::RangePipeline{
+        return details::RangePipeline
+        {
             [start]<Range R>(R&& r)
             {
-                using Iter = RangeTraits<R>::BeginIterType;
-                using EnumRange = details::EnumRange<Iter>;
-                return EnumRange{r.begin(), r.end(), start};
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+                return details::EnumRange<RangeType>{all, start};
             }
         };
     }
