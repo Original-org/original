@@ -18,8 +18,8 @@ export namespace original
     template<
         typename Derived,
         StdObject T,
-        StdReference Reference,
-        StdPointer Pointer
+        typename Reference,
+        typename Pointer
     >
     class IteratorBase
     {
@@ -106,8 +106,8 @@ export namespace original
     template<
         typename Derived,
         StdObject T,
-        StdReference Reference,
-        StdPointer Pointer
+        typename Reference,
+        typename Pointer
     >
     class ForwardIteratorBase : public IteratorBase<Derived, T, Reference, Pointer>
     {
@@ -152,8 +152,8 @@ export namespace original
     template<
         typename Derived,
         StdObject T,
-        StdReference Reference,
-        StdPointer Pointer
+        typename Reference,
+        typename Pointer
     >
     class BidirectionalIteratorBase
     : public ForwardIteratorBase<Derived, T, Reference, Pointer>
@@ -200,8 +200,8 @@ export namespace original
     template<
         typename Derived,
         StdObject T,
-        StdReference Reference,
-        StdPointer Pointer,
+        typename Reference,
+        typename Pointer,
         SignedIntegralLike Difference
     >
     class RandomAccessIteratorBase
@@ -340,8 +340,8 @@ export namespace original
     template<
         typename Derived,
         StdObject T,
-        StdReference Reference,
-        StdPointer Pointer,
+        typename Reference,
+        typename Pointer,
         SignedIntegralLike Difference
     >
     class ContiguousIteratorBase
