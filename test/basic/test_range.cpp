@@ -20,21 +20,21 @@ TEST_F(RangeTest, ArraySatisfiesRangeConcept) {
 }
 
 TEST_F(RangeTest, TakeRangeSatisfiesIterRange) {
-    auto taken = arr | take(3_size);
-    static_assert(IterRange<decltype(taken)>);
-    EXPECT_TRUE(IterRange<decltype(taken)>);
+    using TakenType = decltype(arr | take(3_size));
+    static_assert(IterRange<TakenType>);
+    EXPECT_TRUE(IterRange<TakenType>);
 }
 
 TEST_F(RangeTest, SkipRangeSatisfiesIterRange) {
-    auto skipped = arr | skip(2_size);
-    static_assert(IterRange<decltype(skipped)>);
-    EXPECT_TRUE(IterRange<decltype(skipped)>);
+    using SkippedType = decltype(arr | skip(2_size));
+    static_assert(IterRange<SkippedType>);
+    EXPECT_TRUE(IterRange<SkippedType>);
 }
 
 TEST_F(RangeTest, EnumRangeSatisfiesIterRange) {
-    auto enumerated = arr | enumerate();
-    static_assert(IterRange<decltype(enumerated)>);
-    EXPECT_TRUE(IterRange<decltype(enumerated)>);
+    using EnumeratedType = decltype(arr | enumerate());
+    static_assert(IterRange<EnumeratedType>);
+    EXPECT_TRUE(IterRange<EnumeratedType>);
 }
 
 TEST_F(RangeTest, RangeTraitsExtraction) {
@@ -96,7 +96,7 @@ TEST_F(RangeTest, EnumeratePipelineDefaultStart) {
     EXPECT_NE(it, end);
 
     std::pair p = {0_size, 1};
-    for (const auto& [index, val]: arr | enumerate())
+    for (auto&& [index, val]: arr | enumerate())
     {
         EXPECT_EQ(index, p.first);
         EXPECT_EQ(val, p.second);
@@ -113,7 +113,8 @@ TEST_F(RangeTest, EnumeratePipelineCustomStart) {
     auto [i1, v1] = *it; EXPECT_EQ(i1, 11_size); EXPECT_EQ(v1, 2); ++it;
 
     auto i = 10_size;
-    for (const auto& cref = arr; const auto& [index, val]: cref | enumerate(10_size)) {
+    for (const auto& cref = arr;
+        auto&& [index, val]: cref | enumerate(10_size)) {
         EXPECT_EQ(i, index);
         ++i;
     }
@@ -131,7 +132,9 @@ TEST_F(RangeTest, SkipBeyondLengthIsEmpty) {
 
 TEST_F(RangeTest, ChainedPipeline) {
     std::pair p {1_size, 2};
-    for (const auto& [index, val]: arr | take(4_size) | skip(1_size) | enumerate(1_size))
+    for (const auto view =
+        arr | take(4_size) | skip(1_size) | enumerate(1_size);
+        auto&& [index, val]: view)
     {
         EXPECT_EQ(index, p.first);
         EXPECT_EQ(val, p.second);
