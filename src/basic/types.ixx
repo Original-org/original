@@ -65,6 +65,9 @@ export namespace original
     template<typename T>
     using RemoveCVRefType = std::remove_cvref_t<T>;
 
+    template<bool Test, typename T>
+    using MaybeConstType = std::conditional_t<Test, const T, T>;
+
     /**
      * @brief Concept that constrains a type to be a standard arithmetic type.
      */
