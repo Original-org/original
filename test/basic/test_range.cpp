@@ -149,3 +149,70 @@ TEST_F(RangeTest, EmptyArraySatisfiesRange) {
     EXPECT_TRUE(Range<decltype(empty)>);
     EXPECT_EQ(empty.begin(), empty.end());
 }
+
+TEST_F(RangeTest, TransformPipelineBasic) {
+    const auto transformed = arr | transform([](int x) { return x * x; });
+
+    auto it = transformed.begin();
+    const auto end = transformed.end();
+
+    EXPECT_EQ(*it, 1);   ++it;
+    EXPECT_EQ(*it, 4);   ++it;
+    EXPECT_EQ(*it, 9);   ++it;
+    EXPECT_EQ(*it, 16);  ++it;
+    EXPECT_EQ(*it, 25);  ++it;
+    EXPECT_EQ(it, end);
+
+    int sum = 0;
+    for (const auto& e : arr | transform([](const int x) { return x * x; })) {
+        sum += e;
+    }
+    EXPECT_EQ(sum, 55);  // 1+4+9+16+25
+}
+
+TEST_F(RangeTest, TransformPipelineWithCapture) {
+    int offset = 10;
+    const auto transformed = arr | transform([offset](const int x) { return x + offset; });
+
+    int expected = 11;
+    for (const auto& e : transformed) {
+        EXPECT_EQ(e, expected++);
+    }
+}
+
+TEST_F(RangeTest, TransformChainedWithTakeAndSkip) {
+    const auto view = arr
+                    | skip(1_size)
+                    | take(3_size)
+                    | transform([](const int x) { return -x; });
+
+    auto it = view.begin();
+    EXPECT_EQ(*it, -2); ++it;
+    EXPECT_EQ(*it, -3); ++it;
+    EXPECT_EQ(*it, -4); ++it;
+    EXPECT_EQ(it, view.end());
+}
+
+TEST_F(RangeTest, TransformOnEmptyRange) {
+    Array<int, 0> empty;
+    const auto transformed = empty | transform([](const int x) { return x * 2; });
+    EXPECT_EQ(transformed.begin(), transformed.end());
+}
+
+TEST_F(RangeTest, TransformConstPropagation) {
+    const auto& cref = arr;
+    const auto transformed = cref | transform([](const int x) { return x + 1; });
+
+    auto it = transformed.begin();
+    EXPECT_EQ(*it, 2); ++it;
+    EXPECT_EQ(*it, 3); ++it;
+    EXPECT_EQ(*it, 4); ++it;
+    EXPECT_EQ(*it, 5);
+
+    int val = 2;
+    for (auto&& e: cref | transform([](const int x) { return x + 1; }))
+    {
+        EXPECT_EQ(val, e);
+        ++val;
+    }
+}
