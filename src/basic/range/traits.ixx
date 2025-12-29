@@ -9,32 +9,36 @@ export namespace original
 {
     template<typename R>
     concept Range =
-    requires(R& r)
-    {
-        typename RemoveCVRefType<R>::BeginIterType;
-        typename RemoveCVRefType<R>::EndIterType;
-    } &&
-    (requires(R& r) {
+    requires(R& r) {
         { r.begin() } -> Iterator;
         { r.end() };
     } ||
     requires(R& r) {
         { begin(r) } -> Iterator;
         { end(r) };
-    });
+    };
 
     template<typename R>
     concept IterRange = Range<R> &&
     requires(R& r)
     {
-        requires StdSame<typename RemoveCVRefType<R>::BeginIterType, typename RemoveCVRefType<R>::EndIterType>;
-        { r.end() } -> StdSame<typename RemoveCVRefType<R>::EndIterType>;
+        { r.end() } -> StdSame<decltype(std::declval<R&>().begin())>;
+    };
+
+    template<typename R>
+    struct RangeTraits;
+
+    template<Range R>
+    struct RangeTraits<R>
+    {
+        using BeginIterType = decltype(std::declval<R&>().begin());
+        using EndIterType = decltype(std::declval<R&>().end());
     };
 
     template<Range R>
-    struct RangeTraits
+    struct RangeTraits<const R>
     {
-        using BeginIterType = decltype(std::declval<R&>().begin());
-        using EndIterType   = decltype(std::declval<R&>().end());
+        using BeginIterType = decltype(std::declval<const R&>().begin());
+        using EndIterType = decltype(std::declval<const R&>().end());
     };
 }
