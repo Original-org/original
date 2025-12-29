@@ -67,7 +67,7 @@ namespace original::details
     class EnumIterator
         : public ForwardIteratorBase<
             EnumIterator<Iter>,
-            typename IterTraits<Iter>::ValueType,
+            std::pair<const Size, typename IterTraits<Iter>::ValueType>,
             std::pair<const Size, typename IterTraits<Iter>::ReferenceType>,
             void
         >
@@ -77,7 +77,7 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ValueType = IterTraits<Iter>::ValueType;
+        using ValueType = std::pair<const Size, typename IterTraits<Iter>::ValueType>;
         using ReferenceType = std::pair<const Size, typename IterTraits<Iter>::ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
