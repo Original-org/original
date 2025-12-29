@@ -84,7 +84,7 @@ namespace original::details
 
         EnumIterator() noexcept = default;
 
-        explicit EnumIterator(IterType cur, const Size start) noexcept
+        EnumIterator(IterType cur, const Size start) noexcept
             : cur_(cur), index_(start) {}
 
         ReferenceType operator*() const
