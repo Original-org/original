@@ -11,7 +11,7 @@ export namespace original
 {
     template<typename C>
     concept Container =
-    StdObject<C> &&
+    IsObject<C> &&
     requires(C c) {
         typename C::IterType;
         typename C::ConstIterType;
@@ -45,6 +45,6 @@ export namespace original
         requires ContiguousIterator<typename ContainerTraits<C>::IterType>;
         requires ContiguousIterator<typename ContainerTraits<C>::ConstIterType>;
 
-        { container.data() } -> StdSame<std::add_pointer_t<typename ContainerTraits<C>::ValueType>>;
+        { container.data() } -> SameType<std::add_pointer_t<typename ContainerTraits<C>::ValueType>>;
     };
 }

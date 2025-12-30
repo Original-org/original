@@ -12,7 +12,7 @@ namespace original::details
 {
     using namespace original::literals;
 
-    template<StdObject T, Size::Type N>
+    template<IsObject T, Size::Type N>
     class ArrayImpl
     {
     protected:
@@ -25,7 +25,7 @@ namespace original::details
         constexpr ArrayImpl() = default;
 
         template<typename... Args>
-        requires (sizeof...(Args) <= N && (StdObject<Args> && ...))
+        requires (sizeof...(Args) <= N && (IsObject<Args> && ...))
         explicit constexpr ArrayImpl(Args&&... args) noexcept
         : data_{static_cast<T>(std::forward<Args>(args))...} {}
     public:
@@ -50,14 +50,14 @@ namespace original::details
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         constexpr ValueType& operator[](U index) noexcept
         {
             return this->data_[numberLikeValue(index)];
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         constexpr const ValueType& operator[](U index) const noexcept
         {
             return this->data_[numberLikeValue(index)];
@@ -67,7 +67,7 @@ namespace original::details
 
 export namespace original
 {
-    template<StdObject T, Size::Type N>
+    template<IsObject T, Size::Type N>
     class Array : public details::ArrayImpl<T, N>
     {
         using Base = details::ArrayImpl<T, N>;
@@ -80,7 +80,7 @@ export namespace original
         constexpr Array() = default;
 
         template<typename... Args>
-        requires (sizeof...(Args) <= N && (StdObject<Args> && ...))
+        requires (sizeof...(Args) <= N && (IsObject<Args> && ...))
         explicit constexpr Array(Args&&... args) noexcept
         : Base{static_cast<T>(std::forward<Args>(args))...} {}
 
@@ -105,7 +105,7 @@ export namespace original
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         constexpr ValueType& at(U index)
         {
             if(index >= N)
@@ -115,7 +115,7 @@ export namespace original
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         constexpr const ValueType& at(U index) const
         {
             if(index >= N)
@@ -125,7 +125,7 @@ export namespace original
         }
     };
 
-    template<StdObject T>
+    template<IsObject T>
     class Array<T, 0> : public details::ArrayImpl<T, 0>
     {
         using Base = details::ArrayImpl<T, 0>;
@@ -158,7 +158,7 @@ export namespace original
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         [[noreturn]]
         constexpr ValueType& at(U)
         {
@@ -166,7 +166,7 @@ export namespace original
         }
 
         template<UnsignedIntegralLike U>
-        requires StdSame<NumberLikeType<U>, NumberLikeType<SizeType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         [[noreturn]]
         constexpr const ValueType& at(U) const
         {

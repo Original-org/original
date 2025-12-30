@@ -22,7 +22,7 @@ export namespace original
     concept IterRange = Range<R> &&
     requires(R& r)
     {
-        { r.end() } -> StdSame<decltype(std::declval<R&>().begin())>;
+        { r.end() } -> SameType<decltype(std::declval<R&>().begin())>;
     };
 
     template<typename R>

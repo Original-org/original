@@ -35,7 +35,7 @@ export namespace original
         }
     };
 
-    template<StdObject T>
+    template<IsObject T>
     struct TypedLayout
     {
         static constexpr Size size() noexcept

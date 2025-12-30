@@ -58,7 +58,7 @@ namespace original::details
 export namespace original
 {
     template<typename T>
-    concept SourceTag = StdObject<T> &&
+    concept SourceTag = IsObject<T> &&
     requires
     {
         typename T::SourceType;
@@ -69,7 +69,7 @@ export namespace original
         using SourceType = void;
     };
 
-    template<StdObject T>
+    template<IsObject T>
     struct SpecifiedSource
     {
         using SourceType = T;
@@ -93,8 +93,8 @@ export namespace original
         Dereferenceable<T> &&
         requires(T it)
     {
-        { *it } -> StdSame<decltype(*std::declval<T>())>;
-        { it == it } -> StdConvertible<bool>;
+        { *it } -> SameType<decltype(*std::declval<T>())>;
+        { it == it } -> Convertible<bool>;
     };
 
     /**
@@ -105,8 +105,8 @@ export namespace original
     template<typename T>
     concept ForwardIterator = Iterator<T> && requires(T it)
     {
-        { ++it } -> StdSame<T&>;
-        { it++ } -> StdSame<T>;
+        { ++it } -> SameType<T&>;
+        { it++ } -> SameType<T>;
         requires std::default_initializable<T>;
     };
 
@@ -118,8 +118,8 @@ export namespace original
     template<typename T>
     concept BidirectionalIterator = ForwardIterator<T> && requires(T it)
     {
-        { --it } -> StdSame<T&>;
-        { it-- } -> StdSame<T>;
+        { --it } -> SameType<T&>;
+        { it-- } -> SameType<T>;
     };
 
     /**
@@ -133,13 +133,13 @@ export namespace original
           requires(T it,
           details::DifferenceType<T> dis)
     {
-        { it + dis } -> StdSame<T>;
-        { dis + it } -> StdSame<T>;
-        { it - dis } -> StdSame<T>;
-        { it - it } -> StdSame<details::DifferenceType<T>>;
-        { it += dis } -> StdSame<T&>;
-        { it -= dis } -> StdSame<T&>;
-        { it[dis] } -> StdSame<decltype(*it)>;
+        { it + dis } -> SameType<T>;
+        { dis + it } -> SameType<T>;
+        { it - dis } -> SameType<T>;
+        { it - it } -> SameType<details::DifferenceType<T>>;
+        { it += dis } -> SameType<T&>;
+        { it -= dis } -> SameType<T&>;
+        { it[dis] } -> SameType<decltype(*it)>;
         { it <=> it } -> StdThreeWayCompareResult;
     };
 
@@ -147,8 +147,8 @@ export namespace original
     concept ContiguousIterator = RandomAccessIterator<T> &&
     requires(T it)
     {
-        requires StdSame<NumberLikeType<details::DifferenceType<T>>, std::ptrdiff_t>;
-        { std::to_address(it) } -> StdConvertible<const RemoveCVRefType<decltype(*it)>*>;
+        requires SameType<NumberLikeType<details::DifferenceType<T>>, std::ptrdiff_t>;
+        { std::to_address(it) } -> Convertible<const RemoveCVRefType<decltype(*it)>*>;
     };
 
     template<typename It>
@@ -174,7 +174,7 @@ export namespace original
     };
 
     template<typename T>
-    concept HasIterator = StdObject<T> && requires
+    concept HasIterator = IsObject<T> && requires
     {
         typename T::IterType;
         typename T::ConstIterType;

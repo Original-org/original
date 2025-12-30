@@ -17,7 +17,7 @@ export namespace original
      */
     template<
         typename Derived,
-        StdObject T,
+        IsObject T,
         typename Reference,
         typename Pointer
     >
@@ -105,7 +105,7 @@ export namespace original
      */
     template<
         typename Derived,
-        StdObject T,
+        IsObject T,
         typename Reference,
         typename Pointer
     >
@@ -151,7 +151,7 @@ export namespace original
      */
     template<
         typename Derived,
-        StdObject T,
+        IsObject T,
         typename Reference,
         typename Pointer
     >
@@ -199,7 +199,7 @@ export namespace original
      */
     template<
         typename Derived,
-        StdObject T,
+        IsObject T,
         typename Reference,
         typename Pointer,
         SignedIntegralLike Difference
@@ -225,7 +225,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr DerivedType& operator+=(U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             static_cast<DerivedType&>(*this) += numberLikeValue(n);
             return static_cast<DerivedType&>(*this);
@@ -239,7 +239,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr DerivedType& operator-=(U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return *this += -numberLikeValue(n);
         }
@@ -262,7 +262,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             DerivedType temp = static_cast<DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
@@ -276,7 +276,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n) const
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             DerivedType temp = static_cast<const DerivedType&>(*this);
             return *(temp + numberLikeValue(n));
@@ -301,7 +301,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator+(DerivedType it, U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             it += n;
             return it;
@@ -316,7 +316,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator+(U n, DerivedType it)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return it + n;
         }
@@ -330,7 +330,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         friend constexpr DerivedType operator-(DerivedType it, U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             it -= n;
             return it;
@@ -339,7 +339,7 @@ export namespace original
 
     template<
         typename Derived,
-        StdObject T,
+        IsObject T,
         typename Reference,
         typename Pointer,
         SignedIntegralLike Difference
@@ -348,7 +348,7 @@ export namespace original
     : public RandomAccessIteratorBase<Derived, T, Reference, Pointer, Difference>
     {
         static_assert(
-            StdSame<NumberLikeType<Difference>, std::ptrdiff_t>,
+            SameType<NumberLikeType<Difference>, std::ptrdiff_t>,
             "Contiguous iterators require difference type compatible with std::ptrdiff_t"
         );
 
@@ -370,9 +370,9 @@ export namespace original
      * @tparam Pointer Pointer type.
      * @tparam Difference Signed integral difference type.
      */
-    template<StdObject T,
-        StdReference Reference,
-        StdPointer Pointer,
+    template<IsObject T,
+        IsReference Reference,
+        IsPointer Pointer,
         SignedIntegralLike Difference,
         SourceTag Source = NoSource
     >
@@ -500,7 +500,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr NormalIterator& operator+=(U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             this->ptr_ += numberLikeValue(n);
             return *this;
@@ -514,7 +514,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr NormalIterator& operator-=(U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return *this += -n;
         }
@@ -537,7 +537,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n)
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return this->ptr_[numberLikeValue(n)];
         }
@@ -550,7 +550,7 @@ export namespace original
          */
         template<SignedIntegralLike U>
         constexpr ReferenceType operator[](U n) const
-        requires StdSame<NumberLikeType<U>, NumberLikeType<DifferenceType>>
+        requires SameType<NumberLikeType<U>, NumberLikeType<DifferenceType>>
         {
             return this->ptr_[numberLikeValue(n)];
         }
@@ -570,18 +570,18 @@ export namespace original
      * @brief Default iterator type alias.
      * @tparam T Value type.
      */
-    template<StdObject T, SourceTag Source = NoSource>
+    template<IsObject T, SourceTag Source = NoSource>
     using DefaultIterator = NormalIterator<T, T&, T*, Diff, Source>;
 
     namespace iterator
     {
-        template<StdObject T>
+        template<IsObject T>
         constexpr auto makeIterator(T* ptr) noexcept
         {
             return DefaultIterator<T>{ptr};
         }
 
-        template<StdObject T>
+        template<IsObject T>
         constexpr auto makeIterator(const T* ptr) noexcept
         {
             return DefaultIterator<const T>{ptr};

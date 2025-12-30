@@ -159,7 +159,7 @@ export namespace original
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter& operator+=(const T n)
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             this->it_ += DifferenceType{n};
             return *this;
@@ -175,7 +175,7 @@ export namespace original
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter& operator-=(const T n)
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return *this += -n;
         }
@@ -190,7 +190,7 @@ export namespace original
         template<SignedIntegralLike T>
         constexpr StdIteratorAdapter operator+(const T n) const
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{ this->it_ + DifferenceType{n} };
         }
@@ -230,7 +230,7 @@ export namespace original
         template<SignedIntegralLike T>
         constexpr reference operator[](T n)
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return this->it_[DifferenceType{n}];
         }
@@ -245,7 +245,7 @@ export namespace original
         template<SignedIntegralLike T>
         constexpr reference operator[](T n) const
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return this->it_[DifferenceType{n}];
         }
@@ -261,7 +261,7 @@ export namespace original
         template<SignedIntegralLike T>
         friend constexpr StdIteratorAdapter operator+(T n, StdIteratorAdapter it)
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{it.it_ + DifferenceType{n}};
         }
@@ -277,7 +277,7 @@ export namespace original
         template<SignedIntegralLike T>
         friend constexpr StdIteratorAdapter operator-(StdIteratorAdapter it, T n)
         requires RandomAccessIterator<iterator_type> &&
-        StdConvertible<NumberLikeType<T>, difference_type>
+        Convertible<NumberLikeType<T>, difference_type>
         {
             return StdIteratorAdapter{it.it_ - DifferenceType{n}};
         }
@@ -301,7 +301,7 @@ export namespace original
         explicit constexpr EnumIterator(IterType it) : it_(it) {}
 
         template<UnsignedIntegralLike T>
-        requires StdSame<NumberLikeType<T>, Size::Type>
+        requires SameType<NumberLikeType<T>, Size::Type>
         constexpr EnumIterator(IterType it, const T start) noexcept
             : index_(Size{start}), it_(it) {}
 

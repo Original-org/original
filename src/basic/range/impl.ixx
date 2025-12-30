@@ -113,12 +113,12 @@ namespace original::details
         }
     };
 
-    template<ForwardIterator Iter, StdInvokable F>
+    template<ForwardIterator Iter, Invokable F>
     class TransformIterator
         : public ForwardIteratorBase<
             TransformIterator<Iter, F>,
-            RemoveCVRefType<StdInvokeResult<F&, typename IterTraits<Iter>::ReferenceType>>,
-            StdInvokeResult<F, typename IterTraits<Iter>::ReferenceType>,
+            RemoveCVRefType<InvokeResult<F&, typename IterTraits<Iter>::ReferenceType>>,
+            InvokeResult<F, typename IterTraits<Iter>::ReferenceType>,
             void
         >
     {
@@ -127,7 +127,7 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = StdInvokeResult<F, typename IterTraits<Iter>::ReferenceType>;
+        using ReferenceType = InvokeResult<F, typename IterTraits<Iter>::ReferenceType>;
         using ValueType = RemoveCVRefType<ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
@@ -331,6 +331,7 @@ namespace original::details
 
     template<Range R, StdInvokable F>
     class TransformRange : public IterRangeBase<R>
+    template<Range R, Invokable F>
     {
         using Base = IterRangeBase<R>;
         using Func = std::decay_t<F>;
@@ -365,7 +366,7 @@ namespace original::details
         }
     };
 
-    template<StdInvokable F>
+    template<Invokable F>
     class RangePipeline
     {
         using FuncType = std::decay_t<F>;
@@ -424,7 +425,7 @@ export namespace original::range
         };
     }
 
-    template<StdInvokable F>
+    template<Invokable F>
     auto transform(F&& func) noexcept
     {
         return details::RangePipeline{
@@ -437,7 +438,7 @@ export namespace original::range
                 using Ref  = IterTraits<Iter>::ReferenceType;
 
                 static_assert(
-                    StdInvokableWith<std::decay_t<F>&, Ref>,
+                    InvokableWith<std::decay_t<F>&, Ref>,
                     "transform(F): F must be invocable with range element"
                 );
 

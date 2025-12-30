@@ -12,11 +12,11 @@ export namespace original
 
     template<typename L>
     concept AllocationLayout =
-        StdObject<L> &&
+        IsObject<L> &&
         requires(L l)
     {
-        { l.size() } -> StdSame<Size>;
-        { l.align() } -> StdSame<Size>;
+        { l.size() } -> SameType<Size>;
+        { l.align() } -> SameType<Size>;
     };
 
     constexpr bool validAlign(const Size align) noexcept
@@ -26,18 +26,18 @@ export namespace original
 
     template<typename A>
     concept CanAllocate =
-        StdObject<A> &&
+        IsObject<A> &&
         requires(A& a, Size size, Size align)
     {
-        { a.allocate(size, align) } -> StdSame<void*>;
+        { a.allocate(size, align) } -> SameType<void*>;
     };
 
     template<typename A>
     concept CanDeallocate =
-        StdObject<A> &&
+        IsObject<A> &&
         requires(A& a, void* ptr, Size size, Size align)
     {
-        { a.deallocate(ptr, size, align) } -> StdSame<void>;
+        { a.deallocate(ptr, size, align) } -> SameType<void>;
     };
 
     template<typename A>
@@ -55,13 +55,13 @@ export namespace original
             a.deallocate(ptr, l.size(), l.align());
         }
 
-        template<StdObject T, typename... Args>
+        template<IsObject T, typename... Args>
         static void construct(T* ptr, Args&&... args)
         {
             new (ptr) T{ std::forward<Args>(args)... };
         }
 
-        template<StdObject T>
+        template<IsObject T>
         static void destroy(T* ptr)
         {
             ptr->~T();
@@ -70,7 +70,7 @@ export namespace original
 
     template<typename A>
     concept Allocator =
-        StdObject<A> &&
+        IsObject<A> &&
         requires(A& a)
     {
         requires CanAllocate<A>;
@@ -79,9 +79,9 @@ export namespace original
 
     template<typename A>
     concept StatelessAllocator =
-        Allocator<A> && StdEmpty<A>;
+        Allocator<A> && IsEmpty<A>;
 
     template<typename A>
     concept StatefulAllocator =
-        Allocator<A> && !StdEmpty<A>;
+        Allocator<A> && !IsEmpty<A>;
 }

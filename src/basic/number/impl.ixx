@@ -1005,7 +1005,7 @@ export namespace original
      * @note Both types must have same signedness.
      */
     template<StdIntegral U, StdIntegral V>
-    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
     constexpr auto operator+(Integer<U> lhs, Integer<V> rhs)
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1023,7 +1023,7 @@ export namespace original
      * @note Both types must have same signedness.
      */
     template<StdIntegral U, StdIntegral V>
-    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
     constexpr auto operator-(Integer<U> lhs, Integer<V> rhs)
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1041,7 +1041,7 @@ export namespace original
      * @note Both types must have same signedness.
      */
     template<StdIntegral U, StdIntegral V>
-    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
     constexpr auto operator*(Integer<U> lhs, Integer<V> rhs)
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1059,7 +1059,7 @@ export namespace original
      * @note Both types must have same signedness.
      */
     template<StdIntegral U, StdIntegral V>
-    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
     constexpr auto operator/(Integer<U> lhs, Integer<V> rhs)
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1077,7 +1077,7 @@ export namespace original
      * @note Both types must have same signedness.
      */
     template<StdIntegral U, StdIntegral V>
-    requires StdSameSignIntegral<U, V> && (!StdSame<U, V>)
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
     constexpr auto operator%(Integer<U> lhs, Integer<V> rhs)
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1445,7 +1445,7 @@ export namespace original
      * @return Floating of appropriate size containing the sum.
      */
     template<StdFloating U, StdFloating V>
-    requires (!StdSame<U, V>)
+    requires (!SameType<U, V>)
     constexpr auto operator+(Floating<U> lhs, Floating<V> rhs) noexcept
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1462,7 +1462,7 @@ export namespace original
      * @return Floating of appropriate size containing the difference.
      */
     template<StdFloating U, StdFloating V>
-    requires (!StdSame<U, V>)
+    requires (!SameType<U, V>)
     constexpr auto operator-(Floating<U> lhs, Floating<V> rhs) noexcept
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1479,7 +1479,7 @@ export namespace original
      * @return Floating of appropriate size containing the product.
      */
     template<StdFloating U, StdFloating V>
-    requires (!StdSame<U, V>)
+    requires (!SameType<U, V>)
     constexpr auto operator*(Floating<U> lhs, Floating<V> rhs) noexcept
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
@@ -1496,7 +1496,7 @@ export namespace original
      * @return Floating of appropriate size containing the quotient.
      */
     template<StdFloating U, StdFloating V>
-    requires (!StdSame<U, V>)
+    requires (!SameType<U, V>)
     constexpr auto operator/(Floating<U> lhs, Floating<V> rhs) noexcept
     {
         using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
