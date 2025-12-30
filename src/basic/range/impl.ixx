@@ -117,8 +117,8 @@ namespace original::details
     class TransformIterator
         : public ForwardIteratorBase<
             TransformIterator<Iter, F>,
-            RemoveCVRefType<InvokeResult<F&, typename IterTraits<Iter>::ReferenceType>>,
-            InvokeResult<F, typename IterTraits<Iter>::ReferenceType>,
+            RemoveCVRefType<InvokeResultType<F&, typename IterTraits<Iter>::ReferenceType>>,
+            InvokeResultType<F, typename IterTraits<Iter>::ReferenceType>,
             void
         >
     {
@@ -127,7 +127,7 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = InvokeResult<F, typename IterTraits<Iter>::ReferenceType>;
+        using ReferenceType = InvokeResultType<F, typename IterTraits<Iter>::ReferenceType>;
         using ValueType = RemoveCVRefType<ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
@@ -427,7 +427,8 @@ export namespace original::range
     template<Invokable F>
     auto transform(F&& func) noexcept
     {
-        return details::RangePipeline{
+        return details::RangePipeline
+        {
             [func = std::forward<F>(func)]<Range R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
