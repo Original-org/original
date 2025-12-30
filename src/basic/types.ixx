@@ -405,7 +405,51 @@ export namespace original
      * @endcode
      */
     template<typename T, typename... Args>
-    using InvokeResult = std::invoke_result_t<T, Args...>;
+    using InvokeResultType = std::invoke_result_t<T, Args...>;
+
+    /**
+     * @brief Concept that constrains a callable to be invocable with given arguments
+     *        and return a type exactly matching R.
+     *
+     * @tparam T   The callable type
+     * @tparam R   The exact expected return type
+     * @tparam Args The argument types
+     *
+     * This concept requires that T is invocable with Args... and that the invocation
+     * result type is identical to R (including cv-qualifiers).
+     *
+     * @code
+     * auto f = [](int) -> double { return 0.0; };
+     * static_assert(InvokableReturns<decltype(f), double, int>);     // true
+     * static_assert(!InvokableReturns<decltype(f), const double, int>); // false
+     * @endcode
+     */
+    template<typename T, typename R, typename... Args>
+    concept InvokableReturns =
+        InvokableWith<T, Args...> &&
+        SameType<InvokeResultType<T, Args...>, R>;
+
+    /**
+     * @brief Concept that constrains a callable to be invocable with given arguments
+     *        and return a type implicitly convertible to R.
+     *
+     * @tparam T   The callable type
+     * @tparam R   The target return type (convertible-to)
+     * @tparam Args The argument types
+     *
+     * This concept is satisfied if the invocation result is implicitly convertible
+     * to R. Useful for cases where exact type match is not required.
+     *
+     * @code
+     * auto g = [](int) -> int { return 42; };
+     * static_assert(InvokableReturnsConvertible<decltype(g), double, int>); // true
+     * static_assert(!InvokableReturnsConvertible<decltype(g), std::string, int>); // false
+     * @endcode
+     */
+    template<typename T, typename R, typename... Args>
+    concept InvokableReturnsConvertible =
+        InvokableWith<T, Args...> &&
+        Convertible<InvokeResultType<T, Args...>, R>;
 
     /** @} */ // end of InvocableTypes group
 } // namespace original
