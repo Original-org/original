@@ -216,3 +216,118 @@ TEST_F(RangeTest, TransformConstPropagation) {
         ++val;
     }
 }
+
+TEST_F(RangeTest, FilterPipelineBasic) {
+    const auto filtered = arr | filter([](const int x) { return x % 2 == 1; });
+
+    auto it = filtered.begin();
+    const auto end = filtered.end();
+
+    EXPECT_EQ(*it, 1); ++it;
+    EXPECT_EQ(*it, 3); ++it;
+    EXPECT_EQ(*it, 5); ++it;
+    EXPECT_EQ(it, end);
+
+    int count = 0;
+    for (const auto& e : arr | filter([](const int x) { return x > 2; })) {
+        EXPECT_GT(e, 2);
+        ++count;
+    }
+    EXPECT_EQ(count, 3);
+}
+
+TEST_F(RangeTest, FilterPipelineWithCapture) {
+    int threshold = 3;
+    const auto filtered = arr | filter([threshold](const int x) { return x >= threshold; });
+
+    int i = 0;
+    for (const auto& e : filtered)
+    {
+        constexpr int expected[] = {3, 4, 5};
+        EXPECT_EQ(e, expected[i++]);
+    }
+    EXPECT_EQ(i, 3);
+}
+
+TEST_F(RangeTest, FilterChainedWithOtherAdapters) {
+    const auto view = arr
+                    | take(4_size)
+                    | filter([](const int x) { return x % 2 == 0; })
+                    | transform([](const int x) { return x * 10; });
+
+    auto it = view.begin();
+    EXPECT_EQ(*it, 20); ++it;  // 2 * 10
+    EXPECT_EQ(*it, 40); ++it;  // 4 * 10
+    EXPECT_EQ(it, view.end());
+}
+
+TEST_F(RangeTest, FilterOnEmptyRange) {
+    Array<int, 0> empty;
+    const auto filtered = empty | filter([](const int) { return true; });
+    EXPECT_EQ(filtered.begin(), filtered.end());
+}
+
+TEST_F(RangeTest, FilterAllFalseIsEmpty) {
+    const auto filtered = arr | filter([](const int) { return false; });
+    EXPECT_EQ(filtered.begin(), filtered.end());
+}
+
+TEST_F(RangeTest, ExcludePipelineBasic)
+{
+    const auto excluded = arr | exclude([](const int x) { return x % 2 == 1; });
+    auto it = excluded.begin();
+    const auto end = excluded.end();
+
+    EXPECT_EQ(*it, 2);
+    ++it;
+    EXPECT_EQ(*it, 4);
+    ++it;
+    EXPECT_EQ(it, end);
+
+    int count = 0;
+    for (const auto& e : arr | exclude([](const int x) { return x <= 2; }))
+    {
+        EXPECT_GT(e, 2);
+        ++count;
+    }
+    EXPECT_EQ(count, 3);  // 3,4,5
+}
+
+TEST_F(RangeTest, ExcludePipelineWithCapture)
+{
+    int threshold = 3;
+    const auto excluded = arr | exclude([threshold](const int x) { return x < threshold; });
+    int i = 0;
+    for (const auto& e : excluded)
+    {
+        constexpr int expected[] = {3, 4, 5};
+        EXPECT_EQ(e, expected[i++]);
+    }
+    EXPECT_EQ(i, 3);
+}
+
+TEST_F(RangeTest, ExcludeChainedWithOtherAdapters)
+{
+    const auto view = arr | take(4_size) | exclude([](const int x) { return x % 2 == 0; })
+                                     | transform([](const int x) { return x * 10; });
+    auto it = view.begin();
+
+    EXPECT_EQ(*it, 10);  // 1 * 10
+    ++it;
+    EXPECT_EQ(*it, 30);  // 3 * 10
+    ++it;
+    EXPECT_EQ(it, view.end());
+}
+
+TEST_F(RangeTest, ExcludeOnEmptyRange)
+{
+    Array<int, 0> empty;
+    const auto excluded = empty | exclude([](const int) { return true; });
+    EXPECT_EQ(excluded.begin(), excluded.end());
+}
+
+TEST_F(RangeTest, ExcludeAllTrueIsEmpty)
+{
+    const auto excluded = arr | exclude([](const int) { return true; });
+    EXPECT_EQ(excluded.begin(), excluded.end());
+}
