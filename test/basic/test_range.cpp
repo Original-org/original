@@ -151,7 +151,7 @@ TEST_F(RangeTest, EmptyArraySatisfiesRange) {
 }
 
 TEST_F(RangeTest, TransformPipelineBasic) {
-    const auto transformed = arr | transform([](int x) { return x * x; });
+    const auto transformed = arr | transform([](const int x) { return x * x; });
 
     auto it = transformed.begin();
     const auto end = transformed.end();
