@@ -204,12 +204,12 @@ namespace original::details
     }
 
     template<Range R>
-    class IterRangeBase
+    class RangeViewBase
     {
     protected:
         R base_;
 
-        explicit IterRangeBase(R r) : base_(std::move(r)) {}
+        explicit RangeViewBase(R r) : base_(std::move(r)) {}
 
         decltype(auto) beginBase()
         {
@@ -233,8 +233,8 @@ namespace original::details
     };
 
     template<Range R>
-    class TakeRange : public IterRangeBase<R> {
-        using Base = IterRangeBase<R>;
+    class TakeRange : public RangeViewBase<R> {
+        using Base = RangeViewBase<R>;
 
         Size n_{};
     public:
@@ -263,8 +263,8 @@ namespace original::details
     };
 
     template<Range R>
-    class SkipRange : public IterRangeBase<R> {
-        using Base = IterRangeBase<R>;
+    class SkipRange : public RangeViewBase<R> {
+        using Base = RangeViewBase<R>;
         Size n_{};
 
         template<ForwardIterator Iter>
@@ -301,8 +301,8 @@ namespace original::details
     };
 
     template<Range R>
-    class EnumRange : public IterRangeBase<R> {
-        using Base = IterRangeBase<R>;
+    class EnumRange : public RangeViewBase<R> {
+        using Base = RangeViewBase<R>;
         Size start_{};
     public:
         EnumRange(R base, const Size start) noexcept
@@ -329,11 +329,10 @@ namespace original::details
         }
     };
 
-    template<Range R, StdInvokable F>
-    class TransformRange : public IterRangeBase<R>
     template<Range R, Invokable F>
+    class TransformRange : public RangeViewBase<R>
     {
-        using Base = IterRangeBase<R>;
+        using Base = RangeViewBase<R>;
         using Func = std::decay_t<F>;
 
         Func func_;
