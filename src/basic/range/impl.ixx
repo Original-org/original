@@ -161,6 +161,64 @@ namespace original::details
         }
     };
 
+    template<ForwardIterator Iter, Invokable F>
+    class FilterIterator
+        : public ForwardIteratorBase<
+            FilterIterator<Iter, F>,
+            typename IterTraits<Iter>::ValueType,
+            typename IterTraits<Iter>::ReferenceType,
+            typename IterTraits<Iter>::PointerType
+        >
+    {
+        Iter cur_;
+        Iter end_;
+        F* func_;
+
+        void satisfy()
+        {
+            while (this->cur_ != this->end_ && !std::invoke(*this->func_, *this->cur_))
+                ++this->cur_;
+        }
+    public:
+        using IterType = IterTraits<Iter>::IterType;
+        using ValueType = IterTraits<Iter>::ValueType;
+        using ReferenceType = IterTraits<Iter>::ReferenceType;
+        using PointerType = IterTraits<Iter>::PointerType;
+        using DifferenceType = IterTraits<Iter>::DifferenceType;
+
+        FilterIterator() noexcept = default;
+
+        FilterIterator(IterType cur, IterType end, F* func) noexcept
+            : cur_(cur), end_(end), func_(func)
+        {
+            this->satisfy();
+        }
+
+        ReferenceType operator*() const
+        {
+            return *this->cur_;
+        }
+
+        FilterIterator& operator++()
+        {
+            ++this->cur_;
+            this->satisfy();
+            return *this;
+        }
+
+        FilterIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        bool operator==(const FilterIterator& rhs) const noexcept
+        {
+            return this->cur_ == rhs.cur_;
+        }
+    };
+
     template<Range R>
     class RefRange {
         R* ptr_;
@@ -365,6 +423,42 @@ namespace original::details
         }
     };
 
+    template<Range R, Invokable F>
+    class FilterRange : public RangeViewBase<R>
+    {
+        using Base = RangeViewBase<R>;
+        using Func = std::decay_t<F>;
+
+        Func func_;
+    public:
+        FilterRange(R base, F func) noexcept
+            : Base(std::move(base)), func_(std::move(func)) {}
+
+        auto begin()
+        {
+            using Iter = decltype(this->beginBase());
+            return FilterIterator<Iter, Func>{this->beginBase(), this->endBase(), &this->func_};
+        }
+
+        auto end()
+        {
+            using Iter = decltype(this->endBase());
+            return FilterIterator<Iter, Func>{this->endBase(), this->endBase(), &this->func_};
+        }
+
+        auto begin() const
+        {
+            using Iter = decltype(this->beginBase());
+            return FilterIterator<Iter, const Func>{this->beginBase(), this->endBase(), &this->func_};
+        }
+
+        auto end() const
+        {
+            using Iter = decltype(this->endBase());
+            return FilterIterator<Iter, const Func>{this->endBase(), this->endBase(), &this->func_};
+        }
+    };
+
     template<Invokable F>
     class RangePipeline
     {
@@ -445,5 +539,46 @@ export namespace original::range
                 return details::TransformRange<RangeType, F>{all, func};
             }
         };
+    }
+
+    template<Invokable F>
+    auto filter(F&& func) noexcept
+    {
+        return details::RangePipeline
+        {
+            [func = std::forward<F>(func)]<Range R>(R&& r)
+            {
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+
+                using Iter = decltype(all.begin());
+                using Ref  = IterTraits<Iter>::ReferenceType;
+
+                static_assert(
+                    InvokableWith<std::decay_t<F>&, Ref>,
+                    "transform(F): F must be invocable with range element"
+                );
+
+                static_assert(
+                    InvokableReturnsConvertible<std::decay_t<F>&, bool, Ref>,
+                    "transform(F): Invoke result of F must be convertible to bool"
+                );
+
+                return details::FilterRange<RangeType, F>{all, func};
+            }
+        };
+    }
+
+    template<Invokable F>
+    auto exclude(F&& func) noexcept
+    {
+        return filter
+        (
+            [p = std::forward<F>(func)]<typename E>(E&& x)
+            requires InvokableReturnsConvertible<std::decay_t<F>&, bool, E&&>
+            {
+                return !std::invoke(p, std::forward<E>(x));
+            }
+        );
     }
 }
