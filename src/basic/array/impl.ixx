@@ -173,4 +173,60 @@ export namespace original
             throw std::out_of_range{"Array<T, 0> out of range."};
         }
     };
+
+    template<std::size_t I, IsObject T, Size::Type N>
+    requires (I < N)
+    constexpr T& get(Array<T, N>& a) noexcept // NOLINT
+    {
+        return a[I];
+    }
+
+    template<std::size_t I, IsObject T, Size::Type N>
+    requires (I < N)
+    constexpr const T& get(const Array<T, N>& a) noexcept // NOLINT
+    {
+        return a[I];
+    }
+
+    template<std::size_t I, IsObject T, Size::Type N>
+    requires (I < N)
+    constexpr T&& get(Array<T, N>&& a) noexcept // NOLINT
+    {
+        return std::move(a[I]);
+    }
+}
+
+export namespace std
+{
+    template<original::IsObject T, original::Size::Type N>
+    struct tuple_size<original::Array<T, N>> // NOLINT
+        : std::integral_constant<std::size_t, N> {};
+
+    template<std::size_t I, original::IsObject T, original::Size::Type N>
+    struct tuple_element<I, original::Array<T, N>> // NOLINT
+    {
+        static_assert(I < N, "tuple_element index out of range");
+        using type = T;
+    };
+
+    template<std::size_t I, original::IsObject T, original::Size::Type N>
+    requires (I < N)
+    constexpr T& get(original::Array<T, N>& a) noexcept // NOLINT
+    {
+        return original::get<I>(a);
+    }
+
+    template<std::size_t I, original::IsObject T, original::Size::Type N>
+    requires (I < N)
+    constexpr const T& get(const original::Array<T, N>& a) noexcept // NOLINT
+    {
+        return original::get<I>(a);
+    }
+
+    template<std::size_t I, original::IsObject T, original::Size::Type N>
+    requires (I < N)
+    constexpr T&& get(original::Array<T, N>&& a) noexcept // NOLINT
+    {
+        return original::get<I>(std::move(a));
+    }
 }
