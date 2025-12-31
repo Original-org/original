@@ -574,10 +574,10 @@ export namespace original::range
     {
         return filter
         (
-            [p = std::forward<F>(func)]<typename E>(E&& x)
+            [func = std::forward<F>(func)]<typename E>(E&& x)
             requires InvokableReturnsConvertible<std::decay_t<F>&, bool, E&&>
             {
-                return !std::invoke(p, std::forward<E>(x));
+                return !std::invoke(func, std::forward<E>(x));
             }
         );
     }
