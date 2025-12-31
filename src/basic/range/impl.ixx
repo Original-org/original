@@ -219,6 +219,135 @@ namespace original::details
         }
     };
 
+    template<ForwardIterator Prev, ForwardIterator Next>
+    class ConcatIterator
+        : public ForwardIteratorBase<
+            FilterIterator<Prev, Next>,
+            RemoveCVRefType<
+                CommonRefType<
+                    typename IterTraits<Prev>::ReferenceType,
+                    typename IterTraits<Next>::ReferenceType
+                >
+            >,
+            CommonRefType<
+                typename IterTraits<Prev>::ReferenceType,
+                typename IterTraits<Next>::ReferenceType
+            >,
+            void
+        >
+    {
+        Prev cur_prev_;
+        Prev end_prev_;
+        Next cur_next_;
+        Next end_next_;
+        bool at_next_{};
+
+    public:
+        using IterType = ConcatIterator;
+        using ReferenceType
+            = CommonRefType<
+                typename IterTraits<Prev>::ReferenceType,
+                typename IterTraits<Next>::ReferenceType
+            >;
+        using ValueType = RemoveCVRefType<ReferenceType>;
+        using PointerType = void;
+        using DifferenceType = IterTraits<Prev>::DifferenceType;
+
+        ConcatIterator() noexcept = default;
+
+        ConcatIterator(Prev cur_prev, Prev end_prev, Next cur_next, Next end_next) noexcept
+            : cur_prev_(cur_prev), end_prev_(end_prev),
+              cur_next_(cur_next), end_next_(end_next), at_next_(cur_prev == end_prev) {}
+
+        ReferenceType operator*() const
+        {
+            return this->at_next_ ?
+                static_cast<ReferenceType>(*this->cur_next_) :
+                static_cast<ReferenceType>(*this->cur_prev_);
+        }
+
+        ConcatIterator& operator++()
+        {
+            if (this->at_next_)
+            {
+                ++this->cur_next_;
+            } else
+            {
+                ++this->cur_prev_;
+                if (this->cur_prev_ == this->end_prev_)
+                    this->at_next_ = true;
+            }
+            return *this;
+        }
+
+        ConcatIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        bool operator==(const ConcatIterator& rhs) const noexcept
+        {
+            if (this->at_next_ != rhs.at_next_)
+                return false;
+
+            return this->at_next_ ?
+                this->cur_next_ == rhs.cur_next_ : this->cur_prev_ == rhs.cur_prev_;
+        }
+    };
+
+    template<ForwardIterator LHS, ForwardIterator RHS>
+    class ZipIterator
+        : public ForwardIteratorBase<
+            FilterIterator<LHS, RHS>,
+            std::pair<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>,
+            std::pair<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>,
+            void
+        >
+    {
+        LHS cur_lhs_;
+        LHS end_lhs_;
+        RHS cur_rhs_;
+        RHS end_rhs_;
+
+    public:
+        using IterType = ZipIterator;
+        using ValueType = std::pair<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>;
+        using ReferenceType = std::pair<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>;
+        using PointerType = void;
+        using DifferenceType = IterTraits<LHS>::DifferenceType;
+
+        ZipIterator() noexcept = default;
+
+        ZipIterator(LHS cur_lhs, LHS end_lhs, RHS cur_rhs, RHS end_rhs) noexcept
+            : cur_lhs_(cur_lhs), end_lhs_(end_lhs), cur_rhs_(cur_rhs), end_rhs_(end_rhs) {}
+
+        ReferenceType operator*() const
+        {
+            return ReferenceType{*this->cur_lhs_, *this->cur_rhs_};
+        }
+
+        ZipIterator& operator++()
+        {
+            ++this->cur_lhs_;
+            ++this->cur_rhs_;
+            return *this;
+        }
+
+        ZipIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        bool operator==(const ZipIterator& rhs) const noexcept
+        {
+            return this->cur_lhs_ == rhs.cur_lhs_ || this->cur_rhs_ == rhs.cur_rhs_;
+        }
+    };
+
     template<Range R>
     class RefRange {
         R* ptr_;
@@ -459,6 +588,140 @@ namespace original::details
         }
     };
 
+    template<Range Prev, Range Next>
+    class ConcatRange : public RangeViewBase<Prev>
+    {
+        using Base = RangeViewBase<Prev>;
+        Next next_;
+
+    public:
+        ConcatRange(Prev prev, Next next) noexcept
+            : Base(std::move(prev)), next_(std::move(next)) {}
+
+        auto begin()
+        {
+            using ItPrev = decltype(this->beginBase());
+            using ItNext = decltype(this->next_.begin());
+
+            return ConcatIterator<ItPrev, ItNext>
+            {
+                this->beginBase(),
+                this->endBase(),
+                this->next_.begin(),
+                this->next_.end()
+            };
+        }
+
+        auto end()
+        {
+            using ItPrev = decltype(this->endBase());
+            using ItNext = decltype(this->next_.end());
+
+            return ConcatIterator<ItPrev, ItNext>
+            {
+                this->endBase(),
+                this->endBase(),
+                this->next_.end(),
+                this->next_.end()
+            };
+        }
+
+        auto begin() const
+        {
+            using ItPrev = decltype(this->beginBase());
+            using ItNext = decltype(this->next_.begin());
+
+            return ConcatIterator<ItPrev, ItNext>
+            {
+                this->beginBase(),
+                this->endBase(),
+                this->next_.begin(),
+                this->next_.end()
+            };
+        }
+
+        auto end() const
+        {
+            using ItPrev = decltype(this->endBase());
+            using ItNext = decltype(this->next_.end());
+
+            return ConcatIterator<ItPrev, ItNext>
+            {
+                this->endBase(),
+                this->endBase(),
+                this->next_.end(),
+                this->next_.end()
+            };
+        }
+    };
+
+    template<Range LHS, Range RHS>
+    class ZipRange
+    {
+        LHS lhs_;
+        RHS rhs_;
+
+    public:
+        ZipRange(LHS lhs, RHS rhs) noexcept
+            : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+
+        auto begin()
+        {
+            using ItLHS = decltype(this->lhs_.begin());
+            using ItRHS = decltype(this->rhs_.begin());
+
+            return ZipIterator<ItLHS, ItRHS>
+            {
+                this->lhs_.begin(),
+                this->lhs_.end(),
+                this->rhs_.begin(),
+                this->rhs_.end()
+            };
+        }
+
+        auto end()
+        {
+            using ItLHS = decltype(this->lhs_.end());
+            using ItRHS = decltype(this->rhs_.end());
+
+            return ZipIterator<ItLHS, ItRHS>
+            {
+                this->lhs_.end(),
+                this->lhs_.end(),
+                this->rhs_.end(),
+                this->rhs_.end()
+            };
+        }
+
+        auto begin() const
+        {
+            using ItLHS = decltype(this->lhs_.begin());
+            using ItRHS = decltype(this->rhs_.begin());
+
+            return ZipIterator<ItLHS, ItRHS>
+            {
+                this->lhs_.begin(),
+                this->lhs_.end(),
+                this->rhs_.begin(),
+                this->rhs_.end()
+            };
+        }
+
+        auto end() const
+        {
+            using ItLHS = decltype(this->lhs_.end());
+            using ItRHS = decltype(this->rhs_.end());
+
+            return ZipIterator<ItLHS, ItRHS>
+            {
+                this->lhs_.end(),
+                this->lhs_.end(),
+                this->rhs_.end(),
+                this->rhs_.end()
+            };
+        }
+    };
+
     template<Invokable F>
     class RangePipeline
     {
@@ -580,5 +843,54 @@ export namespace original::range
                 return !std::invoke(func, std::forward<E>(x));
             }
         );
+    }
+
+    template<Range Next>
+    auto concat(Next&& next) noexcept
+    {
+        return details::RangePipeline
+        {
+            [n = details::all(std::forward<Next>(next))]<Range Prev>(Prev&& prev)
+            {
+                auto p = details::all(std::forward<Prev>(prev));
+
+                using IterPrev = decltype(p.begin());
+                using IterNext = decltype(n.begin());
+
+                static_assert(ForwardIterator<IterPrev>, "Iter type of the prev range must be ForwardIterator");
+                static_assert(ForwardIterator<IterNext>, "Iter type of the next range must be ForwardIterator");
+
+                using RefPrev = IterTraits<IterPrev>::ReferenceType;
+                using RefNext = IterTraits<IterNext>::ReferenceType;
+                using CommonRef = CommonRefType<RefPrev, RefNext>;
+
+                static_assert(
+                    Convertible<RefNext, CommonRef> && Convertible<RefPrev, CommonRef>,
+                    "Reference type of next range must be convertible to prev range's"
+                );
+
+                return details::ConcatRange<decltype(p), decltype(n)>{p, n};
+            }
+        };
+    }
+
+
+    template<Range RHS>
+    auto zip(RHS&& rhs) noexcept
+    {
+        return details::RangePipeline
+        {
+            [r = details::all(std::forward<RHS>(rhs))]<Range LHS>(LHS&& lhs)
+            {
+                using IterLHS = RangeTraits<LHS>::BeginIterType;
+                using IterRHS = RangeTraits<RHS>::BeginIterType;
+
+                static_assert(ForwardIterator<IterLHS>, "Iter type of left hands range must be ForwardIterator");
+                static_assert(ForwardIterator<IterRHS>, "Iter type of right hands range must be ForwardIterator");
+
+                auto l = details::all(std::forward<LHS>(lhs));
+                return details::ZipRange<decltype(l), decltype(r)>{l, r};
+            }
+        };
     }
 }
