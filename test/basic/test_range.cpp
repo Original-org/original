@@ -293,10 +293,22 @@ TEST_F(RangeTest, ExcludePipelineBasic)
     EXPECT_EQ(count, 3);  // 3,4,5
 }
 
+namespace
+{
+    class Functor
+    {
+        int threshold_;
+    public:
+        explicit Functor(const int threshold) : threshold_(threshold) {} // NOLINT
+
+        bool operator()(const int x) const { return x < this->threshold_; }
+    };
+}
+
 TEST_F(RangeTest, ExcludePipelineWithCapture)
 {
-    int threshold = 3;
-    const auto excluded = arr | exclude([threshold](const int x) { return x < threshold; });
+    constexpr int threshold = 3;
+    const auto excluded = arr | exclude(Functor{threshold});
     int i = 0;
     for (const auto& e : excluded)
     {
