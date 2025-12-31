@@ -174,7 +174,7 @@ namespace original::details
         Iter end_;
         F* func_;
 
-        void satisfy()
+        void skipUntilSatisfy()
         {
             while (this->cur_ != this->end_ && !std::invoke(*this->func_, *this->cur_))
                 ++this->cur_;
@@ -191,7 +191,7 @@ namespace original::details
         FilterIterator(IterType cur, IterType end, F* func) noexcept
             : cur_(cur), end_(end), func_(func)
         {
-            this->satisfy();
+            this->skipUntilSatisfy();
         }
 
         ReferenceType operator*() const
@@ -202,7 +202,7 @@ namespace original::details
         FilterIterator& operator++()
         {
             ++this->cur_;
-            this->satisfy();
+            this->skipUntilSatisfy();
             return *this;
         }
 
