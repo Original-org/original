@@ -187,6 +187,9 @@ export namespace original
     template<bool Test, typename T>
     using MaybeConstType = std::conditional_t<Test, const T, T>;
 
+    template<typename... Args>
+    using CommonRefType = std::common_reference_t<Args...>;
+
     /** @} */ // end of TypeTraits group
 
     /**
