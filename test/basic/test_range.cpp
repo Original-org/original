@@ -343,3 +343,234 @@ TEST_F(RangeTest, ExcludeAllTrueIsEmpty)
     const auto excluded = arr | exclude([](const int) { return true; });
     EXPECT_EQ(excluded.begin(), excluded.end());
 }
+
+TEST_F(RangeTest, ConcatPipelineBasic) {
+    Array<int, 3> a{10, 20, 30};
+    Array<int, 2> b{40, 50};
+
+    const auto concatenated = arr | concat(a) | concat(b);
+
+    auto it = concatenated.begin();
+    const auto end = concatenated.end();
+
+    EXPECT_EQ(*it, 1); ++it;
+    EXPECT_EQ(*it, 2); ++it;
+    EXPECT_EQ(*it, 3); ++it;
+    EXPECT_EQ(*it, 4); ++it;
+    EXPECT_EQ(*it, 5); ++it;
+    EXPECT_EQ(*it, 10); ++it;
+    EXPECT_EQ(*it, 20); ++it;
+    EXPECT_EQ(*it, 30); ++it;
+    EXPECT_EQ(*it, 40); ++it;
+    EXPECT_EQ(*it, 50); ++it;
+    EXPECT_EQ(it, end);
+
+    int sum = 0;
+    int count = 0;
+    for (const auto& e : arr | concat(a) | concat(b)) {
+        sum += e;
+        ++count;
+    }
+    EXPECT_EQ(sum, 165);   // 1+2+3+4+5+10+20+30+40+50
+    EXPECT_EQ(count, 10);
+}
+
+TEST_F(RangeTest, ConcatPipelineWithEmptyRange) {
+    Array<int, 0> empty;
+
+    {
+        int count = 0;
+        for (const auto& _ : arr | concat(empty)) {
+            ++count;
+        }
+        EXPECT_EQ(count, 5);
+    }
+
+    {
+        int count = 0;
+        for (const auto& _ : empty | concat(arr)) {
+            ++count;
+        }
+        EXPECT_EQ(count, 5);
+    }
+
+    {
+        auto view = empty | concat(empty);
+        EXPECT_EQ(view.begin(), view.end());
+    }
+
+    {
+        int invoked = 0;
+        for (const auto& _ : empty | concat(empty)) {
+            ++invoked;  // 不应执行
+        }
+        EXPECT_EQ(invoked, 0);
+    }
+}
+
+TEST_F(RangeTest, ConcatChainedWithOtherAdapters) {
+    Array<int, 3> extra{100, 200, 300};
+
+    const auto view = arr
+                    | take(3_size)
+                    | transform([](const int x) { return x * 10; })
+                    | concat(extra | transform([](const int x) { return x / 10; }));
+
+    auto it = view.begin();
+    const auto end = view.end();
+
+    EXPECT_EQ(*it, 10); ++it;
+    EXPECT_EQ(*it, 20); ++it;
+    EXPECT_EQ(*it, 30); ++it;
+    EXPECT_EQ(*it, 10); ++it;
+    EXPECT_EQ(*it, 20); ++it;
+    EXPECT_EQ(*it, 30); ++it;
+    EXPECT_EQ(it, end);
+
+    int sum = 0;
+    int count = 0;
+    for (const auto& e : arr
+                         | take(3_size)
+                         | transform([](int x) { return x * 10; })
+                         | concat(extra | transform([](int x) { return x / 10; }))) {
+        sum += e;
+        ++count;
+    }
+    EXPECT_EQ(sum, 120);  // 10+20+30 + 10+20+30
+    EXPECT_EQ(count, 6);
+}
+
+TEST_F(RangeTest, ZipPipelineBasic) {
+    Array<int, 5> other{10, 20, 30, 40, 50};
+
+    const auto zipped = arr | zip(other);
+
+    auto it = zipped.begin();
+    const auto end = zipped.end();
+
+    auto [l1, r1] = *it; EXPECT_EQ(l1, 1);  EXPECT_EQ(r1, 10); ++it;
+    auto [l2, r2] = *it; EXPECT_EQ(l2, 2);  EXPECT_EQ(r2, 20); ++it;
+    auto [l3, r3] = *it; EXPECT_EQ(l3, 3);  EXPECT_EQ(r3, 30); ++it;
+    auto [l4, r4] = *it; EXPECT_EQ(l4, 4);  EXPECT_EQ(r4, 40); ++it;
+    auto [l5, r5] = *it; EXPECT_EQ(l5, 5);  EXPECT_EQ(r5, 50); ++it;
+    EXPECT_EQ(it, end);
+
+    int i = 1;
+    for (const auto& [left, right] : arr | zip(other)) {
+        EXPECT_EQ(left, i);
+        EXPECT_EQ(right, i * 10);
+        ++i;
+    }
+    EXPECT_EQ(i, 6);
+}
+
+TEST_F(RangeTest, ZipPipelineShorterRight) {
+    Array<int, 3> shorter{100, 200, 300};
+
+    const auto zipped = arr | zip(shorter);
+
+    auto it = zipped.begin();
+    const auto end = zipped.end();
+
+    auto [l1, r1] = *it; EXPECT_EQ(l1, 1);   EXPECT_EQ(r1, 100); ++it;
+    auto [l2, r2] = *it; EXPECT_EQ(l2, 2);   EXPECT_EQ(r2, 200); ++it;
+    auto [l3, r3] = *it; EXPECT_EQ(l3, 3);   EXPECT_EQ(r3, 300); ++it;
+    EXPECT_EQ(it, end);
+
+    int idx = 0;
+    for (const auto& [l, r] : arr | zip(shorter)) {
+        int expected_right[] = {100, 200, 300};
+        int expected_left[] = {1, 2, 3};
+        EXPECT_EQ(l, expected_left[idx]);
+        EXPECT_EQ(r, expected_right[idx]);
+        ++idx;
+    }
+    EXPECT_EQ(idx, 3);
+}
+
+TEST_F(RangeTest, ZipPipelineShorterLeft) {
+    constexpr Array<int, 3> shorter{100, 200, 300};
+
+    const auto zipped = shorter | zip(arr);
+
+    auto it = zipped.begin();
+    const auto end = zipped.end();
+
+    auto [l1, r1] = *it; EXPECT_EQ(l1, 100); EXPECT_EQ(r1, 1); ++it;
+    auto [l2, r2] = *it; EXPECT_EQ(l2, 200); EXPECT_EQ(r2, 2); ++it;
+    auto [l3, r3] = *it; EXPECT_EQ(l3, 300); EXPECT_EQ(r3, 3); ++it;
+    EXPECT_EQ(it, end);
+
+    auto cnt = 0_size;
+    Array<std::pair<int, int>, 3> elements {std::pair{100, 1}, std::pair{200, 2}, std::pair{300, 3}};
+    for (const auto& [index, e]: shorter | zip(arr) | enumerate())
+    {
+        EXPECT_EQ(index, cnt);
+        EXPECT_EQ(elements[cnt], e);
+        ++cnt;
+    }
+
+    int idx = 0;
+    for (const auto& cref = arr; auto&& [l, r] : shorter | zip(cref)) {
+        constexpr int expected_right[] = {1, 2, 3};
+        constexpr int expected_left[] = {100, 200, 300};
+        EXPECT_EQ(l, expected_left[idx]);
+        EXPECT_EQ(r, expected_right[idx]);
+        ++idx;
+    }
+    EXPECT_EQ(idx, 3);
+}
+
+TEST_F(RangeTest, ZipChainedWithOtherAdapters) {
+    Array<int, 5> other{10, 20, 30, 40, 50};
+
+    const auto view = arr
+                    | skip(1_size)
+                    | take(3_size)
+                    | zip(other | skip(1_size) | take(3_size));
+
+    auto it = view.begin();
+    const auto end = view.end();
+
+    auto [l1, r1] = *it; EXPECT_EQ(l1, 2); EXPECT_EQ(r1, 20); ++it;
+    auto [l2, r2] = *it; EXPECT_EQ(l2, 3); EXPECT_EQ(r2, 30); ++it;
+    auto [l3, r3] = *it; EXPECT_EQ(l3, 4); EXPECT_EQ(r3, 40); ++it;
+    EXPECT_EQ(it, end);
+
+    int idx = 0;
+    for (const auto& [l, r] : arr
+                             | skip(1_size)
+                             | take(3_size)
+                             | zip(other | skip(1_size) | take(3_size))) {
+        int expected_left[] = {2, 3, 4};
+        int expected_right[] = {20, 30, 40};
+        EXPECT_EQ(l, expected_left[idx]);
+        EXPECT_EQ(r, expected_right[idx]);
+        ++idx;
+    }
+    EXPECT_EQ(idx, 3);
+}
+
+TEST_F(RangeTest, ZipWithEmptyRange) {
+    Array<int, 0> empty;
+
+    auto view1 = arr | zip(empty);
+    EXPECT_EQ(view1.begin(), view1.end());
+    auto view2 = empty | zip(arr);
+    EXPECT_EQ(view2.begin(), view2.end());
+
+    {
+        int invoked = 0;
+        for (const auto& _ : arr | zip(empty)) {
+            ++invoked;
+        }
+        EXPECT_EQ(invoked, 0);
+    }
+    {
+        int invoked = 0;
+        for (const auto& _ : empty | zip(arr)) {
+            ++invoked;
+        }
+        EXPECT_EQ(invoked, 0);
+    }
+}
