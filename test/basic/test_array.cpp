@@ -3,7 +3,7 @@
 
 import original.basic.array;
 import original.basic.number;
-import orginal.basic.container;
+import original.basic.container;
 
 using namespace original;
 using namespace original::literals;
@@ -71,7 +71,7 @@ TEST(ArrayTest, IteratorSupport) {
 
     const Array<int, 4>& carr = arr;
     expected = 1;
-    for (auto cit = carr.begin(); cit != carr.end(); ++cit) {
+    for (auto cit = carr.begin(); cit != carr.end(); ++cit) { // NOLINT
         EXPECT_EQ(*cit, expected++);
     }
 }
@@ -92,7 +92,7 @@ TEST(ArrayTest, EmptyArray) {
     EXPECT_EQ(cref.end(), cref.begin());
 
     int count = 0;
-    for (int _ : empty_arr) {
+    for (int _ : empty_arr) { // NOLINT
         ++count;
     }
     EXPECT_EQ(count, 0);
@@ -194,4 +194,81 @@ TEST(ContainerTraitsTest, ContainerTraitsAccess) {
 
     EXPECT_NE(arr.data(), nullptr);
     static_assert(std::same_as<decltype(arr.data()), int*>);
+}
+
+TEST(ArrayGetTest, BasicGetAccess)
+{
+    Array<int, 4> arr(1, 2, 3, 4);
+
+    EXPECT_EQ(std::get<0>(arr), 1);
+    EXPECT_EQ(std::get<1>(arr), 2);
+    EXPECT_EQ(std::get<2>(arr), 3);
+    EXPECT_EQ(std::get<3>(arr), 4);
+
+    std::get<1>(arr) = 42;
+    EXPECT_EQ(arr[1_size], 42);
+    EXPECT_EQ(std::get<1>(arr), 42);
+
+    const Array<int, 4>& carr = arr;
+    EXPECT_EQ(std::get<0>(carr), 1);
+    EXPECT_EQ(std::get<1>(carr), 42);
+
+    EXPECT_EQ(std::get<3>(std::move(arr)), 4); // NOLINT
+}
+
+TEST(ArrayTupleTraitsTest, TupleSizeAndElement)
+{
+    static_assert(std::tuple_size_v<Array<double, 5>> == 5);
+    static_assert(std::tuple_size_v<Array<int, 0>> == 0);
+
+    static_assert(std::is_same_v<std::tuple_element_t<0, Array<double, 5>>, double>);
+    static_assert(std::is_same_v<std::tuple_element_t<3, Array<double, 5>>, double>);
+}
+
+TEST(ArrayStructuredBindingTest, BindingNonConst)
+{
+    Array<int, 3> arr(10, 20, 30);
+
+    auto&& [a, b, c] = arr;
+
+    EXPECT_EQ(a, 10);
+    EXPECT_EQ(b, 20);
+    EXPECT_EQ(c, 30);
+
+    a = 100;
+    b = 200;
+
+    EXPECT_EQ(arr[0_size], 100);
+    EXPECT_EQ(arr[1_size], 200);
+    EXPECT_EQ(std::get<2>(arr), 30);
+}
+
+TEST(ArrayStructuredBindingTest, BindingConst)
+{
+    constexpr Array<int, 3> arr(5, 6, 7);
+
+    auto [x, y, z] = arr;
+
+    EXPECT_EQ(x, 5);
+    EXPECT_EQ(y, 6);
+    EXPECT_EQ(z, 7);
+}
+
+TEST(ArrayStructuredBindingTest, BindingCopy)
+{
+    Array<int, 2> arr(1, 2);
+
+    auto&& [p, q] = arr;
+    auto [r, s] = arr;
+
+    r = 10; // NOLINT
+    EXPECT_EQ(arr[0_size], 1);
+
+    p = 100;
+    EXPECT_EQ(arr[0_size], 100);
+}
+
+TEST(ArrayStructuredBindingTest, EmptyArrayBinding)
+{
+    static_assert(std::tuple_size_v<Array<int, 0>> == 0);
 }

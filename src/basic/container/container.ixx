@@ -1,4 +1,4 @@
-export module orginal.basic.container;
+export module original.basic.container;
 
 
-export import orginal.basic.container.traits;
+export import original.basic.container.traits;

@@ -1,6 +1,6 @@
 module;
 #include <type_traits>
-export module orginal.basic.container.traits;
+export module original.basic.container.traits;
 import original.basic.types;
 import original.basic.iterator.traits;
 import original.basic.number.traits;

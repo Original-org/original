@@ -6,5 +6,5 @@ export import original.basic.types;
 export import original.basic.iterator;
 export import original.basic.range;
 export import original.basic.allocator;
-export import orginal.basic.container;
+export import original.basic.container;
 export import original.basic.array;
