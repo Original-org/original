@@ -16,9 +16,9 @@ namespace original::details
     class TakeIterator
         : public ForwardIteratorBase<
             TakeIterator<Iter>,
-            typename IterTraits<Iter>::ValueType,
+            RemoveCVRefType<typename IterTraits<Iter>::ReferenceType>,
             typename IterTraits<Iter>::ReferenceType,
-            typename IterTraits<Iter>::PointerType
+            void
         >
     {
         Iter cur_;
@@ -26,9 +26,9 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ValueType = IterTraits<Iter>::ValueType;
         using ReferenceType = IterTraits<Iter>::ReferenceType;
-        using PointerType = IterTraits<Iter>::PointerType;
+        using ValueType = RemoveCVRefType<ReferenceType>;
+        using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         TakeIterator() noexcept = default;
@@ -68,7 +68,7 @@ namespace original::details
     class EnumIterator
         : public ForwardIteratorBase<
             EnumIterator<Iter>,
-            std::pair<const Size, typename IterTraits<Iter>::ValueType>,
+            RemoveCVRefType<std::pair<const Size, typename IterTraits<Iter>::ReferenceType>>,
             std::pair<const Size, typename IterTraits<Iter>::ReferenceType>,
             void
         >
@@ -78,8 +78,8 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ValueType = std::pair<const Size, typename IterTraits<Iter>::ValueType>;
         using ReferenceType = std::pair<const Size, typename IterTraits<Iter>::ReferenceType>;
+        using ValueType = RemoveCVRefType<ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
@@ -165,9 +165,9 @@ namespace original::details
     class FilterIterator
         : public ForwardIteratorBase<
             FilterIterator<Iter, F>,
-            typename IterTraits<Iter>::ValueType,
+            RemoveCVRefType<typename IterTraits<Iter>::ReferenceType>,
             typename IterTraits<Iter>::ReferenceType,
-            typename IterTraits<Iter>::PointerType
+            void
         >
     {
         Iter cur_;
@@ -181,9 +181,9 @@ namespace original::details
         }
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ValueType = IterTraits<Iter>::ValueType;
         using ReferenceType = IterTraits<Iter>::ReferenceType;
-        using PointerType = IterTraits<Iter>::PointerType;
+        using ValueType = RemoveCVRefType<ReferenceType>;
+        using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         FilterIterator() noexcept = default;
