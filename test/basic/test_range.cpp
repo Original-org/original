@@ -1,8 +1,10 @@
 #include <gtest/gtest.h>
 
 import original.basic.array;
+import original.basic.types;
 import original.basic.range;
 import original.basic.number;
+import original.basic.iterator;
 
 using namespace original;
 using namespace original::range;
@@ -13,10 +15,23 @@ protected:
     Array<int, 5> arr {1, 2, 3, 4, 5};
 };
 
-TEST_F(RangeTest, ArraySatisfiesRangeConcept) {
+TEST_F(RangeTest, RangeConcept) {
     static_assert(Range<decltype(arr)>);
     EXPECT_TRUE(Range<decltype(arr)>);
     static_assert(IterRange<decltype(arr)>);
+}
+
+TEST_F(RangeTest, RangeInterfacesForBuiltinArray)
+{
+    constexpr int builtin[] = {1, 2, 3, 4, 5, 6}; // NOLINT
+    static_assert(SameType<const int*, decltype(begin(builtin))>);
+    static_assert(SameType<const int*, decltype(end(builtin))>);
+    static_assert(Iterator<decltype(begin(builtin))>);
+    static_assert(Iterator<decltype(end(builtin))>);
+    static_assert(Range<decltype(builtin)>);
+    static_assert(IterRange<decltype(builtin)>);
+    static_assert(SameType<const int*, RangeTraits<decltype(builtin)>::BeginIterType>);
+    static_assert(SameType<const int*, RangeTraits<decltype(builtin)>::EndIterType>);
 }
 
 TEST_F(RangeTest, TakeRangeSatisfiesIterRange) {

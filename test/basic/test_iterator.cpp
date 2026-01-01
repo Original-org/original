@@ -5,6 +5,7 @@
 #include <numeric>
 import original.basic.iterator;
 import original.basic.number;
+import original.basic.types;
 
 using namespace original;
 using namespace original::literals;
@@ -678,4 +679,15 @@ TEST(IteratorViewConcept, DetectsIteratorWithIteratorMember)
     static_assert(IteratorView<Enum>);
     using Rev = ReversedIterator<DefaultIter>;
     static_assert(IteratorView<Rev>);
+}
+
+TEST(IteratorTest, IterTraitsForBuiltInPointer)
+{
+    using Pointer = int*;
+    using Ref = IterTraits<Pointer>::ReferenceType;
+    static_assert(SameType<Ref, int&>);
+    using P = IterTraits<Pointer>::PointerType;
+    static_assert(SameType<P, int*>);
+    using Val = IterTraits<Pointer>::ValueType;
+    static_assert(SameType<Val, int>);
 }
