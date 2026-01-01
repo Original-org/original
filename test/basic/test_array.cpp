@@ -4,6 +4,7 @@
 import original.basic.array;
 import original.basic.number;
 import original.basic.container;
+import original.basic.algorithm;
 
 using namespace original;
 using namespace original::literals;
@@ -56,7 +57,6 @@ TEST(ArrayTest, IteratorSupport) {
     arr[2_size] = 3;
     arr[3_size] = 4;
 
-    // 使用范围 for
     int expected = 1;
     for (int value : arr) {
         EXPECT_EQ(value, expected++);
@@ -134,14 +134,17 @@ TEST(ArrayTraitsTest, ArrayLikeType) {
     static_assert(std::same_as<ArrayLikeType<std::array<double, 3>>, std::array<double, 3>>);
 }
 
-struct NonTrivial {
-    int value;
-    bool constructed = false;
+namespace
+{
+   struct NonTrivial {
+        int value;
+        bool constructed = false;
 
-    NonTrivial() : value(0) {}
-    explicit NonTrivial(const int v) : value(v), constructed(true) {}
-    NonTrivial(const NonTrivial& other) : value(other.value), constructed(true) {}
-};
+        NonTrivial() : value(0) {}
+        explicit NonTrivial(const int v) : value(v), constructed(true) {}
+        NonTrivial(const NonTrivial& other) : value(other.value), constructed(true) {}
+    };
+}
 
 TEST(ArrayTest, NonTrivialType) {
     Array<NonTrivial, 2> arr;
