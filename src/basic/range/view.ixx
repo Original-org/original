@@ -799,6 +799,11 @@ export namespace original::range
                     "transform(F): F must be invocable with range element"
                 );
 
+                static_assert(
+                    Functor<std::decay_t<F>&>,
+                    "transform(F): F must be a functor"
+                );
+
                 return details::TransformRange<RangeType, F>{all, func};
             }
         };
@@ -823,8 +828,8 @@ export namespace original::range
                 );
 
                 static_assert(
-                    InvokableReturnsConvertible<std::decay_t<F>&, bool, Ref>,
-                    "transform(F): Invoke result of F must be convertible to bool"
+                    Predicate<std::decay_t<F>&, Ref>,
+                    "transform(F): F must be a predicate"
                 );
 
                 return details::FilterRange<RangeType, F>{all, func};
@@ -838,7 +843,7 @@ export namespace original::range
         return filter
         (
             [func = std::forward<F>(func)]<typename E>(E&& x)
-            requires InvokableReturnsConvertible<std::decay_t<F>&, bool, E&&>
+            requires Predicate<std::decay_t<F>&, E&&>
             {
                 return !std::invoke(func, std::forward<E>(x));
             }
