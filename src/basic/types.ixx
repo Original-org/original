@@ -23,8 +23,7 @@ namespace original::details {
 /**
  * @brief Main namespace for the Original library
  */
-export namespace original
-{
+export namespace original {
     /**
      * @addtogroup TypeTraits
      * @{
@@ -35,8 +34,8 @@ export namespace original
      *
      * @tparam T The type to check
      *
-     * This concept is satisfied if `T` is not a function type, reference type, or void.
-     * It corresponds to `std::is_object_v<T>`.
+     * This concept is satisfied if `T` is not a function type, reference type, or
+     * void. It corresponds to `std::is_object_v<T>`.
      *
      * @note Useful for ensuring a type can be instantiated as an object.
      *
@@ -47,7 +46,7 @@ export namespace original
      * static_assert(!IsObject<int()>);       // false (function type)
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept IsObject = std::is_object_v<T>;
 
     /**
@@ -74,7 +73,7 @@ export namespace original
      * static_assert(!IsEmpty<int>);          // false (not a class)
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept IsEmpty = std::is_empty_v<T>;
 
     /**
@@ -82,8 +81,9 @@ export namespace original
      *
      * @tparam T The type to check
      *
-     * A type satisfies this concept if the expression `*t` is valid for an instance `t`.
-     * This includes pointers, smart pointers, and any type with overloaded `operator*`.
+     * A type satisfies this concept if the expression `*t` is valid for an instance
+     * `t`. This includes pointers, smart pointers, and any type with overloaded
+     * `operator*`.
      *
      * @code
      * static_assert(Dereferenceable<int*>);          // true
@@ -91,7 +91,7 @@ export namespace original
      * static_assert(!Dereferenceable<int>);          // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept Dereferenceable = requires(T t) { *t; };
 
     /**
@@ -99,8 +99,8 @@ export namespace original
      *
      * @tparam T The type to check
      *
-     * This concept is satisfied if `T` is a raw pointer type (e.g., `int*`, `const char*`).
-     * It corresponds to `std::is_pointer_v<T>`.
+     * This concept is satisfied if `T` is a raw pointer type (e.g., `int*`, `const
+     * char*`). It corresponds to `std::is_pointer_v<T>`.
      *
      * @code
      * static_assert(IsPointer<int*>);        // true
@@ -109,7 +109,7 @@ export namespace original
      * static_assert(!IsPointer<int&>);       // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept IsPointer = std::is_pointer_v<T>;
 
     /**
@@ -117,8 +117,8 @@ export namespace original
      *
      * @tparam T The type to check
      *
-     * This concept is satisfied if `T` is either a lvalue reference or rvalue reference.
-     * It corresponds to `std::is_reference_v<T>`.
+     * This concept is satisfied if `T` is either a lvalue reference or rvalue
+     * reference. It corresponds to `std::is_reference_v<T>`.
      *
      * @code
      * static_assert(IsReference<int&>);      // true (lvalue reference)
@@ -126,7 +126,7 @@ export namespace original
      * static_assert(!IsReference<int>);      // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept IsReference = std::is_reference_v<T>;
 
     /**
@@ -148,7 +148,7 @@ export namespace original
      * static_assert(!Convertible<int*, double*>);    // false
      * @endcode
      */
-    template<typename From, typename To>
+    template <typename From, typename To>
     concept Convertible = std::is_convertible_v<From, To>;
 
     /**
@@ -166,7 +166,7 @@ export namespace original
      * static_assert(!SameType<int, double>);     // false (different types)
      * @endcode
      */
-    template<typename T, typename U>
+    template <typename T, typename U>
     concept SameType = std::same_as<T, U>;
 
     /**
@@ -183,8 +183,7 @@ export namespace original
      * using T3 = RemoveCVRefType<int>;           // int
      * @endcode
      */
-    template<typename T>
-    using RemoveCVRefType = std::remove_cvref_t<T>;
+    template <typename T> using RemoveCVRefType = std::remove_cvref_t<T>;
 
     /**
      * @brief Conditionally adds const qualification to a type.
@@ -200,7 +199,7 @@ export namespace original
      * using T2 = MaybeConstType<false, int>;  // int
      * @endcode
      */
-    template<bool Test, typename T>
+    template <bool Test, typename T>
     using MaybeConstType = std::conditional_t<Test, const T, T>;
 
     /**
@@ -261,7 +260,7 @@ export namespace original
      * static_assert(!StdArithmetic<void*>);   // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept StdArithmetic = std::is_arithmetic_v<T>;
 
     /**
@@ -282,7 +281,7 @@ export namespace original
      * static_assert(!StdIntegral<float>);     // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept StdIntegral = std::is_integral_v<T>;
 
     /**
@@ -299,12 +298,12 @@ export namespace original
      * static_assert(!StdSignedIntegral<float>);    // false
      * @endcode
      */
-    template<typename T>
-    concept StdSignedIntegral =
-        StdIntegral<T> && std::is_signed_v<T>;
+    template <typename T>
+    concept StdSignedIntegral = StdIntegral<T> && std::is_signed_v<T>;
 
     /**
-     * @brief Concept that constrains a type to be an unsigned standard integral type.
+     * @brief Concept that constrains a type to be an unsigned standard integral
+     * type.
      *
      * @tparam T The type to check
      *
@@ -316,12 +315,12 @@ export namespace original
      * static_assert(!StdUnsignedIntegral<int>);       // false
      * @endcode
      */
-    template<typename T>
-    concept StdUnsignedIntegral =
-        StdIntegral<T> && std::is_unsigned_v<T>;
+    template <typename T>
+    concept StdUnsignedIntegral = StdIntegral<T> && std::is_unsigned_v<T>;
 
     /**
-     * @brief Concept that constrains two integral types to have the same signedness.
+     * @brief Concept that constrains two integral types to have the same
+     * signedness.
      *
      * @tparam T First integral type
      * @tparam U Second integral type
@@ -331,11 +330,12 @@ export namespace original
      *
      * @code
      * static_assert(StdSameSignIntegral<int, long>);          // true (both signed)
-     * static_assert(StdSameSignIntegral<unsigned, size_t>);   // true (both unsigned)
-     * static_assert(!StdSameSignIntegral<int, unsigned>);     // false (mixed)
+     * static_assert(StdSameSignIntegral<unsigned, size_t>);   // true (both
+     * unsigned) static_assert(!StdSameSignIntegral<int, unsigned>);     // false
+     * (mixed)
      * @endcode
      */
-    template<typename T, typename U>
+    template <typename T, typename U>
     concept StdSameSignIntegral =
         (StdSignedIntegral<T> && StdSignedIntegral<U>) ||
         (StdUnsignedIntegral<T> && StdUnsignedIntegral<U>);
@@ -354,7 +354,7 @@ export namespace original
      * static_assert(!StdFloating<int>);       // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept StdFloating = std::is_floating_point_v<T>;
 
     /** @} */ // end of ArithmeticTypes group
@@ -365,7 +365,8 @@ export namespace original
      */
 
     /**
-     * @brief Concept that constrains a type to be a valid three-way comparison result.
+     * @brief Concept that constrains a type to be a valid three-way comparison
+     * result.
      *
      * @tparam T The type to check
      *
@@ -382,10 +383,9 @@ export namespace original
      * static_assert(!StdThreeWayCompareResult<int>);                  // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept StdThreeWayCompareResult =
-        SameType<T, std::strong_ordering> ||
-        SameType<T, std::weak_ordering>   ||
+        SameType<T, std::strong_ordering> || SameType<T, std::weak_ordering> ||
         SameType<T, std::partial_ordering>;
 
     template <typename T>
@@ -424,20 +424,21 @@ export namespace original
      * static_assert(!Invokable<int>);                 // false
      * @endcode
      */
-    template<typename T>
+    template <typename T>
     concept Invokable = requires {
-        std::is_function_v<std::remove_pointer_t<T>> ||
-        requires(T t) { t(); };
+      std::is_function_v<std::remove_pointer_t<T>> || requires(T t) { t(); };
     };
 
     /**
-     * @brief Concept that constrains a type to be invocable with specific arguments.
+     * @brief Concept that constrains a type to be invocable with specific
+     * arguments.
      *
      * @tparam T The callable type
      * @tparam Args Argument types for the invocation
      *
      * This concept is satisfied if `T` is invocable and can be called with
-     * arguments of types `Args...`. It corresponds to `std::is_invocable_v<T, Args...>`.
+     * arguments of types `Args...`. It corresponds to `std::is_invocable_v<T,
+     * Args...>`.
      *
      * @code
      * auto lambda = [](int, double) { return 0; };
@@ -445,7 +446,7 @@ export namespace original
      * static_assert(!InvokableWith<decltype(lambda), std::string>); // false
      * @endcode
      */
-    template<typename T, typename... Args>
+    template <typename T, typename... Args>
     concept InvokableWith = Invokable<T> && std::is_invocable_v<T, Args...>;
 
     /**
@@ -462,19 +463,19 @@ export namespace original
      * static_assert(SameType<Result, int>); // true
      * @endcode
      */
-    template<typename T, typename... Args>
+    template <typename T, typename... Args>
     using InvokeResultType = std::invoke_result_t<T, Args...>;
 
     /**
-     * @brief Concept that constrains a callable to be invocable with given arguments
-     *        and return a type exactly matching R.
+     * @brief Concept that constrains a callable to be invocable with given
+     * arguments and return a type exactly matching R.
      *
      * @tparam T   The callable type
      * @tparam R   The exact expected return type
      * @tparam Args The argument types
      *
-     * This concept requires that T is invocable with Args... and that the invocation
-     * result type is identical to R (including cv-qualifiers).
+     * This concept requires that T is invocable with Args... and that the
+     * invocation result type is identical to R (including cv-qualifiers).
      *
      * @code
      * auto f = [](int) -> double { return 0.0; };
@@ -482,14 +483,13 @@ export namespace original
      * static_assert(!InvokableReturns<decltype(f), const double, int>); // false
      * @endcode
      */
-    template<typename T, typename R, typename... Args>
+    template <typename T, typename R, typename... Args>
     concept InvokableReturns =
-        InvokableWith<T, Args...> &&
-        SameType<InvokeResultType<T, Args...>, R>;
+        InvokableWith<T, Args...> && SameType<InvokeResultType<T, Args...>, R>;
 
     /**
-     * @brief Concept that constrains a callable to be invocable with given arguments
-     *        and return a type implicitly convertible to R.
+     * @brief Concept that constrains a callable to be invocable with given
+     * arguments and return a type implicitly convertible to R.
      *
      * @tparam T   The callable type
      * @tparam R   The target return type (convertible-to)
@@ -501,7 +501,8 @@ export namespace original
      * @code
      * auto g = [](int) -> int { return 42; };
      * static_assert(InvokableReturnsConvertible<decltype(g), double, int>); // true
-     * static_assert(!InvokableReturnsConvertible<decltype(g), std::string, int>); // false
+     * static_assert(!InvokableReturnsConvertible<decltype(g), std::string, int>);
+     * // false
      * @endcode
      */
     template <typename T, typename R, typename... Args>
