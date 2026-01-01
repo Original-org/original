@@ -4,6 +4,22 @@ module;
 #include <concepts>
 export module original.basic.types;
 
+namespace original::details {
+    template <typename... Args>
+    struct HasCommonTypeTrait : std::common_type<Args...> {};
+
+    template <typename... Args>
+    inline constexpr bool HasCommonTypeTraitVal =
+        requires { typename HasCommonTypeTrait<Args...>::type; };
+
+    template <typename... Args>
+    struct HasCommonRefTrait : std::common_reference<Args...> {};
+
+    template <typename... Args>
+    inline constexpr bool HasCommonRefTraitVal =
+        requires { typename HasCommonRefTrait<Args...>::type; };
+} // namespace original::details
+
 /**
  * @brief Main namespace for the Original library
  */
@@ -187,7 +203,37 @@ export namespace original
     template<bool Test, typename T>
     using MaybeConstType = std::conditional_t<Test, const T, T>;
 
-    template<typename... Args>
+    /**
+     * @brief Concept that constrains a pack of types to have a well-defined common
+     * type.
+     *
+     * @tparam Args The types to check (at least two types recommended)
+     *
+     * This concept is satisfied if `std::common_type_t<Args...>` is well-formed,
+     * meaning there exists a common type to which all `Args...` can be implicitly
+     * converted. It is useful for generic code that relies on mixed-type operations
+     * requiring a common result type.
+     *
+     * @note If the pack is empty or no common type exists, the concept is false.
+     *       This directly detects the availability of `std::common_type_t` without
+     * invoking the stronger requirements of `std::common_with`.
+     *
+     * @code
+     * static_assert(HasCommonType<int, double>);          // true
+     * static_assert(HasCommonType<int, long, float>);     // true
+     * static_assert(HasCommonType<int, std::string>);     // false (no common type)
+     * static_assert(!HasCommonType<>);                    // false (empty pack)
+     * @endcode
+     */
+    template <typename... Args>
+    concept HasCommonType = details::HasCommonTypeTraitVal<Args...>;
+
+    template <typename... Args>
+    concept HasCommonRef = HasCommonType<Args...>;
+
+    template <typename... Args> using CommonType = std::common_type_t<Args...>;
+
+    template <typename... Args>
     using CommonRefType = std::common_reference_t<Args...>;
 
     /** @} */ // end of TypeTraits group
@@ -342,6 +388,15 @@ export namespace original
         SameType<T, std::weak_ordering>   ||
         SameType<T, std::partial_ordering>;
 
+    template <typename T>
+    concept EqualityComparable = std::equality_comparable<T>;
+
+    template <typename T>
+    concept ThreeWayComparable = std::three_way_comparable<T>;
+
+    template <typename T>
+    concept Comparable = EqualityComparable<T> && ThreeWayComparable<T>;
+
     /** @} */ // end of ComparisonTypes group
 
     /**
@@ -449,10 +504,35 @@ export namespace original
      * static_assert(!InvokableReturnsConvertible<decltype(g), std::string, int>); // false
      * @endcode
      */
-    template<typename T, typename R, typename... Args>
+    template <typename T, typename R, typename... Args>
     concept InvokableReturnsConvertible =
-        InvokableWith<T, Args...> &&
-        Convertible<InvokeResultType<T, Args...>, R>;
+        InvokableWith<T, Args...> && Convertible<InvokeResultType<T, Args...>, R>;
+
+    /**
+     * @name Predicate and Functor Concepts
+     * @brief Convenience concepts to identify predicates and functor objects.
+     *
+     * - `Predicate<F, Args...>`: `F` is invokable with `Args...` and the
+     *   result is convertible to `bool`.
+     * - `UnaryPredicate` / `BinaryPredicate`: common unary/binary predicate
+     *   aliases.
+     * - `Functor<F>`: identifies callable class types (objects with
+     *   `operator()`), excluding function pointers and plain function types.
+     */
+
+    template <typename F, typename... Args>
+    concept Predicate = InvokableWith<F, Args...> &&
+                        (Convertible<InvokeResultType<F, Args...>, bool> ||
+                         StdThreeWayCompareResult<InvokeResultType<F, Args...>>);
+
+    template <typename F, typename Arg>
+    concept UnaryPredicate = Predicate<F, Arg>;
+
+    template <typename F, typename Arg1, typename Arg2>
+    concept BinaryPredicate = Predicate<F, Arg1, Arg2>;
+
+    template <typename F>
+    concept Functor = Invokable<F> && std::is_class_v<std::remove_reference_t<F>>;
 
     /** @} */ // end of InvocableTypes group
 } // namespace original
