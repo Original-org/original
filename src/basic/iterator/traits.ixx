@@ -158,6 +158,50 @@ export namespace original
         { it.iterator() } -> Iterator;
     };
 
+    template <typename T>
+    struct IterTraits<T*>
+    {
+        using IterType       = T*;
+        using DerivedType    = details::IterCRTPDerivedType<IterType>;
+        using PointerType    = T*;
+        using ValueType      = std::remove_cv_t<T>;
+        using ReferenceType  = std::add_lvalue_reference_t<T>;
+        using DifferenceType = details::DifferenceType<T*>;
+    };
+
+    template <typename T>
+    struct IterTraits<const T*>
+    {
+        using IterType       = const T*;
+        using DerivedType    = details::IterCRTPDerivedType<IterType>;
+        using PointerType    = const T*;
+        using ValueType      = std::remove_cv_t<T>;
+        using ReferenceType  = std::add_lvalue_reference_t<const T>;
+        using DifferenceType = details::DifferenceType<const T*>;
+    };
+
+    template <typename T>
+    struct IterTraits<volatile T*>
+    {
+        using IterType       = volatile T*;
+        using DerivedType    = details::IterCRTPDerivedType<IterType>;
+        using PointerType    = volatile T*;
+        using ValueType      = std::remove_cv_t<T>;
+        using ReferenceType  = std::add_lvalue_reference_t<volatile T>;
+        using DifferenceType = details::DifferenceType<volatile T*>;
+    };
+
+    template <typename T>
+    struct IterTraits<const volatile T*>
+    {
+        using IterType       = const volatile T*;
+        using DerivedType    = details::IterCRTPDerivedType<IterType>;
+        using PointerType    = const volatile T*;
+        using ValueType      = std::remove_cv_t<T>;
+        using ReferenceType  = std::add_lvalue_reference_t<const volatile T>;
+        using DifferenceType = details::DifferenceType<const volatile T*>;
+    };
+
     /**
      * @brief Iterator traits specialization.
      * @tparam Iter Iterator type satisfying Iterator concept.
