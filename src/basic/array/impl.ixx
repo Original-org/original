@@ -1,4 +1,5 @@
 module;
+#include <compare>
 #include <stdexcept>
 #include <type_traits> // NOLINT
 export module original.basic.array.impl;
@@ -6,6 +7,7 @@ import original.basic.types;
 import original.basic.number;
 import orginal.basic.iterator.impl;
 import original.basic.iterator.traits;
+import original.basic.algorithm;
 
 
 namespace original::details
@@ -123,6 +125,18 @@ export namespace original
 
             return this->data_[numberLikeValue(index)];
         }
+
+        bool operator==(const Array& rhs) const
+        requires EqualityComparable<ValueType>
+        {
+            return algorithms::equal(*this, rhs);
+        }
+
+        auto operator<=>(const Array& rhs) const
+        requires ThreeWayComparable<ValueType>
+        {
+            return algorithms::lexicographicallyCompare(*this, rhs);
+        }
     };
 
     template<IsObject T>
@@ -172,7 +186,33 @@ export namespace original
         {
             throw std::out_of_range{"Array<T, 0> out of range."};
         }
+
+        bool operator==(const Array&) const noexcept
+        {
+            return true;
+        }
+
+        auto operator<=>(const Array&) const noexcept
+        {
+            return std::strong_ordering::equal;
+        }
     };
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    requires (N1 != N2) && EqualityComparable<T>
+    constexpr bool operator==(const Array<T, N1>&, const Array<T, N2>&)
+    noexcept
+    {
+        return false;
+    }
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    requires (N1 != N2) && ThreeWayComparable<T>
+    constexpr auto operator<=>(const Array<T, N1>&, const Array<T, N2>&)
+    noexcept
+    {
+        return N1 <=> N2;
+    }
 
     template<std::size_t I, IsObject T, Size::Type N>
     requires (I < N)
