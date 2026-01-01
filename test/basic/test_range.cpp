@@ -295,11 +295,11 @@ TEST_F(RangeTest, ExcludePipelineBasic)
 
 namespace
 {
-    class Functor
+    class Closure
     {
         int threshold_;
     public:
-        explicit Functor(const int threshold) : threshold_(threshold) {} // NOLINT
+        explicit Closure(const int threshold) : threshold_(threshold) {} // NOLINT
 
         bool operator()(const int x) const { return x < this->threshold_; }
     };
@@ -308,7 +308,7 @@ namespace
 TEST_F(RangeTest, ExcludePipelineWithCapture)
 {
     constexpr int threshold = 3;
-    const auto excluded = arr | exclude(Functor{threshold});
+    const auto excluded = arr | exclude(Closure{threshold});
     int i = 0;
     for (const auto& e : excluded)
     {
