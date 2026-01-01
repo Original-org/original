@@ -275,3 +275,94 @@ TEST(ArrayStructuredBindingTest, EmptyArrayBinding)
 {
     static_assert(std::tuple_size_v<Array<int, 0>> == 0);
 }
+
+TEST(ArrayAlgoTest, EqualCompareBetweenArray) {
+  constexpr Array<int, 4> a(1, 2, 3, 4);
+  Array<int, 4> b(1, 2, 3, 4);
+
+  // Member operator overload
+  EXPECT_TRUE(a == b);
+
+  // range overload
+  EXPECT_TRUE(original::algorithms::equal(a, b));
+
+  // iterator overload
+  EXPECT_TRUE(original::algorithms::equal(a.begin(), a.end(), b.begin()));
+
+  // change an element
+  b[2_size] = 42;
+  EXPECT_FALSE(original::algorithms::equal(a, b));
+
+  // predicate overload (compare absolute values)
+  Array<int, 4> c(1, -2, 3, -4);
+  EXPECT_TRUE(original::algorithms::equal(
+      a, c, [](const int x, const int y) { return x == std::abs(y); }));
+
+  // bounded iterator overload
+  b[2_size] = 3; // restore
+  EXPECT_TRUE(
+      original::algorithms::equal(a.begin(), a.end(), b.begin(), b.end()));
+
+  constexpr Array<int, 0> empty1;
+  constexpr Array<int, 0> empty2;
+
+  EXPECT_TRUE(empty1 == empty2);
+}
+
+TEST(ArrayAlgoTest, LexicographicallyCompare) {
+  constexpr Array<int, 4> a(1, 2, 3, 4);
+  constexpr Array<int, 4> b(1, 2, 3, 4);
+  constexpr Array<int, 4> c(1, 2, 4, 0);
+  constexpr Array<int, 4> d(1, 2, 2, 5);
+
+  // range overload - equal
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a, b) == 0);
+
+  // range overload - less than
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a, c) < 0);
+
+  // range overload - greater than
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a, d) > 0);
+
+  // Member operator overload
+  EXPECT_TRUE((a <=> b) == 0);
+  EXPECT_TRUE((a <=> c) < 0);
+  EXPECT_TRUE((a <=> d) > 0);
+  EXPECT_TRUE(a == b);
+  EXPECT_TRUE(a <= c);
+  EXPECT_TRUE(a > d);
+
+  // iterator overload
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a.begin(), a.end(),
+                                                             b.begin()) == 0);
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a.begin(), a.end(),
+                                                             c.begin()) < 0);
+
+  // predicate overload (compare absolute values)
+  Array<int, 4> neg_a(1, -2, 3, -4);
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(
+                  a, neg_a, [](const int x, const int y) {
+                    return x <=> std::abs(y);
+                  }) == 0);
+
+  // bounded iterator overload
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(
+                  a.begin(), a.end(), b.begin(), b.end()) == 0);
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(
+                  a.begin(), a.end(), c.begin(), c.end()) < 0);
+
+  // different sized ranges
+  constexpr Array<int, 3> shorter(1, 2, 3);
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(shorter, a) < 0);
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(a, shorter) > 0);
+  EXPECT_TRUE(shorter < a);
+  EXPECT_TRUE(shorter <= a);
+  EXPECT_TRUE(a > shorter);
+  EXPECT_TRUE(a >= shorter);
+
+  // empty ranges
+  constexpr Array<int, 0> empty1;
+  constexpr Array<int, 0> empty2;
+  EXPECT_TRUE(original::algorithms::lexicographicallyCompare(empty1, empty2) == 0);
+  EXPECT_TRUE((empty1 <=> empty2) == 0);
+}
