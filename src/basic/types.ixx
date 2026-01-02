@@ -392,6 +392,12 @@ export namespace original {
     concept EqualityComparable = std::equality_comparable<T>;
 
     template <typename T>
+    concept LessComparable = requires(T t1, T t2) { {t1 < t2} -> Convertible<bool>; };
+
+    template <typename T>
+    concept GreaterComparable = requires(T t1, T t2) { {t1 > t2} -> Convertible<bool>; };
+
+    template <typename T>
     concept ThreeWayComparable = std::three_way_comparable<T>;
 
     template <typename T>
