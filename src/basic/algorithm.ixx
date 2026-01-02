@@ -386,6 +386,52 @@ export namespace original::algorithms {
     }
 
     /**
+     * @brief Performs lexicographically comparison of two bounded iterator ranges
+     * with custom comparator.
+     *
+     * Compares elements from first1 to last1 with elements from first2 to last2
+     * using the provided comparator function that returns a three-way comparison
+     * result.
+     *
+     * @tparam Iter1 Type of the first iterator.
+     * @tparam Iter2 Type of the second iterator.
+     * @tparam Pred Type of the comparator function/object.
+     * @param first1 Iterator to the beginning of the first range.
+     * @param last1 Iterator to the end of the first range.
+     * @param first2 Iterator to the beginning of the second range.
+     * @param last2 Iterator to the end of the second range.
+     * @param pred Comparator function returning three-way comparison result.
+     * @return Result of lexicographical comparison.
+     */
+    template <Iterator Iter1, Iterator Iter2, Invokable Pred = ThreeWayCompare>
+    requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
+                        typename IterTraits<Iter2>::ReferenceType> &&
+             Predicate<Pred,
+                       CommonRefType<typename IterTraits<Iter1>::ReferenceType,
+                                     typename IterTraits<Iter2>::ReferenceType>,
+                       CommonRefType<typename IterTraits<Iter1>::ReferenceType,
+                                     typename IterTraits<Iter2>::ReferenceType>>
+    auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
+                                  Iter2 last2, Pred pred = {})
+    {
+        using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
+                                        typename IterTraits<Iter2>::ReferenceType>;
+        while (first1 != last1 && first2 != last2)
+        {
+            auto& ref1 = static_cast<CommonRef>(*first1);
+            auto& ref2 = static_cast<CommonRef>(*first2);
+            if (auto cmp = pred(ref1, ref2); cmp != 0)
+            {
+              return cmp;
+            }
+            ++first1;
+            ++first2;
+        }
+
+        return (first1 != last1) <=> (first2 != last2);
+    }
+
+    /**
      * @brief Performs lexicographically comparison of two ranges with custom
      * comparator.
      *
@@ -412,26 +458,11 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>>
     auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred = {})
     {
-        auto it1 = RangeTraits<Range1>::begin(range1);
-        auto it2 = RangeTraits<Range2>::begin(range2);
-        auto end1 = RangeTraits<Range1>::end(range1);
-        auto end2 = RangeTraits<Range2>::end(range2);
-        using CommonRef = CommonRefType<typename RangeTraits<Range1>::ReferenceType,
-                                        typename RangeTraits<Range2>::ReferenceType>;
-
-        while (it1 != end1 && it2 != end2)
-        {
-            auto &type1 = static_cast<CommonRef>(*it1);
-            auto &type2 = static_cast<CommonRef>(*it2);
-            if (auto cmp = pred(type1, type2); cmp != 0)
-            {
-                return cmp;
-            }
-            ++it1;
-            ++it2;
-        }
-
-        return (it1 != end1) <=> (it2 != end2);
+        return lexicographicallyCompare(RangeTraits<Range1>::begin(range1),
+                                        RangeTraits<Range1>::end(range1),
+                                        RangeTraits<Range2>::begin(range2),
+                                        RangeTraits<Range2>::end(range2),
+                                        pred);
     }
 
     /**
@@ -477,51 +508,5 @@ export namespace original::algorithms {
         }
 
         return (first1 == last1) <=> true;
-    }
-
-    /**
-     * @brief Performs lexicographically comparison of two bounded iterator ranges
-     * with custom comparator.
-     *
-     * Compares elements from first1 to last1 with elements from first2 to last2
-     * using the provided comparator function that returns a three-way comparison
-     * result.
-     *
-     * @tparam Iter1 Type of the first iterator.
-     * @tparam Iter2 Type of the second iterator.
-     * @tparam Pred Type of the comparator function/object.
-     * @param first1 Iterator to the beginning of the first range.
-     * @param last1 Iterator to the end of the first range.
-     * @param first2 Iterator to the beginning of the second range.
-     * @param last2 Iterator to the end of the second range.
-     * @param pred Comparator function returning three-way comparison result.
-     * @return Result of lexicographical comparison.
-     */
-    template <Iterator Iter1, Iterator Iter2, Invokable Pred = ThreeWayCompare>
-    requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
-                        typename IterTraits<Iter2>::ReferenceType> &&
-             Predicate<Pred,
-                       CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                     typename IterTraits<Iter2>::ReferenceType>,
-                       CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                     typename IterTraits<Iter2>::ReferenceType>>
-    auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
-                                  Iter2 last2, Pred pred = {})
-    {
-        using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                        typename IterTraits<Iter2>::ReferenceType>;
-        while (first1 != last1 && first2 != last2)
-        {
-            auto& ref1 = static_cast<CommonRef>(*first1);
-            auto& ref2 = static_cast<CommonRef>(*first2);
-            if (auto cmp = pred(ref1, ref2); cmp != 0)
-            {
-              return cmp;
-            }
-            ++first1;
-            ++first2;
-        }
-
-        return (first1 != last1) <=> (first2 != last2);
     }
 } // namespace original::algorithms
