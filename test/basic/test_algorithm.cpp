@@ -94,9 +94,10 @@ TEST(AlgorithmsTest, LexicographicalCompareWithNativeArraysAndPointers) {
           original::begin(arr1), original::end(arr1), original::begin(arr2)),
       std::strong_ordering::equal);
   EXPECT_EQ(
-      original::algorithms::lexicographicallyCompare(
-          original::begin(arr1), original::end(arr1), original::begin(arr4)),
-      std::strong_ordering::greater);
+        original::algorithms::lexicographicallyCompare(
+            original::begin(arr1), original::end(arr1),
+            original::begin(arr4), original::end(arr4)),
+        std::strong_ordering::greater);
 
   EXPECT_EQ(original::algorithms::lexicographicallyCompare(
                 original::begin(arr1), original::end(arr1),
