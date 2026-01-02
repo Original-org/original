@@ -1,5 +1,4 @@
 ﻿module;
-#include <compare>
 #include <utility>
 export module original.basic.algorithm;
 import original.basic.types;
@@ -387,48 +386,6 @@ export namespace original::algorithms {
     }
 
     /**
-     * @brief Performs lexicographically comparison of two ranges.
-     *
-     * Compares elements of two ranges lexicographically using three-way comparison
-     * operator. Returns the result of the first non-equal element comparison.
-     *
-     * @tparam Range1 Type of the first range.
-     * @tparam Range2 Type of the second range.
-     * @param range1 The first range to compare.
-     * @param range2 The second range to compare.
-     * @return Result of lexicographical comparison (strong_ordering).
-     */
-    template <Range Range1, Range Range2>
-        requires HasCommonRef<typename RangeTraits<Range1>::ReferenceType,
-                              typename RangeTraits<Range2>::ReferenceType> &&
-                 ThreeWayComparable<
-                     CommonRefType<typename RangeTraits<Range1>::ReferenceType,
-                                   typename RangeTraits<Range2>::ReferenceType>>
-    std::strong_ordering lexicographicallyCompare(Range1 &range1, Range2 &range2)
-    {
-        auto it1 = RangeTraits<Range1>::begin(range1);
-        auto it2 = RangeTraits<Range2>::begin(range2);
-        auto end1 = RangeTraits<Range1>::end(range1);
-        auto end2 = RangeTraits<Range2>::end(range2);
-        using CommonRef = CommonRefType<typename RangeTraits<Range1>::ReferenceType,
-                                        typename RangeTraits<Range2>::ReferenceType>;
-
-        while (it1 != end1 && it2 != end2)
-        {
-            auto &type1 = static_cast<CommonRef>(*it1);
-            auto &type2 = static_cast<CommonRef>(*it2);
-            if (auto cmp = type1 <=> type2; cmp != 0)
-            {
-                return cmp;
-            }
-            ++it1;
-            ++it2;
-        }
-
-        return (it1 != end1) <=> (it2 != end2);
-    }
-
-    /**
      * @brief Performs lexicographically comparison of two ranges with custom
      * comparator.
      *
@@ -445,7 +402,7 @@ export namespace original::algorithms {
      * type.
      * @return Result of lexicographical comparison.
      */
-    template <Range Range1, Range Range2, Invokable Pred>
+    template <Range Range1, Range Range2, Invokable Pred = ThreeWayCompare>
     requires HasCommonRef<typename RangeTraits<Range1>::ReferenceType,
                           typename RangeTraits<Range2>::ReferenceType> &&
              Predicate<Pred,
@@ -453,7 +410,7 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>,
                        CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                      typename RangeTraits<Range2>::ReferenceType>>
-    auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred)
+    auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred = {})
     {
         auto it1 = RangeTraits<Range1>::begin(range1);
         auto it2 = RangeTraits<Range2>::begin(range2);
@@ -478,45 +435,6 @@ export namespace original::algorithms {
     }
 
     /**
-     * @brief Performs lexicographically comparison of two iterator ranges.
-     *
-     * Compares elements from first1 to last1 with elements starting at first2
-     * using three-way comparison operator.
-     *
-     * @tparam Iter1 Type of the first iterator.
-     * @tparam Iter2 Type of the second iterator.
-     * @param first1 Iterator to the beginning of the first range.
-     * @param last1 Iterator to the end of the first range.
-     * @param first2 Iterator to the beginning of the second range.
-     * @return Result of lexicographical comparison.
-     */
-    template <Iterator Iter1, Iterator Iter2>
-      requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
-                            typename IterTraits<Iter2>::ReferenceType> &&
-               ThreeWayComparable<
-                   CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                 typename IterTraits<Iter2>::ReferenceType>>
-    std::strong_ordering lexicographicallyCompare(Iter1 first1, Iter1 last1,
-                                                  Iter2 first2)
-    {
-        using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                        typename IterTraits<Iter2>::ReferenceType>;
-        while (first1 != last1)
-        {
-            auto& ref1 = static_cast<CommonRef>(*first1);
-            auto& ref2 = static_cast<CommonRef>(*first2);
-            if (auto cmp = ref1 <=> ref2; cmp != 0)
-            {
-                return cmp;
-            }
-            ++first1;
-            ++first2;
-        }
-
-        return std::strong_ordering::equal;
-    }
-
-    /**
      * @brief Performs lexicographically comparison of two iterator ranges with
      * custom comparator.
      *
@@ -533,7 +451,7 @@ export namespace original::algorithms {
      * @param pred Comparator function returning three-way comparison result.
      * @return Result of lexicographical comparison.
      */
-    template <Iterator Iter1, Iterator Iter2, Invokable Pred>
+    template <Iterator Iter1, Iterator Iter2, Invokable Pred = ThreeWayCompare>
     requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
                           typename IterTraits<Iter2>::ReferenceType> &&
              Predicate<Pred,
@@ -542,7 +460,7 @@ export namespace original::algorithms {
                 CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                               typename IterTraits<Iter2>::ReferenceType>>
     auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
-                                  Pred pred)
+                                  Pred pred = {})
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                         typename IterTraits<Iter2>::ReferenceType>;
@@ -559,46 +477,6 @@ export namespace original::algorithms {
         }
 
         return (first1 == last1) <=> true;
-    }
-
-    /**
-     * @brief Performs lexicographically comparison of two bounded iterator ranges.
-     *
-     * Compares elements from first1 to last1 with elements from first2 to last2
-     * using three-way comparison operator.
-     *
-     * @tparam Iter1 Type of the first iterator.
-     * @tparam Iter2 Type of the second iterator.
-     * @param first1 Iterator to the beginning of the first range.
-     * @param last1 Iterator to the end of the first range.
-     * @param first2 Iterator to the beginning of the second range.
-     * @param last2 Iterator to the end of the second range.
-     * @return Result of lexicographical comparison.
-     */
-    template <Iterator Iter1, Iterator Iter2>
-      requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
-                            typename IterTraits<Iter2>::ReferenceType> &&
-               ThreeWayComparable<
-                   CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                 typename IterTraits<Iter2>::ReferenceType>>
-    std::strong_ordering lexicographicallyCompare(Iter1 first1, Iter1 last1,
-                                                  Iter2 first2, Iter2 last2)
-    {
-        using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
-                                        typename IterTraits<Iter2>::ReferenceType>;
-        while (first1 != last1 && first2 != last2)
-        {
-            auto& ref1 = static_cast<CommonRef>(*first1);
-            auto& ref2 = static_cast<CommonRef>(*first2);
-            if (auto cmp = ref1 <=> ref2; cmp != 0)
-            {
-                return cmp;
-            }
-            ++first1;
-            ++first2;
-        }
-
-        return (first1 != last1) <=> (first2 != last2);
     }
 
     /**
@@ -619,7 +497,7 @@ export namespace original::algorithms {
      * @param pred Comparator function returning three-way comparison result.
      * @return Result of lexicographical comparison.
      */
-    template <Iterator Iter1, Iterator Iter2, Invokable Pred>
+    template <Iterator Iter1, Iterator Iter2, Invokable Pred = ThreeWayCompare>
     requires HasCommonRef<typename IterTraits<Iter1>::ReferenceType,
                         typename IterTraits<Iter2>::ReferenceType> &&
              Predicate<Pred,
@@ -628,7 +506,7 @@ export namespace original::algorithms {
                        CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
     auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
-                                  Iter2 last2, Pred pred)
+                                  Iter2 last2, Pred pred = {})
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                         typename IterTraits<Iter2>::ReferenceType>;
