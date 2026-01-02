@@ -136,13 +136,51 @@ TEST(ArrayTraitsTest, ArrayLikeType) {
 
 namespace
 {
-   struct NonTrivial {
+    struct NonTrivial {
         int value;
         bool constructed = false;
+        bool moved_from = false;  // 新增：标记是否已被移动
 
         NonTrivial() : value(0) {}
+
         explicit NonTrivial(const int v) : value(v), constructed(true) {}
+
         NonTrivial(const NonTrivial& other) : value(other.value), constructed(true) {}
+
+        NonTrivial& operator=(const NonTrivial& other)
+        {
+            if (this == &other)
+            {
+                return *this;
+            }
+
+            value = other.value;
+            constructed = true;
+            return *this;
+        }
+
+        NonTrivial(NonTrivial&& other) noexcept
+            : value(other.value), constructed(other.constructed)
+        {
+            other.value = 0;
+            other.constructed = false;
+            other.moved_from = true;
+        }
+
+        NonTrivial& operator=(NonTrivial&& other) noexcept
+        {
+            if (this == &other)
+            {
+                return *this;
+            }
+
+            value = other.value;
+            constructed = other.constructed;
+            other.value = 0;
+            other.constructed = false;
+            other.moved_from = true;
+            return *this;
+        }
     };
 }
 
@@ -153,6 +191,28 @@ TEST(ArrayTest, NonTrivialType) {
 
     arr[0_size] = NonTrivial(42);
     EXPECT_EQ(arr[0_size].value, 42);
+
+    Array moved_construct(std::move(arr));
+    EXPECT_EQ(moved_construct[0_size].value, 42);
+    EXPECT_EQ(moved_construct[0_size].constructed, true);
+    EXPECT_EQ(moved_construct[1_size].value, 0);
+
+    EXPECT_EQ(arr[0_size].value, 0);
+    EXPECT_EQ(arr[0_size].constructed, false);
+    EXPECT_TRUE(arr[0_size].moved_from);
+    EXPECT_EQ(arr[1_size].value, 0);
+    EXPECT_TRUE(arr[1_size].moved_from);
+
+    Array<NonTrivial, 2> target;
+    target[0_size] = NonTrivial(100);
+    target = std::move(moved_construct);
+
+    EXPECT_EQ(target[0_size].value, 42);
+    EXPECT_EQ(target[1_size].value, 0);
+
+    EXPECT_TRUE(moved_construct[0_size].moved_from);
+    EXPECT_EQ(moved_construct[0_size].value, 0);
+    EXPECT_EQ(moved_construct[0_size].constructed, false);
 }
 
 TEST(ContainerTraitsTest, ArraySatisfiesContainerConcept) {
