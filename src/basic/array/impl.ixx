@@ -1,6 +1,7 @@
 module;
 #include <compare>
 #include <stdexcept>
+#include <memory>
 #include <type_traits> // NOLINT
 export module original.basic.array.impl;
 import original.basic.types;
