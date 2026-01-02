@@ -29,12 +29,12 @@ namespace original::details
             const auto& type1 = static_cast<const CommonRef&>(*first1);
             if (const auto& type2 = static_cast<const CommonRef&>(*first2); !pred(type1, type2))
             {
-                return std::pair<Iter1, Iter2>{first1, first2};
+                return {first1, first2};
             }
             ++first1;
             ++first2;
         }
-        return std::pair<Iter1, Iter2>{first1, first2};
+        return {first1, first2};
     }
 
     template <Iterator Iter1, Iterator Iter2, Invokable Pred = algorithms::EqualTo>
