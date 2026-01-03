@@ -1,4 +1,5 @@
 module;
+#include <functional>
 export module original.basic.tuple.utility;
 import original.basic.number;
 import original.basic.types;
@@ -142,15 +143,74 @@ export namespace original
     }
 
     template<
+        IntegralLike Num,
+        NumberLikeType<Num> Cnt,
+        Invokable F
+    >
+    constexpr decltype(auto)
+    forAll(F&& f)
+    {
+        return forAll(std::forward<F>(f), makeIntegralSequence<Num, Cnt>());
+    }
+
+    template<
+        IntegralLike Num,
+        NumberLikeType<Num> Start,
+        NumberLikeType<Num> Cnt,
+        Invokable F
+    >
+    constexpr decltype(auto)
+    forAll(F&& f)
+    {
+        return forAll(std::forward<F>(f), makeIntegralSequence<Num, Start, Cnt>());
+    }
+
+    template<Size::Type I, Invokable F>
+    constexpr decltype(auto)
+    forAll(F&& f)
+    {
+        return forAll(std::forward<F>(f), makeIndexSequence<I>());
+    }
+
+    template<
         Invokable F,
         IntegralLike Num,
         NumberLikeType<Num>... I
     >
-    requires Functor<F> &&
-             (InvokableWith<F, IntegralConstant<Num, I>> && ...)
+    requires Functor<F> && (InvokableWith<F, IntegralConstant<Num, I>> && ...)
     constexpr void
     forEach(F&& f, IntegralSequence<Num, I...>)
     {
         (f(IntegralConstant<Num, I>{}), ...);
+    }
+
+    template<
+        IntegralLike Num,
+        NumberLikeType<Num> Cnt,
+        Invokable F
+    >
+    constexpr void
+    forEach(F&& f)
+    {
+        forEach(std::forward<F>(f), makeIntegralSequence<Num, Cnt>());
+    }
+
+    template<
+        IntegralLike Num,
+        NumberLikeType<Num> Start,
+        NumberLikeType<Num> Cnt,
+        Invokable F
+    >
+    constexpr void
+    forEach(F&& f)
+    {
+        forEach(std::forward<F>(f), makeIntegralSequence<Num, Start, Cnt>());
+    }
+
+    template<Size::Type I, Invokable F>
+    constexpr void
+    forEach(F&& f)
+    {
+        forEach(std::forward<F>(f), makeIndexSequence<I>());
     }
 }
