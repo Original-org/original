@@ -226,4 +226,11 @@ export namespace original
     {
         return static_cast<NumberLikeType<T>>(v);
     }
+
+    template<NumberLike T, NumberLikeType<T> V>
+    [[nodiscard]]
+    consteval NumberLikeType<T> numberLikeValue(NumberConstant<T, V>) noexcept
+    {
+        return V;
+    }
 }
