@@ -74,7 +74,7 @@ export namespace std
      * @note Inherits all properties from the underlying type's numeric_limits.
      */
     template<original::StdIntegral T>
-    class numeric_limits<original::Integer<T>>
+    class numeric_limits<original::Integer<T>> // NOLINT
         : public std::numeric_limits<T> {};
 
     /**
@@ -83,7 +83,7 @@ export namespace std
      * @note Inherits all properties from the underlying type's numeric_limits.
      */
     template<original::StdFloating T>
-    class numeric_limits<original::Floating<T>>
+    class numeric_limits<original::Floating<T>> // NOLINT
         : public std::numeric_limits<T> {};
 }
 
