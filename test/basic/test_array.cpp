@@ -128,10 +128,24 @@ TEST(ArrayTraitsTest, IsArrayLikeConcept) {
     static_assert(!IsArrayLike<std::vector<int>>);
 }
 
-TEST(ArrayTraitsTest, ArrayLikeType) {
-    static_assert(std::same_as<ArrayLikeType<Array<int, 5>>, Array<int, 5>>);
-    static_assert(std::same_as<ArrayLikeType<int[10]>, int[10]>);
-    static_assert(std::same_as<ArrayLikeType<std::array<double, 3>>, std::array<double, 3>>);
+TEST(ArrayTraitsTest, ArrayLikeTraits) {
+    static constexpr Array<int, 5> arr1;
+    static constexpr int arr2[10] {};
+    static constexpr std::array<double, 3> arr3{};
+
+    using ArrayType1 = decltype(arr1);
+    using ArrayType2 = decltype(arr2);
+    using ArrayType3 = decltype(arr3);
+
+    static_assert(std::same_as<ArrayLikeTraits<ArrayType1>::Type, const Array<int, 5>>);
+    static_assert(std::same_as<ArrayLikeTraits<ArrayType2>::Type, const int[10]>);
+    static_assert(std::same_as<ArrayLikeTraits<ArrayType3>::Type, const std::array<double, 3>>);
+    static_assert(ArrayLikeTraits<ArrayType1>::data(arr1) == arr1.data());
+    static_assert(ArrayLikeTraits<ArrayType2>::data(arr2) == arr2);
+    static_assert(ArrayLikeTraits<ArrayType3>::data(arr3) == arr3.data());
+    static_assert(ArrayLikeTraits<ArrayType1>::SIZE == 5);
+    static_assert(ArrayLikeTraits<ArrayType2>::SIZE == 10);
+    static_assert(ArrayLikeTraits<ArrayType3>::SIZE == 3);
 }
 
 namespace
