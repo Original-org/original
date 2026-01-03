@@ -555,3 +555,53 @@ TEST(ArrayIntegralConstant, ConstArrayGetWithIntegralConstant)
     EXPECT_EQ(s1, "world");
     EXPECT_EQ(s2, "test");
 }
+
+TEST(ArrayConcatTest, ConcatNonEmptyArrays) {
+    constexpr Array<int, 3> a(1, 2, 3);
+    constexpr Array<int, 2> b(4, 5);
+
+    auto c = a + b;
+
+    static_assert(std::same_as<decltype(c), Array<int, 5>>);
+    EXPECT_EQ(c.size(), 5_size);
+    EXPECT_EQ(c[0_size], 1);
+    EXPECT_EQ(c[1_size], 2);
+    EXPECT_EQ(c[2_size], 3);
+    EXPECT_EQ(c[3_size], 4);
+    EXPECT_EQ(c[4_size], 5);
+}
+
+TEST(ArrayConcatTest, ConcatWithEmptyArrays) {
+    constexpr Array<int, 0> empty;
+    constexpr Array<int, 3> d(7, 8, 9);
+
+    auto left = empty + d;
+    auto right = d + empty;
+
+    static_assert(std::same_as<decltype(left), Array<int, 3>>);
+    static_assert(std::same_as<decltype(right), Array<int, 3>>);
+
+    EXPECT_EQ(left.size(), 3_size);
+    EXPECT_EQ(left[0_size], 7);
+    EXPECT_EQ(left[1_size], 8);
+    EXPECT_EQ(left[2_size], 9);
+
+    EXPECT_EQ(right.size(), 3_size);
+    EXPECT_EQ(right[0_size], 7);
+    EXPECT_EQ(right[1_size], 8);
+    EXPECT_EQ(right[2_size], 9);
+}
+
+TEST(ArrayConcatTest, ConcatConstAndRvalue) {
+    constexpr Array<int, 2> ca(10, 11);
+    Array<int, 2> rb(12, 13);
+
+    auto result = ca + std::move(rb); // NOLINT
+    static_assert(std::same_as<decltype(result), Array<int, 4>>);
+
+    EXPECT_EQ(result.size(), 4_size);
+    EXPECT_EQ(result[0_size], 10);
+    EXPECT_EQ(result[1_size], 11);
+    EXPECT_EQ(result[2_size], 12);
+    EXPECT_EQ(result[3_size], 13);
+}
