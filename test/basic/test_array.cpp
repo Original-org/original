@@ -5,6 +5,7 @@ import original.basic.array;
 import original.basic.number;
 import original.basic.container;
 import original.basic.algorithm;
+import original.basic.tuple;
 
 using namespace original;
 using namespace original::literals;
@@ -439,4 +440,118 @@ TEST(ArrayAlgoTest, LexicographicallyCompare) {
   constexpr Array<int, 0> empty2;
   EXPECT_TRUE(original::algorithms::lexicographicallyCompare(empty1, empty2) == 0);
   EXPECT_TRUE((empty1 <=> empty2) == 0);
+}
+
+TEST(ArrayIntegralConstant, GetWithIntegralConstant)
+{
+    // Test get function with IntegralConstant index
+    Array<int, 5> arr(10, 20, 30, 40, 50);
+
+    const int val0 = get(arr, IntegralConstant<Size, 0>{});
+    const int val2 = get(arr, IntegralConstant<Size, 2>{});
+    const int val4 = get(arr, IntegralConstant<Size, 4>{});
+
+    EXPECT_EQ(val0, 10);
+    EXPECT_EQ(val2, 30);
+    EXPECT_EQ(val4, 50);
+}
+
+TEST(ArrayIntegralConstant, ApplyWithArrayGet)
+{
+    // Test combining apply with Array get using IntegralConstant indices
+    Array<int, 4> arr(5, 10, 15, 20);
+
+    int sum = 0;
+    auto getter = [&arr, &sum](auto index) {
+        sum += get(arr, index);
+    };
+
+    forEach(getter, MakeIntegralSequence<Size, 4>());
+
+    // 5 + 10 + 15 + 20 = 50
+    EXPECT_EQ(sum, 50);
+}
+
+TEST(ArrayIntegralConstant, GetArrayElementsWithSequence)
+{
+    // Advanced test: collect all array elements using apply and get
+    Array<double, 3> arr(1.5, 2.5, 3.5);
+
+    std::vector<double> collected;
+    auto collector = [&arr, &collected](auto indices) {
+        collected.push_back(get(arr, indices));
+    };
+
+    forEach(collector, MakeIntegralSequence<Size, 3>());
+
+    EXPECT_EQ(collected.size(), 3);
+    EXPECT_DOUBLE_EQ(collected[0], 1.5);
+    EXPECT_DOUBLE_EQ(collected[1], 2.5);
+    EXPECT_DOUBLE_EQ(collected[2], 3.5);
+}
+
+TEST(ArrayIntegralConstant, ModifyArrayWithForEach)
+{
+    // Test modifying array elements using apply with IntegralConstant
+    Array<int, 5> arr(1, 2, 3, 4, 5);
+
+    auto doubler = [&arr](auto index) {
+        get(arr, index) *= 2;
+    };
+
+    forEach(doubler, MakeIntegralSequence<Size, 5>());
+
+    EXPECT_EQ(get(arr, IntegralConstant<Size, 0>{}), 2);
+    EXPECT_EQ(get(arr, IntegralConstant<Size, 1>{}), 4);
+    EXPECT_EQ(get(arr, IntegralConstant<Size, 2>{}), 6);
+    EXPECT_EQ(get(arr, IntegralConstant<Size, 3>{}), 8);
+    EXPECT_EQ(get(arr, IntegralConstant<Size, 4>{}), 10);
+}
+
+TEST(ArrayIntegralConstant, ArrayMappingWithForEach)
+{
+    // Test mapping array elements to another container using apply
+    Array<int, 4> source(1, 2, 3, 4);
+    Array<int, 4> result;
+
+    auto mapper = [&source, &result](auto index) {
+        get(result, index) = get(source, index) * get(source, index);
+    };
+
+    forEach(mapper, MakeIntegralSequence<Size, 4>());
+
+    EXPECT_EQ(get(result, IntegralConstant<Size, 0>{}), 1);
+    EXPECT_EQ(get(result, IntegralConstant<Size, 1>{}), 4);
+    EXPECT_EQ(get(result, IntegralConstant<Size, 2>{}), 9);
+    EXPECT_EQ(get(result, IntegralConstant<Size, 3>{}), 16);
+}
+
+TEST(ArrayIntegralConstant, SumArrayElementsWithForEach)
+{
+    // Test accumulating array elements using apply
+    Array<int, 6> arr(10, 20, 30, 40, 50, 60);
+
+    int sum = 0;
+    auto accumulator = [&arr, &sum](auto indices) {
+        sum += get(arr, indices);
+    };
+
+    forEach(accumulator, MakeIntegralSequence<Size, 6>());
+
+    // 10+20+30+40+50+60 = 210
+    EXPECT_EQ(sum, 210);
+}
+
+TEST(ArrayIntegralConstant, ConstArrayGetWithIntegralConstant)
+{
+    // Test const get with IntegralConstant
+    const Array<std::string, 3> arr{std::string{"hello"}, std::string{"world"}, std::string{"test"}};
+
+    const std::string& s0 = get(arr, IntegralConstant<Size, 0>{});
+    const std::string& s1 = get(arr, IntegralConstant<Size, 1>{});
+    const std::string& s2 = get(arr, IntegralConstant<Size, 2>{});
+
+    EXPECT_EQ(s0, "hello");
+    EXPECT_EQ(s1, "world");
+    EXPECT_EQ(s2, "test");
 }
