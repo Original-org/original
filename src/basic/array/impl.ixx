@@ -272,6 +272,62 @@ export namespace original
     {
         return std::move(a[I]);
     }
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    constexpr Array<T, N1 + N2>
+    operator+(const Array<T, N1>& a, const Array<T, N2>& b)
+    {
+        return forAll<N1 + N2>(
+            [&]<Size::Type... I>(IndexConstant<I>...)
+            {
+                return Array<T, N1 + N2>{
+                    (static_cast<T>(I < N1 ? a[I] : b[I - N1]))...
+                };
+            }
+        );
+    }
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    constexpr Array<T, N1 + N2>
+    operator+(Array<T, N1>&& a, const Array<T, N2>& b)
+    {
+        return forAll<N1 + N2>(
+            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            {
+                return Array<T, N1 + N2>{
+                    (static_cast<T>(I < N1 ? std::move(a[I]) : b[I - N1]))...
+                };
+            }
+        );
+    }
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    constexpr Array<T, N1 + N2>
+    operator+(const Array<T, N1>& a, Array<T, N2>&& b)
+    {
+        return forAll<N1 + N2>(
+            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            {
+                return Array<T, N1 + N2>{
+                    (static_cast<T>(I < N1 ? a[I] : std::move(b[I - N1])))...
+                };
+            }
+        );
+    }
+
+    template<IsObject T, Size::Type N1, Size::Type N2>
+    constexpr Array<T, N1 + N2>
+    operator+(Array<T, N1>&& a, Array<T, N2>&& b)
+    {
+        return forAll<N1 + N2>(
+            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            {
+                return Array<T, N1 + N2>{
+                    (static_cast<T>(I < N1 ? std::move(a[I]) : std::move(b[I - N1])))...
+                };
+            }
+        );
+    }
 }
 
 export namespace std
