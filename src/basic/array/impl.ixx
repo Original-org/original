@@ -292,7 +292,7 @@ export namespace original
     operator+(Array<T, N1>&& a, const Array<T, N2>& b)
     {
         return forAll<N1 + N2>(
-            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
                     (static_cast<T>(I < N1 ? std::move(a[I]) : b[I - N1]))...
@@ -306,7 +306,7 @@ export namespace original
     operator+(const Array<T, N1>& a, Array<T, N2>&& b)
     {
         return forAll<N1 + N2>(
-            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
                     (static_cast<T>(I < N1 ? a[I] : std::move(b[I - N1])))...
@@ -320,7 +320,7 @@ export namespace original
     operator+(Array<T, N1>&& a, Array<T, N2>&& b)
     {
         return forAll<N1 + N2>(
-            [&]<NumberLikeType<Size>... I>(IndexConstant<I>...)
+            [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
                     (static_cast<T>(I < N1 ? std::move(a[I]) : std::move(b[I - N1])))...
