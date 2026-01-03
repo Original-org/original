@@ -30,21 +30,28 @@ namespace original::details
 
     template <
         IntegralLike Num,
-        NumberLikeType<Num> N,
+        NumberLikeType<Num> Cur,
+        NumberLikeType<Num> End,
         NumberLikeType<Num>... I
     >
     struct MakeIntegralSequenceImpl
     : MakeIntegralSequenceImpl<
           Num,
-          N - NumberLikeType<Num>{1},
-          N - NumberLikeType<Num>{1},
-          I...> {};
+          Cur + NumberLikeType<Num>{1},
+          End,
+          I...,
+          Cur>
+    {
+        static_assert(Cur <= End,
+        "MakeIntegralSequenceImpl: Current value must be less than or equal to End");
+    };
 
     template <
         IntegralLike Num,
+        NumberLikeType<Num> End,
         NumberLikeType<Num>... I
     >
-    struct MakeIntegralSequenceImpl<Num, NumberLikeType<Num>{0}, I...>
+    struct MakeIntegralSequenceImpl<Num, End, End, I...>
     {
         using Type = IntegralSequence<Num, I...>;
     };
@@ -73,12 +80,53 @@ export namespace original
         static constexpr Size::Type SIZE = sizeof...(I);
     };
 
-    template<IntegralLike Num, NumberLikeType<Num> N>
-    using MakeIntegralSequence =
-        details::MakeIntegralSequenceImpl<Num, N>::Type;
+    template<IntegralLike Num, NumberLikeType<Num> Start, NumberLikeType<Num> Cnt>
+    requires (numberLikeValue(Cnt) >= 0)
+    using IntegralSequenceType =
+        details::MakeIntegralSequenceImpl<Num, Start, Start + Cnt>::Type;
 
-    template<Size::Type I>
-    using MakeIndexSequence = details::MakeIntegralSequenceImpl<Size, I>::Type;
+    template<IntegralLike Num, NumberLikeType<Num> Cnt>
+    requires (numberLikeValue(Cnt) >= 0)
+    using DefaultIntegralSequenceType =
+        details::MakeIntegralSequenceImpl<Num, 0, Cnt>::Type;
+
+    template<Size::Type Start, Size::Type Cnt>
+    using IndexSequenceType =
+        details::MakeIntegralSequenceImpl<Size, Start, Start + Cnt>::Type;
+
+    template<Size::Type Cnt>
+    using DefaultIndexSequenceType =
+        details::MakeIntegralSequenceImpl<Size, 0, Cnt>::Type;
+
+    template <IntegralLike Num, NumberLikeType<Num> Cnt>
+    requires (numberLikeValue(Cnt) >= 0)
+    consteval auto makeIntegralSequence()
+    {
+        using Seq = details::MakeIntegralSequenceImpl<Num, 0, Cnt>::Type;
+        return Seq{};
+    }
+
+    template <IntegralLike Num, NumberLikeType<Num> Start, NumberLikeType<Num> Cnt>
+    requires (numberLikeValue(Cnt) >= 0)
+    consteval auto makeIntegralSequence()
+    {
+        using Seq = details::MakeIntegralSequenceImpl<Num, Start, Start + Cnt>::Type;
+        return Seq{};
+    }
+
+    template <Size::Type Cnt>
+    consteval auto makeIndexSequence()
+    {
+        using Seq = details::MakeIntegralSequenceImpl<Size, 0, Cnt>::Type;
+        return Seq{};
+    }
+
+    template <Size::Type Start, Size::Type Cnt>
+    consteval auto makeIndexSequence()
+    {
+        using Seq = details::MakeIntegralSequenceImpl<Size, Start, Start + Cnt>::Type;
+        return Seq{};
+    }
 
     template<
         Invokable F,
