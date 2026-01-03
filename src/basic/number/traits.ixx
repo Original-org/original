@@ -176,6 +176,9 @@ export namespace original
         StdUnsignedIntegral<T> ||
         UnsignedInteger<T>;
 
+    template<typename T>
+    concept IntegralLike = SignedIntegralLike<T> || UnsignedIntegralLike<T>;
+
     /**
      * @brief Require two wrapped integers to have same signedness.
      * @tparam T First integer wrapper type.
@@ -186,4 +189,25 @@ export namespace original
     concept SameSignIntegral =
         (SignedInteger<T> && SignedInteger<U>) ||
         (UnsignedInteger<T> && UnsignedInteger<U>);
+
+    template<typename T>
+    concept FloatingPointLike = FloatingPoint<T> || StdFloating<T>;
+
+    template<NumberLike NUM, NumberLikeType<NUM> V>
+    struct NumberConstant
+    {
+        using NumberType = NUM;
+        using ValueType  = NumberLikeType<NUM>;
+
+        static constexpr ValueType VAL = V;
+    };
+
+    template<IntegralLike NUM, NumberLikeType<NUM> V>
+    using IntegralConstant = NumberConstant<NUM, V>;
+
+    template<FloatingPointLike NUM, NumberLikeType<NUM> V>
+    using FloatingConstant = NumberConstant<NUM, V>;
+
+    template<Size::Type V>
+    using IndexConstant = NumberConstant<Size, V>;
 }
