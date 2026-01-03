@@ -146,6 +146,40 @@ export namespace original
         {
             return algorithms::lexicographicallyCompare(*this, rhs);
         }
+
+        template<Size::Type Start, Size::Type Cnt>
+        requires (Start + Cnt <= N)
+        constexpr Array<T, Cnt>
+        subArray() const &
+        {
+            return forAll<Cnt>
+            (
+                [&]<Size::Type... I>(IndexConstant<I>...)
+                {
+                    return Array<T, Cnt>{
+                        static_cast<T>((*this)[Start + I])...
+                    };
+                }
+            );
+        }
+
+        template<Size::Type Start, Size::Type Cnt>
+        requires (Start + Cnt <= N)
+        constexpr Array<T, Cnt>
+        subArray() &&
+        {
+            return forAll<Cnt>
+            (
+                [&]<Size::Type... I>(IndexConstant<I>...)
+                {
+                    return Array<T, Cnt>{
+                        static_cast<T>(
+                            std::move((*this)[Start + I])
+                        )...
+                    };
+                }
+            );
+        }
     };
 
     template<IsObject T>
@@ -212,6 +246,13 @@ export namespace original
         auto operator<=>(const Array&) const noexcept
         {
             return std::strong_ordering::equal;
+        }
+
+        template<Size::Type Start, Size::Type Cnt>
+        requires (Start + Cnt == 0)
+        constexpr Array subArray() const // NOLINT
+        {
+            return {};
         }
     };
 
