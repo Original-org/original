@@ -6,7 +6,7 @@ import original.basic.types;
 
 export namespace original
 {
-    template<IntegralLike NUM, NumberLikeType<NUM>...>
+    template<IntegralLike Num, NumberLikeType<Num>...>
     struct IntegralSequence {};
 }
 
@@ -29,24 +29,24 @@ namespace original::details
     };
 
     template <
-        IntegralLike NUM,
-        NumberLikeType<NUM> N,
-        NumberLikeType<NUM>... I
+        IntegralLike Num,
+        NumberLikeType<Num> N,
+        NumberLikeType<Num>... I
     >
     struct MakeIntegralSequenceImpl
     : MakeIntegralSequenceImpl<
-          NUM,
-          N - NumberLikeType<NUM>{1},
-          N - NumberLikeType<NUM>{1},
+          Num,
+          N - NumberLikeType<Num>{1},
+          N - NumberLikeType<Num>{1},
           I...> {};
 
     template <
-        IntegralLike NUM,
-        NumberLikeType<NUM>... I
+        IntegralLike Num,
+        NumberLikeType<Num>... I
     >
-    struct MakeIntegralSequenceImpl<NUM, NumberLikeType<NUM>{0}, I...>
+    struct MakeIntegralSequenceImpl<Num, NumberLikeType<Num>{0}, I...>
     {
-        using Type = IntegralSequence<NUM, I...>;
+        using Type = IntegralSequence<Num, I...>;
     };
 }
 
@@ -64,45 +64,45 @@ export namespace original
     template<typename Seq>
     struct IntegralSequenceTraits;
 
-    template<IntegralLike NUM, NumberLikeType<NUM>... I>
-    struct IntegralSequenceTraits<IntegralSequence<NUM, I...>>
+    template<IntegralLike Num, NumberLikeType<Num>... I>
+    struct IntegralSequenceTraits<IntegralSequence<Num, I...>>
     {
-        using NumberType = NUM;
-        using ValueType  = NumberLikeType<NUM>;
+        using NumberType = Num;
+        using ValueType  = NumberLikeType<Num>;
 
         static constexpr Size::Type SIZE = sizeof...(I);
     };
 
-    template<IntegralLike NUM, NumberLikeType<NUM> N>
+    template<IntegralLike Num, NumberLikeType<Num> N>
     using MakeIntegralSequence =
-        details::MakeIntegralSequenceImpl<NUM, N>::Type;
+        details::MakeIntegralSequenceImpl<Num, N>::Type;
 
     template<Size::Type I>
     using MakeIndexSequence = details::MakeIntegralSequenceImpl<Size, I>::Type;
 
     template<
         Invokable F,
-        IntegralLike NUM,
-        NumberLikeType<NUM>... I
+        IntegralLike Num,
+        NumberLikeType<Num>... I
     >
     requires Functor<F> &&
-             InvokableWith<F, IntegralConstant<NUM, I>...>
+             InvokableWith<F, IntegralConstant<Num, I>...>
     constexpr decltype(auto)
-    forAll(F&& f, IntegralSequence<NUM, I...>)
+    forAll(F&& f, IntegralSequence<Num, I...>)
     {
-        return f(IntegralConstant<NUM, I>{}...);
+        return f(IntegralConstant<Num, I>{}...);
     }
 
     template<
         Invokable F,
-        IntegralLike NUM,
-        NumberLikeType<NUM>... I
+        IntegralLike Num,
+        NumberLikeType<Num>... I
     >
     requires Functor<F> &&
-             (InvokableWith<F, IntegralConstant<NUM, I>> && ...)
+             (InvokableWith<F, IntegralConstant<Num, I>> && ...)
     constexpr void
-    forEach(F&& f, IntegralSequence<NUM, I...>)
+    forEach(F&& f, IntegralSequence<Num, I...>)
     {
-        (f(IntegralConstant<NUM, I>{}), ...);
+        (f(IntegralConstant<Num, I>{}), ...);
     }
 }
