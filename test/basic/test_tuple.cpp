@@ -158,18 +158,31 @@ TEST(TupleUtility, ForAllWithComplexLambda)
         int count = 0;
     };
     
-    Accumulator acc;
-    auto complex_op = [&acc](auto... indices) {
-        ((acc.sum += numberLikeValue(indices), 
-          acc.product *= (numberLikeValue(indices) + 1),
-          acc.count++), ...);
+    Accumulator acc1;
+    auto complex_op = [&acc1](auto... indices) {
+        ((acc1.sum += numberLikeValue(indices),
+          acc1.product *= (numberLikeValue(indices) + 1),
+          acc1.count++), ...);
+    };
+
+    Accumulator acc2;
+    auto complex_op2 = [&acc2](auto... indices)
+    {
+        ((acc2.sum += numberLikeValue(indices),
+        acc2.product *= (numberLikeValue(indices) + 1),
+        acc2.count++), ...);
     };
     
     forAll(complex_op, MakeIntegralSequence<int, 4>());
+    forAll(complex_op2, MakeIntegralSequence<I32, 4>());
     
-    EXPECT_EQ(acc.sum, 6);      // 0+1+2+3 = 6
-    EXPECT_EQ(acc.product, 24);  // 1*2*3*4 = 24
-    EXPECT_EQ(acc.count, 4);
+    EXPECT_EQ(acc1.sum, 6);      // 0+1+2+3 = 6
+    EXPECT_EQ(acc1.product, 24);  // 1*2*3*4 = 24
+    EXPECT_EQ(acc1.count, 4);
+
+    EXPECT_EQ(acc2.sum, 6);
+    EXPECT_EQ(acc2.product, 24);
+    EXPECT_EQ(acc2.count, 4);
 }
 
 TEST(TupleUtility, IntegralSequenceTraitsLarge)
