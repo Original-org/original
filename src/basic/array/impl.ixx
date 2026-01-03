@@ -254,21 +254,21 @@ export namespace original
 
     template<std::size_t I, IsObject T, Size::Type N>
     requires (I < N)
-    constexpr T& get(Array<T, N>& a, IntegralConstant<Size, I>) noexcept
+    constexpr T& get(Array<T, N>& a, IndexConstant<I>) noexcept
     {
         return a[I];
     }
 
     template<std::size_t I, IsObject T, Size::Type N>
     requires (I < N)
-    constexpr const T& get(const Array<T, N>& a, IntegralConstant<Size, I>) noexcept
+    constexpr const T& get(const Array<T, N>& a, IndexConstant<I>) noexcept
     {
         return a[I];
     }
 
     template<std::size_t I, IsObject T, Size::Type N>
     requires (I < N)
-    constexpr T&& get(Array<T, N>&& a, IntegralConstant<Size, I>) noexcept
+    constexpr T&& get(Array<T, N>&& a, IndexConstant<I>) noexcept
     {
         return std::move(a[I]);
     }
