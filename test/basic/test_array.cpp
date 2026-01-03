@@ -605,3 +605,50 @@ TEST(ArrayConcatTest, ConcatConstAndRvalue) {
     EXPECT_EQ(result[2_size], 12);
     EXPECT_EQ(result[3_size], 13);
 }
+
+TEST(ArraySubArrayTest, ConstSubArray) {
+    constexpr Array<int, 5> a(1, 2, 3, 4, 5);
+
+    constexpr auto sub = a.subArray<1, 3>();
+    static_assert(std::same_as<decltype(sub), const Array<int, 3>>);
+
+    EXPECT_EQ(sub.size(), 3_size);
+    EXPECT_EQ(sub[0_size], 2);
+    EXPECT_EQ(sub[1_size], 3);
+    EXPECT_EQ(sub[2_size], 4);
+
+    // original remains unchanged
+    EXPECT_EQ(a[0_size], 1);
+    EXPECT_EQ(a[4_size], 5);
+}
+
+TEST(ArraySubArrayTest, RvalueSubArrayMovesElements) {
+    Array<NonTrivial, 3> arr;
+    arr[0_size] = NonTrivial(10);
+    arr[1_size] = NonTrivial(20);
+    arr[2_size] = NonTrivial(30);
+
+    auto sub = std::move(arr).subArray<0, 2>(); // NOLINT
+
+    EXPECT_EQ(sub.size(), 2_size);
+    EXPECT_EQ(sub[0_size].value, 10);
+    EXPECT_EQ(sub[1_size].value, 20);
+
+    // elements moved-from in the source array
+    EXPECT_TRUE(arr[0_size].moved_from);
+    EXPECT_TRUE(arr[1_size].moved_from);
+}
+
+TEST(ArraySubArrayTest, EmptyArraySubArray) {
+    constexpr Array<int, 0> empty;
+
+    constexpr auto sub = empty.subArray<0, 0>();
+    EXPECT_EQ(sub.size(), 0_size);
+    EXPECT_TRUE(sub.empty());
+    EXPECT_EQ(sub.begin(), sub.end());
+
+    Array<int, 0> r_empty;
+    auto rsub = std::move(r_empty).subArray<0, 0>(); // NOLINT
+    EXPECT_EQ(rsub.size(), 0_size);
+    EXPECT_TRUE(rsub.empty());
+}
