@@ -27,7 +27,7 @@ TEST(TupleUtility, IntegralSequenceTraits)
 
 TEST(TupleUtility, MakeIntegralSequence)
 {
-    using Seq = MakeIntegralSequence<int, 4>;
+    using Seq = IntegralSequenceType<int, 0, 4>;
     using Traits = IntegralSequenceTraits<Seq>;
     
     EXPECT_EQ(Traits::SIZE, 4);
@@ -41,7 +41,7 @@ TEST(TupleUtility, ForAllWithMakeSequence)
         return sum;
     };
 
-    const auto result = forAll(accumulator, MakeIntegralSequence<int, 5>());
+    const auto result = forAll<int, 5>(accumulator);
 
     // 0 + 1 + 2 + 3 + 4 = 10
     EXPECT_EQ(result, 10);
@@ -55,9 +55,9 @@ TEST(TupleUtility, ForAllMultipleInvocations)
         return call_count;
     };
 
-    auto result1 = forAll(counter, MakeIntegralSequence<int, 0>());
+    const auto result1 = forAll(counter, makeIntegralSequence<int, 0>());
     EXPECT_EQ(result1, 1);
-    auto result2 = forAll(counter, MakeIntegralSequence<int, 1>());
+    const auto result2 = forAll<I32, 1>(counter);
     EXPECT_EQ(result2, 2);
 }
 
@@ -86,8 +86,8 @@ TEST(TupleUtility, ForAllWithSingleElement)
     auto getter = [](auto x) {
         return numberLikeValue(x);
     };
-    
-    auto result = forAll(getter, MakeIntegralSequence<int, 1>());
+
+    constexpr auto result = forAll(getter, makeIntegralSequence<int, 1>());
     EXPECT_EQ(result, 0);
 }
 
@@ -98,8 +98,8 @@ TEST(TupleUtility, ForAllWithEmptySequence)
         count++;
         return count;
     };
-    
-    auto result = forAll(noop, MakeIntegralSequence<int, 0>());
+
+    const auto result = forAll(noop, makeIntegralSequence<int, 0>());
     EXPECT_EQ(result, 1);
 }
 
@@ -111,8 +111,8 @@ TEST(TupleUtility, ForAllWithLargeSequence)
         ((sum += numberLikeValue(values)), ...);
         return sum;
     };
-    
-    auto result = forAll(add_all, MakeIntegralSequence<int, 10>());
+
+    const auto result = forAll(add_all, makeIntegralSequence<int, 10>());
     // 0+1+2+3+4+5+6+7+8+9 = 45
     EXPECT_EQ(result, 45);
 }
@@ -124,8 +124,8 @@ TEST(TupleUtility, ForAllWithUnsignedIntSequence)
         ((product *= (numberLikeValue(values) + 1)), ...);
         return product;
     };
-    
-    auto result = forAll(multiply, MakeIntegralSequence<unsigned int, 5>());
+
+    const auto result = forAll<U32, 5>(multiply);
     // (0+1) * (1+1) * (2+1) * (3+1) * (4+1) = 1*2*3*4*5 = 120
     EXPECT_EQ(result, 120u);
 }
@@ -141,11 +141,11 @@ TEST(TupleUtility, ForAllConstExpr)
             return sum;
         };
         
-        forAll(add, MakeIntegralSequence<int, 4>());
+        forAll(add, makeIntegralSequence<int, 4>());
         return sum;
     };
-    
-    const int result = compute();
+
+    constexpr int result = compute();
     EXPECT_EQ(result, 6);  // 0+1+2+3 = 6
 }
 
@@ -173,8 +173,8 @@ TEST(TupleUtility, ForAllWithComplexLambda)
         acc2.count++), ...);
     };
     
-    forAll(complex_op, MakeIntegralSequence<int, 4>());
-    forAll(complex_op2, MakeIntegralSequence<I32, 4>());
+    forAll<int, 4>(complex_op);
+    forAll(complex_op2, makeIntegralSequence<I32, 4>());
     
     EXPECT_EQ(acc1.sum, 6);      // 0+1+2+3 = 6
     EXPECT_EQ(acc1.product, 24);  // 1*2*3*4 = 24
@@ -187,7 +187,7 @@ TEST(TupleUtility, ForAllWithComplexLambda)
 
 TEST(TupleUtility, IntegralSequenceTraitsLarge)
 {
-    using Seq = MakeIntegralSequence<long long, 8>;
+    using Seq = DefaultIntegralSequenceType<long long, 8>;
     using Traits = IntegralSequenceTraits<Seq>;
     
     EXPECT_EQ(Traits::SIZE, 8);
