@@ -154,7 +154,7 @@ namespace
     struct NonTrivial {
         int value;
         bool constructed = false;
-        bool moved_from = false;  // 新增：标记是否已被移动
+        bool moved_from = false;
 
         NonTrivial() : value(0) {}
 
