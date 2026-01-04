@@ -4,14 +4,25 @@ module;
 #include <memory>
 export module original.basic.range.impl;
 import original.basic.range.traits;
-import original.basic.iterator.traits;
-import orginal.basic.iterator.impl;
+import original.basic.iterator;
 import original.basic.types;
 import original.basic.number;
 
+/**
+ * @addtogroup RangeViews
+ * @{
+ */
 
 namespace original::details
 {
+    /**
+     * @brief Iterator that limits traversal to the first N elements of an underlying range.
+     *
+     * @tparam Iter Underlying forward iterator type
+     *
+     * Produces a forward iterator that stops after `remains_` elements have been visited.
+     * Equality comparison treats exhausted iterators (remains_ == 0) as equal.
+     */
     template<ForwardIterator Iter>
     class TakeIterator
         : public ForwardIteratorBase<
@@ -33,6 +44,12 @@ namespace original::details
 
         TakeIterator() noexcept = default;
 
+        /**
+         * @brief Constructs the iterator.
+         *
+         * @param cur Current position in the underlying range
+         * @param remains Number of elements remaining to yield
+         */
         TakeIterator(IterType cur, const Size remains) noexcept
             : cur_(cur), remains_(remains) {}
 
@@ -64,6 +81,13 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Iterator that yields index-element pairs during traversal.
+     *
+     * @tparam Iter Underlying forward iterator type
+     *
+     * Dereferencing returns `std::pair<const Size, ReferenceType>`.
+     */
     template<ForwardIterator Iter>
     class EnumIterator
         : public ForwardIteratorBase<
@@ -85,6 +109,12 @@ namespace original::details
 
         EnumIterator() noexcept = default;
 
+        /**
+         * @brief Constructs the iterator.
+         *
+         * @param cur Current position
+         * @param start Starting index value
+         */
         EnumIterator(IterType cur, const Size start) noexcept
             : cur_(cur), index_(start) {}
 
@@ -113,6 +143,12 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Iterator that applies a transformation function on dereference.
+     *
+     * @tparam Iter Underlying forward iterator type
+     * @tparam F Callable type
+     */
     template<ForwardIterator Iter, Invokable F>
     class TransformIterator
         : public ForwardIteratorBase<
@@ -161,6 +197,12 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Iterator that skips elements not satisfying a predicate.
+     *
+     * @tparam Iter Underlying forward iterator type
+     * @tparam F Predicate type
+     */
     template<ForwardIterator Iter, Invokable F>
     class FilterIterator
         : public ForwardIteratorBase<
@@ -219,10 +261,16 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Iterator for concatenating two ranges.
+     *
+     * @tparam Prev Iterator type of the first range
+     * @tparam Next Iterator type of the second range
+     */
     template<ForwardIterator Prev, ForwardIterator Next>
     class ConcatIterator
         : public ForwardIteratorBase<
-            FilterIterator<Prev, Next>,
+            ConcatIterator<Prev, Next>,
             RemoveCVRefType<
                 CommonRefType<
                     typename IterTraits<Prev>::ReferenceType,
@@ -297,10 +345,18 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Iterator that yields pairs of elements from two ranges.
+     *
+     * @tparam LHS Left-hand iterator type
+     * @tparam RHS Right-hand iterator type
+     *
+     * Stops when either underlying range is exhausted.
+     */
     template<ForwardIterator LHS, ForwardIterator RHS>
     class ZipIterator
         : public ForwardIteratorBase<
-            FilterIterator<LHS, RHS>,
+            ZipIterator<LHS, RHS>,
             std::pair<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>,
             std::pair<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>,
             void
@@ -348,6 +404,13 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Lightweight range reference wrapper.
+     *
+     * @tparam R Range type
+     *
+     * Enables pipe syntax on lvalue ranges without moving the underlying range.
+     */
     template<Range R>
     class RefRange {
         R* ptr_;
@@ -379,6 +442,13 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Creates a range view over an lvalue range; forwards rvalues unchanged.
+     *
+     * @tparam R Range type
+     * @param r Range object
+     * @return RefRange<R> for lvalues, R&& for rvalues
+     */
     template<Range R>
     auto all(R& r) noexcept {
         return RefRange<R>(r);
@@ -390,6 +460,13 @@ namespace original::details
         return std::forward<R>(r);
     }
 
+    /**
+     * @brief Base class for owning range views.
+     *
+     * @tparam R Underlying range type
+     *
+     * Stores the base range by value and provides access to its begin/end.
+     */
     template<Range R>
     class RangeViewBase
     {
@@ -419,6 +496,12 @@ namespace original::details
         }
     };
 
+    // Individual view classes (TakeRange, SkipRange, EnumRange, TransformRange,
+    // FilterRange, ConcatRange, ZipRange) are documented inline below.
+
+    /**
+     * @brief View that yields the first N elements of a range.
+     */
     template<Range R>
     class TakeRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
@@ -449,6 +532,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that skips the first N elements of a range.
+     */
     template<Range R>
     class SkipRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
@@ -487,6 +573,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that enumerates elements with an index.
+     */
     template<Range R>
     class EnumRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
@@ -516,6 +605,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that applies a transformation to each element.
+     */
     template<Range R, Invokable F>
     class TransformRange : public RangeViewBase<R>
     {
@@ -552,6 +644,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that yields only elements satisfying a predicate.
+     */
     template<Range R, Invokable F>
     class FilterRange : public RangeViewBase<R>
     {
@@ -588,6 +683,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that concatenates two ranges.
+     */
     template<Range Prev, Range Next>
     class ConcatRange : public RangeViewBase<Prev>
     {
@@ -655,6 +753,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief View that zips two ranges into pairs.
+     */
     template<Range LHS, Range RHS>
     class ZipRange
     {
@@ -722,6 +823,9 @@ namespace original::details
         }
     };
 
+    /**
+     * @brief Internal type for building pipeline operators.
+     */
     template<Invokable F>
     class RangePipeline
     {
@@ -742,6 +846,13 @@ namespace original::details
 
 export namespace original::range
 {
+    /**
+     * @brief Creates a pipeline adaptor that takes the first N elements.
+     *
+     * @param n Number of elements to take
+     * @return RangePipeline yielding a TakeRange view
+     *
+     */
     auto take(const Size n) noexcept
     {
         return details::RangePipeline
@@ -755,6 +866,9 @@ export namespace original::range
         };
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that skips the first N elements.
+     */
     auto skip(const Size n) noexcept
     {
         return details::RangePipeline
@@ -768,6 +882,11 @@ export namespace original::range
         };
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that enumerates elements with indices.
+     *
+     * @param start Starting index (default 0)
+     */
     auto enumerate(const Size start = Size{}) noexcept
     {
         return details::RangePipeline
@@ -781,6 +900,12 @@ export namespace original::range
         };
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that transforms elements.
+     *
+     * @tparam F Callable type
+     * @param func Transformation function
+     */
     template<Invokable F>
     auto transform(F&& func) noexcept
     {
@@ -809,6 +934,12 @@ export namespace original::range
         };
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that filters elements by predicate.
+     *
+     * @tparam F Predicate type
+     * @param func Predicate (should return convertible to bool)
+     */
     template<Invokable F>
     auto filter(F&& func) noexcept
     {
@@ -824,12 +955,12 @@ export namespace original::range
 
                 static_assert(
                     InvokableWith<std::decay_t<F>&, Ref>,
-                    "transform(F): F must be invocable with range element"
+                    "filter(F): F must be invocable with range element"
                 );
 
                 static_assert(
                     Predicate<std::decay_t<F>&, Ref>,
-                    "transform(F): F must be a predicate"
+                    "filter(F): F must be a predicate"
                 );
 
                 return details::FilterRange<RangeType, F>{all, func};
@@ -837,6 +968,12 @@ export namespace original::range
         };
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that excludes elements satisfying a predicate.
+     *
+     * @tparam F Predicate type
+     * @param func Predicate to exclude
+     */
     template<Invokable F>
     auto exclude(F&& func) noexcept
     {
@@ -850,6 +987,12 @@ export namespace original::range
         );
     }
 
+    /**
+     * @brief Creates a pipeline adaptor that concatenates another range.
+     *
+     * @tparam Next Second range type
+     * @param next Range to append
+     */
     template<Range Next>
     auto concat(Next&& next) noexcept
     {
@@ -879,7 +1022,12 @@ export namespace original::range
         };
     }
 
-
+    /**
+     * @brief Creates a pipeline adaptor that zips with another range.
+     *
+     * @tparam RHS Right-hand range type
+     * @param rhs Range to zip with
+     */
     template<Range RHS>
     auto zip(RHS&& rhs) noexcept
     {
@@ -899,3 +1047,5 @@ export namespace original::range
         };
     }
 }
+
+/** @} */ // end of RangeViews group

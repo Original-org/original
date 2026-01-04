@@ -5,21 +5,58 @@ import original.basic.iterator.traits;
 import original.basic.types;
 import original.basic.number;
 
+/**
+ * @addtogroup RangeTraits
+ * @{
+ */
 
 export namespace original
 {
+    /**
+     * @brief Returns a pointer to the beginning of a C-style array.
+     *
+     * @tparam T Element type
+     * @tparam Size Array size
+     * @param arr Reference to the array
+     * @return Pointer to the first element
+     *
+     * Overload for built-in arrays to enable range-based operations.
+     */
     template<typename T, Size::Type Size>
     T* begin(T (&arr) [Size])
     {
         return arr;
     }
 
+    /**
+     * @brief Returns a pointer to one past the end of a C-style array.
+     *
+     * @tparam T Element type
+     * @tparam Size Array size
+     * @param arr Reference to the array
+     * @return Pointer past the last element
+     */
     template<typename T, Size::Type Size>
     T* end(T (&arr) [Size])
     {
         return arr + Size;
     }
 
+    /**
+     * @brief Concept identifying types that model a range.
+     *
+     * @tparam R The type to check
+     *
+     * A type satisfies this concept if it provides either member functions
+     * `begin()` and `end()`, or if non-member `begin(r)` and `end(r)` are
+     * available, and the begin expression yields an iterator.
+     *
+     * @code
+     * static_assert(Range<std::vector<int>>);      // true (member begin/end)
+     * static_assert(Range<int[5]>);                // true (non-member overloads)
+     * static_assert(!Range<int>);                  // false
+     * @endcode
+     */
     template<typename R>
     concept Range =
     requires(R& r) {
@@ -31,6 +68,21 @@ export namespace original
         { end(r) };
     };
 
+    /**
+     * @brief Concept for ranges where begin and end iterators have the same type.
+     *
+     * @tparam R The range type
+     *
+     * This refines Range by requiring that the iterator type returned by
+     * `begin()` matches the sentinel type returned by `end()`. Typical for
+     * containers where end() returns an iterator of the same type as begin().
+     *
+     * @code
+     * static_assert(IterRange<std::vector<int>>);  // true
+     * static_assert(IterRange<std::list<int>>);    // true
+     * // Some sentinel-based ranges may not satisfy this
+     * @endcode
+     */
     template<typename R>
     concept IterRange = Range<R> &&
     requires(R& r)
@@ -42,9 +94,25 @@ export namespace original
         { end(r) } -> SameType<decltype(begin(std::declval<R&>()))>;
     };
 
+    /**
+     * @brief Traits class providing uniform access to range properties.
+     *
+     * @tparam R The range type
+     *
+     * This class template extracts iterator types, value/reference types,
+     * and provides static `begin` and `end` functions that work uniformly
+     * across different range kinds (member or non-member begin/end).
+     *
+     * Specializations exist for const-qualified ranges and built-in arrays.
+     */
     template<typename R>
     struct RangeTraits;
 
+    /**
+     * @brief Primary template specialization for mutable ranges with member begin/end.
+     *
+     * @tparam R The range type (must satisfy Range)
+     */
     template<Range R>
     struct RangeTraits<R>
     {
@@ -55,17 +123,28 @@ export namespace original
         using PointerType = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
 
+        /**
+         * @brief Returns the begin iterator using the range's member function.
+         */
         static BeginIterType begin(R& r)
         {
             return r.begin();
         }
 
+        /**
+         * @brief Returns the end sentinel using the range's member function.
+         */
         static EndIterType end(R& r)
         {
             return r.end();
         }
     };
 
+    /**
+     * @brief Specialization for const-qualified ranges.
+     *
+     * Adjusts iterator types to const iterators.
+     */
     template<Range R>
     struct RangeTraits<const R>
     {
@@ -87,6 +166,11 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Specialization for built-in mutable arrays.
+     *
+     * Uses raw pointers as iterators.
+     */
     template<typename T, Size::Type Size>
     struct RangeTraits<T[Size]>
     {
@@ -108,6 +192,11 @@ export namespace original
         }
     };
 
+    /**
+     * @brief Specialization for built-in const arrays.
+     *
+     * Uses const pointers as iterators.
+     */
     template<typename T, Size::Type Size>
     struct RangeTraits<const T[Size]>
     {
@@ -129,3 +218,5 @@ export namespace original
         }
     };
 }
+
+/** @} */ // end of RangeTraits group
