@@ -227,9 +227,37 @@ export namespace original
         return static_cast<NumberLikeType<T>>(v);
     }
 
+    /**
+     * @brief Extracts the compile-time arithmetic value from a NumberConstant wrapper.
+     *
+     * @tparam T Type satisfying the NumberLike concept
+     * @tparam V Compile-time constant value
+     * @param c A NumberConstant instance (parameter is used only for type deduction)
+     * @return The compile-time constant value as NumberLikeType<T>
+     *
+     * @note This is a consteval function that operates at compile-time only
+     * @note The parameter is not used; only its type is needed to deduce T and V
+     *
+     * @example
+     * @code
+     * // Define a compile-time constant
+     * using Answer = NumberConstant<Integer<int>, 42>;
+     *
+     * // Extract the value at compile-time
+     * constexpr int val1 = numberLikeValue(Answer{});
+     * static_assert(val1 == 42);
+     *
+     * // With alias template
+     * using Pi = FloatingConstant<Floating<double>, 3.14159>;
+     * constexpr double pi_val = numberLikeValue(Pi{});
+     * static_assert(pi_val == 3.14159);
+     * @endcode
+     *
+     * @see numberLikeValue(const T&)
+     */
     template<NumberLike T, NumberLikeType<T> V>
     [[nodiscard]]
-    consteval NumberLikeType<T> numberLikeValue(NumberConstant<T, V>) noexcept
+    consteval NumberLikeType<T> numberLikeValue(NumberConstant<T, V> c) noexcept
     {
         return V;
     }

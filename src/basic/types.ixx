@@ -183,7 +183,8 @@ export namespace original {
      * using T3 = RemoveCVRefType<int>;           // int
      * @endcode
      */
-    template <typename T> using RemoveCVRefType = std::remove_cvref_t<T>;
+    template <typename T>
+    using RemoveCVRefType = std::remove_cvref_t<T>;
 
     /**
      * @brief Conditionally adds const qualification to a type.
@@ -227,11 +228,55 @@ export namespace original {
     template <typename... Args>
     concept HasCommonType = details::HasCommonTypeTraitVal<Args...>;
 
+    /**
+     * @brief Concept that constrains a pack of types to have a well-defined common
+     * reference type.
+     *
+     * @tparam Args The types to check
+     *
+     * This concept is satisfied if `std::common_reference_t<Args...>` is well-formed.
+     * It has the same requirements as `HasCommonType` in this implementation
+     * (both detect the existence of the corresponding type trait).
+     *
+     * @note Useful when generic code needs to deduce a common reference type
+     *       that preserves reference semantics across multiple types.
+     *
+     * @code
+     * static_assert(HasCommonRef<int&, const int&>);      // true
+     * static_assert(!HasCommonRef<int, std::string>);    // false
+     * @endcode
+     */
     template <typename... Args>
     concept HasCommonRef = HasCommonType<Args...>;
 
-    template <typename... Args> using CommonType = std::common_type_t<Args...>;
+    /**
+     * @brief Alias for the common type of parameter pack.
+     *
+     * @tparam Args The types to find a common type for
+     *
+     * Equivalent to `std::common_type_t<Args...>`. The type to which all `Args...`
+     * can be implicitly converted, if such a type exists.
+     *
+     * @code
+     * using CT = CommonType<int, long, float>;  // typically float or double
+     * @endcode
+     */
+    template <typename... Args>
+    using CommonType = std::common_type_t<Args...>;
 
+    /**
+     * @brief Alias for the common reference type of a parameter pack.
+     *
+     * @tparam Args The types to find a common reference type for
+     *
+     * Equivalent to `std::common_reference_t<Args...>`. Provides a reference type
+     * that is common to all `Args...` while preserving reference semantics where
+     * possible.
+     *
+     * @code
+     * using CR = CommonRefType<int&, const int&, int&&>;  // typically const int&
+     * @endcode
+     */
     template <typename... Args>
     using CommonRefType = std::common_reference_t<Args...>;
 
@@ -388,18 +433,106 @@ export namespace original {
         SameType<T, std::strong_ordering> || SameType<T, std::weak_ordering> ||
         SameType<T, std::partial_ordering>;
 
+    /**
+     * @brief Concept that constrains a type to support equality comparison.
+     *
+     * @tparam T The type to check
+     *
+     * This concept is satisfied if expressions `t1 == t2` and `t1 != t2` are valid
+     * and yield results convertible to `bool`. It corresponds to
+     * `std::equality_comparable<T>`.
+     *
+     * @note Useful for generic code requiring only equality testing.
+     *
+     * @code
+     * static_assert(EqualityComparable<int>);                 // true
+     * static_assert(EqualityComparable<std::string>);         // true
+     * struct NoEq {};                                         // no operator== defined
+     * static_assert(!EqualityComparable<NoEq>);               // false
+     * @endcode
+     */
     template <typename T>
     concept EqualityComparable = std::equality_comparable<T>;
 
+    /**
+     * @brief Concept that constrains a type to support less-than comparison.
+     *
+     * @tparam T The type to check
+     *
+     * This concept is satisfied if the expression `t1 < t2` is valid and its result
+     * is implicitly convertible to `bool`. It enables use of `<` for ordering.
+     *
+     * @note This is a minimal requirement for strict weak ordering components.
+     *
+     * @code
+     * static_assert(LessComparable<int>);                     // true
+     * static_assert(LessComparable<std::string>);             // true
+     * struct NoLess {};                                       // no operator< defined
+     * static_assert(!LessComparable<NoLess>);                 // false
+     * @endcode
+     */
     template <typename T>
     concept LessComparable = requires(T t1, T t2) { {t1 < t2} -> Convertible<bool>; };
 
+    /**
+     * @brief Concept that constrains a type to support greater-than comparison.
+     *
+     * @tparam T The type to check
+     *
+     * This concept is satisfied if the expression `t1 > t2` is valid and its result
+     * is implicitly convertible to `bool`. It enables use of `>` for ordering.
+     *
+     * @note Often used in conjunction with `LessComparable` for symmetric ordering.
+     *
+     * @code
+     * static_assert(GreaterComparable<int>);                  // true
+     * static_assert(GreaterComparable<double>);               // true
+     * struct NoGreater {};                                    // no operator> defined
+     * static_assert(!GreaterComparable<NoGreater>);           // false
+     * @endcode
+     */
     template <typename T>
     concept GreaterComparable = requires(T t1, T t2) { {t1 > t2} -> Convertible<bool>; };
 
+    /**
+     * @brief Concept that constrains a type to support three-way comparison.
+     *
+     * @tparam T The type to check
+     *
+     * This concept is satisfied if the expression `t1 <=> t2` is valid and yields a
+     * type that satisfies `std::three_way_comparable`. It corresponds to
+     * `std::three_way_comparable<T>`.
+     *
+     * @note Preferred for modern C++ code utilizing the spaceship operator.
+     *
+     * @code
+     * static_assert(ThreeWayComparable<int>);                 // true
+     * static_assert(ThreeWayComparable<float>);               // true (partial ordering)
+     * struct NoSpaceship {};                                  // no operator<=> defined
+     * static_assert(!ThreeWayComparable<NoSpaceship>);        // false
+     * @endcode
+     */
     template <typename T>
     concept ThreeWayComparable = std::three_way_comparable<T>;
 
+    /**
+     * @brief Concept that constrains a type to be fully comparable.
+     *
+     * @tparam T The type to check
+     *
+     * This concept requires both equality comparison and three-way comparison
+     * support, providing a complete set of relational operators (==, !=, <, >, <=, >=,
+     * <=>).
+     *
+     * @note Useful for generic algorithms requiring total ordering or equality.
+     *
+     * @code
+     * static_assert(Comparable<int>);                         // true
+     * static_assert(Comparable<std::string>);                 // true
+     * struct Partial {};                                      // only equality, no ordering
+     * static_assert(!Comparable<Partial>);                    // false
+     * @endcode
+     */
     template <typename T>
     concept Comparable = EqualityComparable<T> && ThreeWayComparable<T>;
 
@@ -516,28 +649,120 @@ export namespace original {
         InvokableWith<T, Args...> && Convertible<InvokeResultType<T, Args...>, R>;
 
     /**
-     * @name Predicate and Functor Concepts
-     * @brief Convenience concepts to identify predicates and functor objects.
+     * @brief Concept that constrains a type to be a predicate with specific arguments.
      *
-     * - `Predicate<F, Args...>`: `F` is invokable with `Args...` and the
-     *   result is convertible to `bool`.
-     * - `UnaryPredicate` / `BinaryPredicate`: common unary/binary predicate
-     *   aliases.
-     * - `Functor<F>`: identifies callable class types (objects with
-     *   `operator()`), excluding function pointers and plain function types.
+     * @tparam F    The predicate type (callable)
+     * @tparam Args Argument types for the predicate
+     *
+     * A type satisfies this concept if:
+     * It is invocable with arguments of types `Args...`
+     * The result is either:
+     * - Convertible to `bool` (traditional predicate)
+     * - A standard three-way comparison result type (`std::strong_ordering`, etc.)
+     *
+     * @note This concept supports both traditional boolean predicates and modern
+     *       three-way comparison predicates used with the spaceship operator.
+     *
+     * @code
+     * // Traditional boolean predicate
+     * auto is_even = [](int x) -> bool { return x % 2 == 0; };
+     * static_assert(Predicate<decltype(is_even), int>); // true
+     *
+     * // Three-way comparison predicate
+     * auto compare = [](int a, int b) { return a <=> b; };
+     * static_assert(Predicate<decltype(compare), int, int>); // true (returns ordering)
+     * @endcode
      */
-
     template <typename F, typename... Args>
     concept Predicate = InvokableWith<F, Args...> &&
                         (Convertible<InvokeResultType<F, Args...>, bool> ||
                          StdThreeWayCompareResult<InvokeResultType<F, Args...>>);
 
+    /**
+     * @brief Concept that constrains a type to be a unary predicate.
+     *
+     * @tparam F   The unary predicate type
+     * @tparam Arg The argument type
+     *
+     * This is a specialization of `Predicate` for single-argument predicates.
+     * Satisfied for callables that take one argument and return a boolean or
+     * comparison result.
+     *
+     * @see Predicate
+     *
+     * @code
+     * auto is_positive = [](double x) -> bool { return x > 0; };
+     * static_assert(UnaryPredicate<decltype(is_positive), double>); // true
+     *
+     * // Negation functor from standard library
+     * static_assert(UnaryPredicate<std::negate<int>, int>); // true
+     * @endcode
+     */
     template <typename F, typename Arg>
     concept UnaryPredicate = Predicate<F, Arg>;
 
+    /**
+     * @brief Concept that constrains a type to be a binary predicate.
+     *
+     * @tparam F    The binary predicate type
+     * @tparam Arg1 First argument type
+     * @tparam Arg2 Second argument type
+     *
+     * This is a specialization of `Predicate` for two-argument predicates.
+     * Commonly used for comparison operations, sorting criteria, and equivalence tests.
+     *
+     * @see Predicate
+     *
+     * @code
+     * auto less_than = [](int a, int b) -> bool { return a < b; };
+     * static_assert(BinaryPredicate<decltype(less_than), int, int>); // true
+     *
+     * // Standard comparator
+     * static_assert(BinaryPredicate<std::less<int>, int, int>); // true
+     *
+     * // Three-way comparison
+     * auto three_way = [](int a, int b) { return a <=> b; };
+     * static_assert(BinaryPredicate<decltype(three_way), int, int>); // true
+     * @endcode
+     */
     template <typename F, typename Arg1, typename Arg2>
     concept BinaryPredicate = Predicate<F, Arg1, Arg2>;
 
+    /**
+     * @brief Concept that constrains a type to be a function object (functor).
+     *
+     * @tparam F The type to check
+     *
+     * A type satisfies this concept if:
+     * - It is invocable (has `operator()` or is a function type)
+     * - It is a class/struct type (excluding function pointers and plain function types)
+     * - Is not a reference type (after reference removal)
+     *
+     * This concept distinguishes between:
+     * - Function objects (classes with `operator()`) - matches `Functor`
+     * - Function pointers and plain function types - does NOT match `Functor`
+     *
+     * @note Useful for template metaprogramming where you need to handle
+     *       function objects differently from function pointers.
+     *
+     * @code
+     * struct MyFunctor {
+     *     int operator()(int x) const { return x * 2; }
+     * };
+     * static_assert(Functor<MyFunctor>); // true
+     *
+     * auto lambda = []() { return 42; };
+     * static_assert(Functor<decltype(lambda)>); // true
+     *
+     * // Function pointers and plain functions are NOT functors
+     * static_assert(!Functor<int(*)(int)>); // false
+     * static_assert(!Functor<void()>);      // false
+     *
+     * // References to function objects ARE functors
+     * static_assert(Functor<MyFunctor&>);   // true
+     * static_assert(Functor<MyFunctor&&>);  // true
+     * @endcode
+     */
     template <typename F>
     concept Functor = Invokable<F> && std::is_class_v<std::remove_reference_t<F>>;
 
