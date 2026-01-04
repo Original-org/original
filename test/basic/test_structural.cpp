@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
-import original.basic.tuple;
+import original.basic.structural;
 import original.basic.number;
 import original.basic.array;
 
 using namespace original;
 
-TEST(TupleUtility, ArgsTraits)
+TEST(StructuralUtility, ArgsTraits)
 {
     using Traits = ArgsTraits<int, double, float>;
     EXPECT_EQ(Traits::SIZE, 3);
@@ -15,7 +15,7 @@ TEST(TupleUtility, ArgsTraits)
     static_assert(std::same_as<Traits::ArgsAt<2>, float>);
 }
 
-TEST(TupleUtility, IntegralSequenceTraits)
+TEST(StructuralUtility, IntegralSequenceTraits)
 {
     using Seq = IntegralSequence<int, 1, 2, 3>;
     using Traits = IntegralSequenceTraits<Seq>;
@@ -25,7 +25,7 @@ TEST(TupleUtility, IntegralSequenceTraits)
     static_assert(std::same_as<Traits::ValueType, IntegralConstant<int, 0>::ValueType>);
 }
 
-TEST(TupleUtility, MakeIntegralSequence)
+TEST(StructuralUtility, MakeIntegralSequence)
 {
     using Seq = IntegralSequenceType<int, 0, 4>;
     using Traits = IntegralSequenceTraits<Seq>;
@@ -33,7 +33,7 @@ TEST(TupleUtility, MakeIntegralSequence)
     EXPECT_EQ(Traits::SIZE, 4);
 }
 
-TEST(TupleUtility, ForAllWithMakeSequence)
+TEST(StructuralUtility, ForAllWithMakeSequence)
 {
     int sum = 0;
     auto accumulator = [&sum](auto... indices) {
@@ -47,7 +47,7 @@ TEST(TupleUtility, ForAllWithMakeSequence)
     EXPECT_EQ(result, 10);
 }
 
-TEST(TupleUtility, ForAllMultipleInvocations)
+TEST(StructuralUtility, ForAllMultipleInvocations)
 {
     int call_count = 0;
     auto counter = [&call_count](auto&&...) {
@@ -61,27 +61,27 @@ TEST(TupleUtility, ForAllMultipleInvocations)
     EXPECT_EQ(result2, 2);
 }
 
-TEST(TupleUtility, ArgsTraitsEmpty)
+TEST(StructuralUtility, ArgsTraitsEmpty)
 {
     using Traits = ArgsTraits<>;
     EXPECT_EQ(Traits::SIZE, 0);
 }
 
-TEST(TupleUtility, ArgsTraitsSingle)
+TEST(StructuralUtility, ArgsTraitsSingle)
 {
     using Traits = ArgsTraits<std::string>;
     EXPECT_EQ(Traits::SIZE, 1);
     static_assert(std::same_as<Traits::ArgsAt<0>, std::string>);
 }
 
-TEST(TupleUtility, IntegralSequenceEmpty)
+TEST(StructuralUtility, IntegralSequenceEmpty)
 {
     using Seq = IntegralSequence<int>;
     using Traits = IntegralSequenceTraits<Seq>;
     EXPECT_EQ(Traits::SIZE, 0);
 }
 
-TEST(TupleUtility, ForAllWithSingleElement)
+TEST(StructuralUtility, ForAllWithSingleElement)
 {
     auto getter = [](auto x) {
         return numberLikeValue(x);
@@ -91,7 +91,7 @@ TEST(TupleUtility, ForAllWithSingleElement)
     EXPECT_EQ(result, 0);
 }
 
-TEST(TupleUtility, ForAllWithEmptySequence)
+TEST(StructuralUtility, ForAllWithEmptySequence)
 {
     int count = 0;
     auto noop = [&count](auto...) {
@@ -103,7 +103,7 @@ TEST(TupleUtility, ForAllWithEmptySequence)
     EXPECT_EQ(result, 1);
 }
 
-TEST(TupleUtility, ForAllWithLargeSequence)
+TEST(StructuralUtility, ForAllWithLargeSequence)
 {
     // Test with larger sequence (10 elements)
     int sum = 0;
@@ -117,7 +117,7 @@ TEST(TupleUtility, ForAllWithLargeSequence)
     EXPECT_EQ(result, 45);
 }
 
-TEST(TupleUtility, ForAllWithUnsignedIntSequence)
+TEST(StructuralUtility, ForAllWithUnsignedIntSequence)
 {
     unsigned int product = 1;
     auto multiply = [&product](auto... values) {
@@ -130,7 +130,7 @@ TEST(TupleUtility, ForAllWithUnsignedIntSequence)
     EXPECT_EQ(result, 120u);
 }
 
-TEST(TupleUtility, ForAllConstExpr)
+TEST(StructuralUtility, ForAllConstExpr)
 {
     // Test that apply can be used in constexpr context
     constexpr auto compute = []
@@ -149,7 +149,7 @@ TEST(TupleUtility, ForAllConstExpr)
     EXPECT_EQ(result, 6);  // 0+1+2+3 = 6
 }
 
-TEST(TupleUtility, ForAllWithComplexLambda)
+TEST(StructuralUtility, ForAllWithComplexLambda)
 {
     // Test with a more complex lambda that combines multiple operations
     struct Accumulator {
@@ -185,7 +185,7 @@ TEST(TupleUtility, ForAllWithComplexLambda)
     EXPECT_EQ(acc2.count, 4);
 }
 
-TEST(TupleUtility, IntegralSequenceTraitsLarge)
+TEST(StructuralUtility, IntegralSequenceTraitsLarge)
 {
     using Seq = DefaultIntegralSequenceType<long long, 8>;
     using Traits = IntegralSequenceTraits<Seq>;

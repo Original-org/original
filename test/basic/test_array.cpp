@@ -5,7 +5,7 @@ import original.basic.array;
 import original.basic.number;
 import original.basic.container;
 import original.basic.algorithm;
-import original.basic.tuple;
+import original.basic.structural;
 
 using namespace original;
 using namespace original::literals;

@@ -1,6 +1,6 @@
 module;
 #include <functional>
-export module original.basic.tuple.utility;
+export module original.basic.structural.utility;
 import original.basic.number;
 import original.basic.types;
 
@@ -76,7 +76,7 @@ namespace original::details
 export namespace original
 {
     /**
-     * @addtogroup TupleUtility
+     * @addtogroup StructuralUtility
      * @{
      */
 
@@ -513,5 +513,5 @@ export namespace original
         forEach(std::forward<F>(f), makeIndexSequence<I>());
     }
 
-    /** @} */ // end of TupleUtility group
+    /** @} */ // end of StructuralUtility group
 } // namespace original
