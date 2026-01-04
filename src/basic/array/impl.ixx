@@ -35,8 +35,8 @@ namespace original::details
         using SizeType = Size;
         using ValueType = T;
 
-        static constexpr SizeType CAPACITY = N == 0 ? 1_size : SizeType{N};
-        T data_[numberLikeValue(CAPACITY)]{};
+        static constexpr Size::Type CAPACITY = N == 0 ? 1 : N;
+        T data_[CAPACITY]{};
 
         constexpr ArrayImpl() = default;
 
