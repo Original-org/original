@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
+#include <tuple>
+import original.basic.array;
 import original.basic.structural;
 import original.basic.number;
-import original.basic.array;
 
 using namespace original;
 
@@ -192,4 +193,22 @@ TEST(StructuralUtility, IntegralSequenceTraitsLarge)
     
     EXPECT_EQ(Traits::SIZE, 8);
     static_assert(std::same_as<Traits::NumberType, long long>);
+}
+
+TEST(StructuralTraits, StructuralConceptTest)
+{
+    using ArrayType1 = Array<int, 2>;
+    using ArrayType2 = Array<int, 0>;
+    using StdTuple = std::tuple<int, int, int>;
+    static_assert(HasStructuralSize<ArrayType1>);
+    static_assert(HasStructuralElements<ArrayType1>);
+    static_assert(Structural<ArrayType1>);
+    static_assert(HasStructuralSize<StdTuple>);
+    static_assert(HasStructuralElements<StdTuple>);
+    static_assert(Structural<StdTuple>);
+    static_assert(Structural<ArrayType2>);
+    static_assert(!CoupleLike<ArrayType2>);
+    static_assert(!TupleLike<ArrayType2>);
+    static_assert(CoupleLike<ArrayType1>);
+    static_assert(TupleLike<StdTuple>);
 }
