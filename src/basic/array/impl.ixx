@@ -543,11 +543,11 @@ export namespace original
  */
 export namespace std
 {
-    template<original::IsObject T, original::Size::Type N>
+    template<typename T, std::size_t N>
     struct tuple_size<original::Array<T, N>> // NOLINT
         : std::integral_constant<std::size_t, N> {};
 
-    template<std::size_t I, original::IsObject T, original::Size::Type N>
+    template<std::size_t I, typename T, std::size_t N>
     struct tuple_element<I, original::Array<T, N>> // NOLINT
     {
         static_assert(I < N, "tuple_element index out of range");
@@ -557,22 +557,19 @@ export namespace std
     /**
      * @brief std::get overloads for original::Array.
      */
-    template<std::size_t I, original::IsObject T, original::Size::Type N>
-    requires (I < N)
+    template<std::size_t I, typename T, std::size_t N>
     constexpr T& get(original::Array<T, N>& a) noexcept // NOLINT
     {
         return original::get<I>(a);
     }
 
-    template<std::size_t I, original::IsObject T, original::Size::Type N>
-    requires (I < N)
+    template<std::size_t I, typename T, std::size_t N>
     constexpr const T& get(const original::Array<T, N>& a) noexcept // NOLINT
     {
         return original::get<I>(a);
     }
 
-    template<std::size_t I, original::IsObject T, original::Size::Type N>
-    requires (I < N)
+    template<std::size_t I, typename T, std::size_t N>
     constexpr T&& get(original::Array<T, N>&& a) noexcept // NOLINT
     {
         return original::get<I>(std::move(a));
