@@ -90,6 +90,8 @@ export namespace original
     struct StructuralTraits
     {
         using Type = std::remove_cvref_t<T>;
+        template<Size::Type I>
+        using ElementType = std::tuple_element<I, T>::type; // NOLINT
         static constexpr Size::Type SIZE = std::tuple_size<Type>::value; // NOLINT
     };
 
