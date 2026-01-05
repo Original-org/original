@@ -421,25 +421,53 @@ namespace original::details
         decltype(auto) begin() const
         {
             const auto& r = *this->ptr_;
-            return r.begin();
+            return RangeTraits<decltype(r)>::begin(r);
         }
 
         decltype(auto) end() const
         {
             const auto& r = *this->ptr_;
-            return r.end();
+            return RangeTraits<decltype(r)>::end(r);
         }
 
         decltype(auto) begin()
         {
             auto& r = *this->ptr_;
-            return r.begin();
+            return RangeTraits<decltype(r)>::begin(r);
         }
 
         decltype(auto) end()
         {
             auto& r = *this->ptr_;
-            return r.end();
+            return RangeTraits<decltype(r)>::end(r);
+        }
+
+        decltype(auto) rBegin() const
+        requires BidirectionalRange<R>
+        {
+            const auto& r = *this->ptr_;
+            return RangeTraits<decltype(r)>::rBegin(r);
+        }
+
+        decltype(auto) rEnd() const
+        requires BidirectionalRange<R>
+        {
+            const auto& r = *this->ptr_;
+            return RangeTraits<decltype(r)>::rEnd(r);
+        }
+
+        decltype(auto) rBegin()
+        requires BidirectionalRange<R>
+        {
+            auto& r = *this->ptr_;
+            return RangeTraits<decltype(r)>::rBegin(r);
+        }
+
+        decltype(auto) rEnd()
+        requires BidirectionalRange<R>
+        {
+            auto& r = *this->ptr_;
+            return RangeTraits<decltype(r)>::rEnd(r);
         }
     };
 
@@ -571,6 +599,36 @@ namespace original::details
 
         auto end() const {
             return this->endBase();
+        }
+    };
+
+    template<BidirectionalRange R>
+    class ReversedRange
+    {
+        R base_;
+
+    public:
+        explicit ReversedRange(R base) noexcept
+            : base_(std::move(base)) {}
+
+        auto begin()
+        {
+            return this->base_.rBegin();
+        }
+
+        auto end()
+        {
+            return this->base_.rEnd();
+        }
+
+        auto begin() const
+        {
+            return this->base_.rBegin();
+        }
+
+        auto end() const
+        {
+            return this->base_.rEnd();
         }
     };
 
@@ -879,6 +937,20 @@ export namespace original::range
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
                 return details::SkipRange<RangeType>{all, n};
+            }
+        };
+    }
+
+
+    auto reverse() noexcept
+    {
+        return details::RangePipeline
+        {
+            []<BidirectionalRange R>(R&& r)
+            {
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+                return details::ReversedRange<RangeType>{all};
             }
         };
     }
