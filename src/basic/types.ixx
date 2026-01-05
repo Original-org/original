@@ -280,6 +280,9 @@ export namespace original {
     template <typename... Args>
     using CommonRefType = std::common_reference_t<Args...>;
 
+    template <typename T, typename... Args>
+    concept Constructible = std::is_constructible_v<T, Args...>;
+
     /** @} */ // end of TypeTraits group
 
     /**
