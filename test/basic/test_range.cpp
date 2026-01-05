@@ -5,6 +5,7 @@ import original.basic.types;
 import original.basic.range;
 import original.basic.number;
 import original.basic.iterator;
+import original.basic.structural;
 
 using namespace original;
 using namespace original::range;
@@ -110,8 +111,8 @@ TEST_F(RangeTest, EnumeratePipelineDefaultStart) {
     auto [i2, v2] = *it; EXPECT_EQ(i2, 2_size); EXPECT_EQ(v2, 3); ++it;
     EXPECT_NE(it, end);
 
-    std::pair p = {0_size, 1};
-    for (auto&& [index, val]: arr | enumerate())
+    Couple p = {0_size, 1};
+    for (const auto& [index, val]: arr | enumerate())
     {
         EXPECT_EQ(index, p.first);
         EXPECT_EQ(val, p.second);
@@ -517,7 +518,7 @@ TEST_F(RangeTest, ZipPipelineShorterLeft) {
     EXPECT_EQ(it, end);
 
     auto cnt = 0_size;
-    Array<std::pair<int, int>, 3> elements {std::pair{100, 1}, std::pair{200, 2}, std::pair{300, 3}};
+    Array<Couple<int, int>, 3> elements {Couple{100, 1}, Couple{200, 2}, Couple{300, 3}};
     for (const auto& [index, e]: shorter | zip(arr) | enumerate())
     {
         EXPECT_EQ(index, cnt);
