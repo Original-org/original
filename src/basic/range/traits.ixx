@@ -10,6 +10,86 @@ import original.basic.number;
  * @{
  */
 
+namespace original::details
+{
+    /**
+     * @brief Internal traits to determine reverse iterator types.
+     *
+     * @tparam R The range type
+     *
+     * Primary template assumes no reverse iterator support.
+     */
+    template<typename R, typename = void>
+    struct ReverseIteratorTraits
+    {
+        using RBeginIterType = void;
+        using REndIterType   = void;
+    };
+
+    /**
+     * @brief Helper to detect member rBegin.
+     */
+    template<typename R, typename = void>
+    struct HasMemberRBegin : std::false_type {};
+
+    template<typename R>
+    struct HasMemberRBegin<R, std::void_t<decltype(std::declval<R&>().rBegin())>>
+        : std::true_type {};
+
+    /**
+     * @brief Helper to detect non-member rBegin.
+     */
+    template<typename R, typename = void>
+    struct HasNonMemberRBegin : std::false_type {};
+
+    template<typename R>
+    struct HasNonMemberRBegin<R, std::void_t<decltype(rBegin(std::declval<R&>()))>>
+        : std::true_type {};
+
+    /**
+     * @brief Helper to detect member rEnd.
+     */
+    template<typename R, typename = void>
+    struct HasMemberREnd : std::false_type {};
+
+    template<typename R>
+    struct HasMemberREnd<R, std::void_t<decltype(std::declval<R&>().rEnd())>>
+        : std::true_type {};
+
+    /**
+     * @brief Helper to detect non-member rEnd.
+     */
+    template<typename R, typename = void>
+    struct HasNonMemberREnd : std::false_type {};
+
+    template<typename R>
+    struct HasNonMemberREnd<R, std::void_t<decltype(rEnd(std::declval<R&>()))>>
+        : std::true_type {};
+
+    /**
+     * @brief Specialization for ranges with member rBegin/rEnd.
+     */
+    template<typename R>
+    struct ReverseIteratorTraits<R,
+        std::enable_if_t<HasMemberRBegin<R>::value && HasMemberREnd<R>::value>>
+    {
+        using RBeginIterType = decltype(std::declval<R&>().rBegin());
+        using REndIterType   = decltype(std::declval<R&>().rEnd());
+    };
+
+    /**
+     * @brief Specialization for ranges with non-member rBegin/rEnd.
+     */
+    template<typename R>
+    struct ReverseIteratorTraits<R,
+        std::enable_if_t<HasNonMemberRBegin<R>::value && HasNonMemberREnd<R>::value &&
+                        !HasMemberRBegin<R>::value>>
+    {
+        using RBeginIterType = decltype(rBegin(std::declval<R&>()));
+        using REndIterType   = decltype(rEnd(std::declval<R&>()));
+    };
+}
+
 export namespace original
 {
     /**
@@ -40,6 +120,18 @@ export namespace original
     T* end(T (&arr) [Size])
     {
         return arr + Size;
+    }
+
+    template<typename T, Size::Type Size>
+    T* rBegin(T (&arr) [Size])
+    {
+        return arr + Size - 1;
+    }
+
+    template<typename T, Size::Type Size>
+    T* rEnd(T (&arr) [Size])
+    {
+        return arr - 1;
     }
 
     /**
@@ -94,6 +186,19 @@ export namespace original
         { end(r) } -> SameType<decltype(begin(std::declval<R&>()))>;
     };
 
+    template<typename R>
+    concept BidirectionalRange = IterRange<R> &&
+    requires(R& r)
+    {
+        { r.rBegin() } -> Iterator;
+        { r.rEnd() } -> SameType<decltype(std::declval<R&>().rBegin())>;
+    } ||
+    requires(R& r)
+    {
+        { rBegin(r) } -> Iterator;
+        { rEnd(r) } -> SameType<decltype(rBegin(std::declval<R&>()))>;
+    };
+
     /**
      * @brief Traits class providing uniform access to range properties.
      *
@@ -116,12 +221,14 @@ export namespace original
     template<Range R>
     struct RangeTraits<R>
     {
-        using BeginIterType = decltype(std::declval<R&>().begin());
-        using EndIterType = decltype(std::declval<R&>().end());
-        using ReferenceType = IterTraits<BeginIterType>::ReferenceType;
-        using ValueType = IterTraits<BeginIterType>::ValueType;
-        using PointerType = IterTraits<BeginIterType>::PointerType;
+        using BeginIterType  = decltype(std::declval<R&>().begin());
+        using EndIterType    = decltype(std::declval<R&>().end());
+        using ReferenceType  = IterTraits<BeginIterType>::ReferenceType;
+        using ValueType      = IterTraits<BeginIterType>::ValueType;
+        using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
+        using RBeginIterType = details::ReverseIteratorTraits<R>::RBeginIterType;
+        using REndIterType   = details::ReverseIteratorTraits<R>::REndIterType;
 
         /**
          * @brief Returns the begin iterator using the range's member function.
@@ -138,6 +245,18 @@ export namespace original
         {
             return r.end();
         }
+
+        static RBeginIterType rBegin(R& r)
+        requires BidirectionalRange<R>
+        {
+            return r.rBegin();
+        }
+
+        static REndIterType rEnd(R& r)
+        requires BidirectionalRange<R>
+        {
+            return r.rEnd();
+        }
     };
 
     /**
@@ -148,12 +267,14 @@ export namespace original
     template<Range R>
     struct RangeTraits<const R>
     {
-        using BeginIterType = decltype(std::declval<const R&>().begin());
-        using EndIterType = decltype(std::declval<const R&>().end());
-        using ReferenceType = IterTraits<BeginIterType>::ReferenceType;
-        using ValueType = IterTraits<BeginIterType>::ValueType;
-        using PointerType = IterTraits<BeginIterType>::PointerType;
+        using BeginIterType  = decltype(std::declval<const R&>().begin());
+        using EndIterType    = decltype(std::declval<const R&>().end());
+        using ReferenceType  = IterTraits<BeginIterType>::ReferenceType;
+        using ValueType      = IterTraits<BeginIterType>::ValueType;
+        using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
+        using RBeginIterType = details::ReverseIteratorTraits<const R>::RBeginIterType;
+        using REndIterType   = details::ReverseIteratorTraits<const R>::REndIterType;
 
         static BeginIterType begin(const R& r)
         {
@@ -163,6 +284,18 @@ export namespace original
         static EndIterType end(const R& r)
         {
             return r.end();
+        }
+
+        static RBeginIterType rBegin(const R& r)
+        requires BidirectionalRange<const R>
+        {
+            return r.rBegin();
+        }
+
+        static REndIterType rEnd(const R& r)
+        requires BidirectionalRange<const R>
+        {
+            return r.rEnd();
         }
     };
 
@@ -174,12 +307,14 @@ export namespace original
     template<typename T, Size::Type Size>
     struct RangeTraits<T[Size]>
     {
-        using BeginIterType = T*;
-        using EndIterType   = T*;
-        using ReferenceType = IterTraits<BeginIterType>::ReferenceType;
-        using ValueType = IterTraits<BeginIterType>::ValueType;
-        using PointerType = IterTraits<BeginIterType>::PointerType;
+        using BeginIterType  = T*;
+        using EndIterType    = T*;
+        using ReferenceType  = IterTraits<BeginIterType>::ReferenceType;
+        using ValueType      = IterTraits<BeginIterType>::ValueType;
+        using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
+        using RBeginIterType = T*;
+        using REndIterType   = T*;
 
         static BeginIterType begin(T (&arr) [Size])
         {
@@ -189,6 +324,16 @@ export namespace original
         static EndIterType end(T (&arr) [Size])
         {
             return arr + Size;
+        }
+
+        static RBeginIterType rBegin(T (&arr) [Size])
+        {
+            return arr + Size - 1;
+        }
+
+        static REndIterType rEnd(T (&arr) [Size])
+        {
+            return arr - 1;
         }
     };
 
@@ -200,12 +345,15 @@ export namespace original
     template<typename T, Size::Type Size>
     struct RangeTraits<const T[Size]>
     {
-        using BeginIterType = const T*;
-        using EndIterType   = const T*;
-        using ReferenceType = IterTraits<BeginIterType>::ReferenceType;
-        using ValueType = IterTraits<BeginIterType>::ValueType;
-        using PointerType = IterTraits<BeginIterType>::PointerType;
+        using BeginIterType  = const T*;
+        using EndIterType    = const T*;
+        using ReferenceType  = IterTraits<BeginIterType>::ReferenceType;
+        using ValueType      = IterTraits<BeginIterType>::ValueType;
+        using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
+        using RBeginIterType = const T*;
+        using REndIterType   = const T*;
+
 
         static BeginIterType begin(const T (&arr) [Size])
         {
@@ -215,6 +363,16 @@ export namespace original
         static EndIterType end(const T (&arr) [Size])
         {
             return arr + Size;
+        }
+
+        static RBeginIterType rBegin(const T (&arr) [Size])
+        {
+            return arr + Size - 1;
+        }
+
+        static REndIterType rEnd(const T (&arr) [Size])
+        {
+            return arr - 1;
         }
     };
 }
