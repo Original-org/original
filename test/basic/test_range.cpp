@@ -590,3 +590,14 @@ TEST_F(RangeTest, ZipWithEmptyRange) {
         EXPECT_EQ(invoked, 0);
     }
 }
+
+TEST_F(RangeTest, ReverseRanbge) {
+    constexpr Array<int, 5> arr {1, 2, 3, 4, 5};
+    const auto reversed = arr | reverse();
+    int cur = 5;
+    for (const auto& e : reversed)
+    {
+        EXPECT_EQ(e, cur);
+        --cur;
+    }
+}
