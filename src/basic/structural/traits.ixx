@@ -19,6 +19,7 @@ namespace original::details
         {
             typename std::tuple_element<I, std::remove_cvref_t<T>>::type; // NOLINT
         }
+        && std::tuple_size<std::remove_cvref_t<T>>::value >= 0 // NOLINT
         && StructuralElementCheck<T, I + 1, N>::value;
     };
 
@@ -34,11 +35,11 @@ namespace original::details
     struct StructuralGetCheck
     {
         static constexpr bool value =
-        requires(T& t)
-        {
-            get<I>(t);
-        }
-        && StructuralGetCheck<T, I + 1, N>::value;
+        requires(T& t) { get<I>(t); } &&
+        requires(const T& t) { get<I>(t); } &&
+        (std::is_move_constructible_v<T> ?
+        requires(T&& t) { get<I>(std::move(t)); } : true) &&
+        StructuralGetCheck<T, I + 1, N>::value;
     };
 
     template<typename T, Size::Type N>
@@ -91,7 +92,7 @@ export namespace original
     {
         using Type = std::remove_cvref_t<T>;
         template<Size::Type I>
-        using ElementType = std::tuple_element<I, T>::type; // NOLINT
+        using ElementType = std::tuple_element<I, Type>::type; // NOLINT
         static constexpr Size::Type SIZE = std::tuple_size<Type>::value; // NOLINT
     };
 
