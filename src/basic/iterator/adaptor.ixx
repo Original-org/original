@@ -283,58 +283,6 @@ export namespace original
         }
     };
 
-    template<ForwardIterator It>
-    class EnumIterator
-    {
-        Size index_{};
-        It it_;
-    public:
-        using IterType        = IterTraits<It>::IterType;
-        using DerivedType     = EnumIterator;
-        using ValueType       = IterTraits<It>::ValueType;
-        using ReferenceType   = std::pair<const Size, typename IterTraits<It>::ReferenceType>;
-        using PointerType     = std::pair<const Size, typename IterTraits<It>::PointerType>;
-        using DifferenceType  = IterTraits<It>::DifferenceType;
-
-        constexpr EnumIterator() = delete;
-
-        explicit constexpr EnumIterator(IterType it) : it_(it) {}
-
-        template<UnsignedIntegralLike T>
-        requires SameType<NumberLikeType<T>, Size::Type>
-        constexpr EnumIterator(IterType it, const T start) noexcept
-            : index_(Size{start}), it_(it) {}
-
-        constexpr bool operator==(const EnumIterator& rhs) const
-        {
-            return this->index_ == rhs.index_ && this->it_ == rhs.it_;
-        }
-
-        constexpr ReferenceType operator*() const
-        {
-            return ReferenceType{this->index_, *this->it_};
-        }
-
-        constexpr EnumIterator& operator++()
-        {
-            ++this->index_;
-            ++this->it_;
-            return *this;
-        }
-
-        constexpr EnumIterator operator++(int)
-        {
-            auto tmp = *this;
-            ++*this;
-            return tmp;
-        }
-
-        [[nodiscard]] constexpr IterType iterator() const
-        {
-            return this->it_;
-        }
-    };
-
     template<BidirectionalIterator It>
     class ReversedIterator
     {
@@ -400,18 +348,6 @@ export namespace original::iterator
     constexpr auto toStd(It it) noexcept
     {
         return StdIteratorAdapter<It>{it};
-    }
-
-    template<ForwardIterator It>
-    constexpr auto enumerate(It it, const Size start = Size{}) noexcept
-    {
-        return EnumIterator<It>{it, start};
-    }
-
-    template<ForwardIterator It>
-    constexpr auto enumerate(It it, const Size::Type start) noexcept
-    {
-        return EnumIterator<It>{it, start};
     }
 
     template<BidirectionalIterator It>
