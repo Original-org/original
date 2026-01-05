@@ -236,3 +236,86 @@ TEST(StructuralTraits, StructuralForEach)
         EXPECT_EQ(index.value(), val);
     }
 }
+
+TEST(Couple, DefaultConstructor)
+{
+    constexpr Couple<int, double> cp;
+    EXPECT_EQ(cp.first, 0);
+    EXPECT_EQ(cp.second, 0.0);
+}
+
+TEST(Couple, ParameterizedConstructor)
+{
+    static constexpr int a = 1;
+    static constexpr double b = 2.5;
+    constexpr Couple cp(a, b);
+    EXPECT_EQ(cp.first, 1);
+    EXPECT_EQ(cp.second, 2.5);
+}
+
+TEST(Couple, CopyAndMoveSemantics)
+{
+    Couple<std::string, int> cp1("hello", 42);
+    const auto cp2 = cp1; // copy
+    const auto cp3 = std::move(cp1); // move
+
+    EXPECT_EQ(cp2.first, "hello");
+    EXPECT_EQ(cp2.second, 42);
+    EXPECT_EQ(cp3.first, "hello");
+    EXPECT_EQ(cp3.second, 42);
+}
+
+TEST(Couple, EqualityComparison)
+{
+    constexpr Couple cp1(1, 2.0f);
+    constexpr Couple cp2(1, 2.0f);
+    constexpr Couple cp3(2, 2.0f);
+
+    EXPECT_TRUE(cp1 == cp2);
+    EXPECT_FALSE(cp1 == cp3);
+}
+
+TEST(Couple, ThreeWayComparison)
+{
+    constexpr Couple cp1(1, 'a');
+    constexpr Couple cp2(1, 'b');
+    constexpr Couple cp3(2, 'a');
+
+    EXPECT_LT(cp1, cp2);
+    EXPECT_LT(cp1, cp3);
+}
+
+TEST(Couple, GetFunction)
+{
+    Couple cp1(42L, true);
+    EXPECT_EQ(original::get<0>(cp1), 42L);
+    EXPECT_EQ(original::get<1>(cp1), true);
+    const auto& cref = cp1;
+    EXPECT_EQ(original::get<0>(cref), 42L);
+    EXPECT_EQ(original::get<1>(cref), true);
+    EXPECT_EQ(original::get<0>(std::move(cp1)), 42L); // NOLINT
+    EXPECT_EQ(original::get<1>(std::move(cp1)), true); // NOLINT
+}
+
+TEST(Couple, StructuralBinding)
+{
+    constexpr Couple cp1(1, 2.0f);
+    auto&& [i, f] = cp1;
+    EXPECT_EQ(i, 1);
+    EXPECT_EQ(f, 2.0f);
+}
+
+TEST(Couple, StructuralTraits)
+{
+    using CpType = Couple<int, float>;
+    static_assert(HasStructuralSize<CpType>);
+    static_assert(HasStructuralElements<CpType>);
+    static_assert(Structural<CpType>);
+    static_assert(CoupleLike<CpType>);
+    static_assert(TupleLike<CpType>);
+    using Traits = StructuralTraits<const CpType>;
+    EXPECT_EQ(Traits::SIZE, 2);
+    static_assert(std::same_as<Traits::Type, CpType>);
+    static_assert(std::same_as<Traits::ElementType<0>, int>);
+    static_assert(std::same_as<Traits::ElementType<1>, float>);
+}
