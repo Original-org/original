@@ -1,10 +1,10 @@
 ﻿module;
-#include <utility>
 export module original.basic.algorithm;
 import original.basic.types;
 import original.basic.range;
 import original.basic.iterator;
 import original.basic.container;
+import original.basic.structural;
 
 
 export namespace original::algorithms
@@ -34,8 +34,8 @@ namespace original::details
      * @return Pair of iterators pointing to the first mismatching elements or the ends.
      */
     template <Iterator Iter1, Iterator Iter2, Invokable Pred = algorithms::EqualTo>
-    std::pair<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
-                                         Iter2 first2, Iter2 last2, Pred pred)
+    Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
+                                      Iter2 first2, Iter2 last2, Pred pred)
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                         typename IterTraits<Iter2>::ReferenceType>;
@@ -68,8 +68,8 @@ namespace original::details
      * @return Pair of iterators pointing to the first mismatching elements or {last1, advanced first2}.
      */
     template <Iterator Iter1, Iterator Iter2, Invokable Pred = algorithms::EqualTo>
-    std::pair<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
-                                          Iter2 first2, Pred pred)
+    Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
+                                      Iter2 first2, Pred pred)
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                         typename IterTraits<Iter2>::ReferenceType>;
@@ -224,7 +224,7 @@ export namespace original::algorithms {
                                      typename IterTraits<Iter2>::ReferenceType>,
                         CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
-    std::pair<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
+    Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
     {
         return details::mismatchImpl(first1, last1, first2, last2, pred);
     }
@@ -254,7 +254,7 @@ export namespace original::algorithms {
                                      typename IterTraits<Iter2>::ReferenceType>,
                        CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
-    std::pair<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1,
+    Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1,
                                      Iter2 first2, Pred pred = {})
     {
         return details::mismatchImpl(first1, last1, first2, pred);

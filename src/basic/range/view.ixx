@@ -7,6 +7,7 @@ import original.basic.range.traits;
 import original.basic.iterator;
 import original.basic.types;
 import original.basic.number;
+import original.basic.structural;
 
 /**
  * @addtogroup RangeViews
@@ -86,14 +87,14 @@ namespace original::details
      *
      * @tparam Iter Underlying forward iterator type
      *
-     * Dereferencing returns `std::pair<const Size, ReferenceType>`.
+     * Dereferencing returns `Couple<const Size, ReferenceType>`.
      */
     template<ForwardIterator Iter>
     class EnumIterator
         : public ForwardIteratorBase<
             EnumIterator<Iter>,
-            RemoveCVRefType<std::pair<const Size, typename IterTraits<Iter>::ReferenceType>>,
-            std::pair<const Size, typename IterTraits<Iter>::ReferenceType>,
+            RemoveCVRefType<Couple<const Size, typename IterTraits<Iter>::ReferenceType>>,
+            Couple<const Size, typename IterTraits<Iter>::ReferenceType>,
             void
         >
     {
@@ -102,7 +103,7 @@ namespace original::details
 
     public:
         using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = std::pair<const Size, typename IterTraits<Iter>::ReferenceType>;
+        using ReferenceType = Couple<const Size, typename IterTraits<Iter>::ReferenceType>;
         using ValueType = RemoveCVRefType<ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
@@ -357,8 +358,8 @@ namespace original::details
     class ZipIterator
         : public ForwardIteratorBase<
             ZipIterator<LHS, RHS>,
-            std::pair<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>,
-            std::pair<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>,
+            Couple<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>,
+            Couple<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>,
             void
         >
     {
@@ -369,8 +370,8 @@ namespace original::details
 
     public:
         using IterType = ZipIterator;
-        using ValueType = std::pair<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>;
-        using ReferenceType = std::pair<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>;
+        using ValueType = Couple<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>;
+        using ReferenceType = Couple<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>;
         using PointerType = void;
         using DifferenceType = IterTraits<LHS>::DifferenceType;
 
