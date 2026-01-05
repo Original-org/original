@@ -130,10 +130,12 @@ export namespace original
     {
         using Base = details::ArrayImpl<T, N>;
     public:
-        using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
-        using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
-        using ValueType     = T;
-        using SizeType      = Size;
+        using IterType       = DefaultIterator<T, SpecifiedSource<Array>>;
+        using ConstIterType  = DefaultIterator<const T, SpecifiedSource<Array>>;
+        using RIterType      = ReversedIterator<IterType>;
+        using ConstRIterType = ReversedIterator<ConstIterType>;
+        using ValueType      = T;
+        using SizeType       = Size;
 
         constexpr Array() = default;
 
@@ -174,6 +176,16 @@ export namespace original
             return IterType{this->data_ + N};
         }
 
+        constexpr RIterType rBegin() noexcept
+        {
+            return RIterType{IterType{this->data_ + N - 1}};
+        }
+
+        constexpr RIterType rEnd() noexcept
+        {
+            return RIterType{IterType{this->data_ - 1}};
+        }
+
         /**
          * @brief Const overloads of begin() and end().
          */
@@ -185,6 +197,16 @@ export namespace original
         [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{this->data_ + N};
+        }
+
+        constexpr ConstRIterType rBegin() const noexcept
+        {
+            return ConstRIterType{ConstIterType{this->data_ + N - 1}};
+        }
+
+        constexpr ConstRIterType rEnd() const noexcept
+        {
+            return ConstRIterType{ConstIterType{this->data_ - 1}};
         }
 
         /**
