@@ -3,8 +3,12 @@
 import original.basic.array;
 import original.basic.structural;
 import original.basic.number;
+import original.basic.range;
+import original.basic.types;
+
 
 using namespace original;
+using namespace original::range;
 
 TEST(StructuralUtility, ArgsTraits)
 {
@@ -199,7 +203,7 @@ TEST(StructuralTraits, StructuralConceptTest)
 {
     using ArrayType1 = Array<int, 2>;
     using ArrayType2 = Array<int, 0>;
-    using StdTuple = std::tuple<int, int, int>;
+    using StdTuple = std::tuple<int, float, int>;
     static_assert(HasStructuralSize<ArrayType1>);
     static_assert(HasStructuralElements<ArrayType1>);
     static_assert(Structural<ArrayType1>);
@@ -211,4 +215,24 @@ TEST(StructuralTraits, StructuralConceptTest)
     static_assert(!TupleLike<ArrayType2>);
     static_assert(CoupleLike<ArrayType1>);
     static_assert(TupleLike<StdTuple>);
+
+    static_assert(SameType<StructuralTraits<StdTuple>::Type, StdTuple>);
+    static_assert(SameType<StructuralTraits<StdTuple>::ElementType<0>, int>);
+    static_assert(SameType<StructuralTraits<StdTuple>::ElementType<1>, float>);
+    static_assert(SameType<StructuralTraits<StdTuple>::ElementType<2>, int>);
+    static_assert(StructuralTraits<StdTuple>::SIZE == 3);
+}
+
+TEST(StructuralTraits, StructuralForEach)
+{
+    Array<int, 5> arr1 {-1, 0, 1, 2, 3};
+    forEach(arr1, [](auto&& e)
+    {
+        e += 1;
+    });
+    for (const auto view = arr1 | enumerate();
+         auto&& [index, val]: view)
+    {
+        EXPECT_EQ(index.value(), val);
+    }
 }
