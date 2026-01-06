@@ -82,6 +82,65 @@ namespace original::details
         }
     };
 
+    template<BidirectionalIterator Iter>
+    class ReversedIterator : public BidirectionalIteratorBase<
+            ReversedIterator<Iter>,
+            RemoveCVRefType<typename IterTraits<Iter>::ReferenceType>,
+            typename IterTraits<Iter>::ReferenceType,
+            void
+        >
+    {
+        Iter it_{};
+    public:
+        using IterType        = IterTraits<Iter>::IterType;
+        using ReferenceType   = IterTraits<Iter>::ReferenceType;
+        using ValueType       = RemoveCVRefType<ReferenceType>;
+        using PointerType     = void;
+        using DifferenceType  = IterTraits<Iter>::DifferenceType;
+
+        constexpr ReversedIterator() = default;
+
+        explicit constexpr ReversedIterator(IterType it) noexcept : it_{it} {}
+
+        constexpr bool operator==(const ReversedIterator& rhs) const
+        {
+            return this->it_ == rhs.it_;
+        }
+
+        constexpr ReferenceType operator*() const
+        {
+            auto tmp = this->it_;
+            --tmp;
+            return *tmp;
+        }
+
+        constexpr ReversedIterator& operator++()
+        {
+            --this->it_;
+            return *this;
+        }
+
+        constexpr ReversedIterator operator++(int)
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        constexpr ReversedIterator& operator--()
+        {
+            ++this->it_;
+            return *this;
+        }
+
+        constexpr ReversedIterator operator--(int)
+        {
+            auto tmp = *this;
+            --*this;
+            return tmp;
+        }
+    };
+
     /**
      * @brief Iterator that yields index-element pairs during traversal.
      *

@@ -282,64 +282,6 @@ export namespace original
             return StdIteratorAdapter{it.it_ - DifferenceType{n}};
         }
     };
-
-    template<BidirectionalIterator It>
-    class ReversedIterator
-    {
-        It it_{};
-    public:
-        using IterType        = IterTraits<It>::IterType;
-        using DerivedType     = ReversedIterator;
-        using ValueType       = IterTraits<It>::ValueType;
-        using ReferenceType   = IterTraits<It>::ReferenceType;
-        using PointerType     = IterTraits<It>::PointerType;
-        using DifferenceType  = IterTraits<It>::DifferenceType;
-
-        constexpr ReversedIterator() = default;
-
-        explicit constexpr ReversedIterator(IterType it) noexcept : it_{it} {}
-
-        constexpr bool operator==(const ReversedIterator& rhs) const
-        {
-            return this->it_ == rhs.it_;
-        }
-
-        constexpr ReferenceType operator*() const
-        {
-            return *this->it_;
-        }
-
-        constexpr ReversedIterator& operator++()
-        {
-            --this->it_;
-            return *this;
-        }
-
-        constexpr ReversedIterator operator++(int)
-        {
-            auto tmp = *this;
-            ++*this;
-            return tmp;
-        }
-
-        constexpr ReversedIterator& operator--()
-        {
-            ++this->it_;
-            return *this;
-        }
-
-        constexpr ReversedIterator operator--(int)
-        {
-            auto tmp = *this;
-            --*this;
-            return tmp;
-        }
-
-        [[nodiscard]] constexpr IterType iterator() const
-        {
-            return this->it_;
-        }
-    };
 }
 
 export namespace original::iterator
@@ -348,11 +290,5 @@ export namespace original::iterator
     constexpr auto toStd(It it) noexcept
     {
         return StdIteratorAdapter<It>{it};
-    }
-
-    template<BidirectionalIterator It>
-    constexpr auto reverse(It it) noexcept
-    {
-        return ReversedIterator<It>{it};
     }
 }
