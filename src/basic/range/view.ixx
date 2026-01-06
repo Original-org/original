@@ -836,6 +836,38 @@ namespace original::details
     // Individual view classes (TakeRange, SkipRange, EnumRange, TransformRange,
     // FilterRange, ConcatRange, ZipRange) are documented inline below.
 
+    template<IterRange R>
+    class StdRange : public RangeViewBase<R>
+    {
+        using Base = RangeViewBase<R>;
+    public:
+        explicit StdRange(R base) noexcept : Base(std::move(base)) {}
+
+        auto begin()
+        {
+            using Iter = decltype(this->beginBase());
+            return StdIterator<Iter>{this->beginBase()};
+        }
+
+        auto end()
+        {
+            using Iter = decltype(this->endBase());
+            return StdIterator<Iter>{this->endBase()};
+        }
+
+        auto begin() const
+        {
+            using Iter = decltype(this->beginBase());
+            return StdIterator<Iter>{this->beginBase()};
+        }
+
+        auto end() const
+        {
+            using Iter = decltype(this->endBase());
+            return StdIterator<Iter>{this->endBase()};
+        }
+    };
+
     /**
      * @brief View that yields the first N elements of a range.
      */
@@ -1216,6 +1248,19 @@ namespace original::details
 
 export namespace original::range
 {
+    auto toStd() noexcept
+    {
+        return details::RangePipeline
+        {
+            []<IterRange R>(R&& r)
+            {
+                auto all = details::all(std::forward<R>(r));
+                using RangeType = decltype(all);
+                return details::StdRange<RangeType>{all};
+            }
+        };
+    }
+
     /**
      * @brief Creates a pipeline adaptor that takes the first N elements.
      *
