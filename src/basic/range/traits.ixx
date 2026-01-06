@@ -2,7 +2,6 @@ module;
 #include <type_traits>
 export module original.basic.range.traits;
 import original.basic.iterator.traits;
-import original.basic.iterator.adaptor;
 import original.basic.types;
 import original.basic.number;
 
