@@ -603,13 +603,12 @@ namespace original::details
     };
 
     template<BidirectionalRange R>
-    class ReversedRange
+    class ReversedRange : public RangeViewBase<R>
     {
-        R base_;
-
+        using Base = RangeViewBase<R>;
     public:
         explicit ReversedRange(R base) noexcept
-            : base_(std::move(base)) {}
+            : Base(std::move(base)) {}
 
         auto begin()
         {
@@ -629,6 +628,26 @@ namespace original::details
         auto end() const
         {
             return this->base_.rEnd();
+        }
+
+        auto rBegin()
+        {
+            return this->beginBase();
+        }
+
+        auto rEnd()
+        {
+            return this->endBase();
+        }
+
+        auto rBegin() const
+        {
+            return this->beginBase();
+        }
+
+        auto rEnd() const
+        {
+            return this->beginBase();
         }
     };
 
