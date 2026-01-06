@@ -1097,8 +1097,10 @@ export namespace original::range
                 using IterPrev = decltype(p.begin());
                 using IterNext = decltype(n.begin());
 
-                static_assert(ForwardIterator<IterPrev>, "Iter type of the prev range must be ForwardIterator");
-                static_assert(ForwardIterator<IterNext>, "Iter type of the next range must be ForwardIterator");
+                static_assert(ForwardIterator<IterPrev>,
+                    "Iter type of the prev range must satisfy ForwardIterator");
+                static_assert(ForwardIterator<IterNext>,
+                    "Iter type of the next range must satisfy ForwardIterator");
 
                 using RefPrev = IterTraits<IterPrev>::ReferenceType;
                 using RefNext = IterTraits<IterNext>::ReferenceType;
@@ -1130,8 +1132,10 @@ export namespace original::range
                 using IterLHS = RangeTraits<LHS>::BeginIterType;
                 using IterRHS = RangeTraits<RHS>::BeginIterType;
 
-                static_assert(ForwardIterator<IterLHS>, "Iter type of left hands range must be ForwardIterator");
-                static_assert(ForwardIterator<IterRHS>, "Iter type of right hands range must be ForwardIterator");
+                static_assert(ForwardIterator<IterLHS>,
+                    "Iter type of left hand side range must satisfy ForwardIterator");
+                static_assert(ForwardIterator<IterRHS>,
+                    "Iter type of right hand side range must satisfy ForwardIterator");
 
                 auto l = details::all(std::forward<LHS>(lhs));
                 return details::ZipRange<decltype(l), decltype(r)>{l, r};
