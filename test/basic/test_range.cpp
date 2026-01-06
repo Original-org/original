@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <numeric>
 #include <gtest/gtest.h>
 
 import original.basic.array;
@@ -675,4 +677,153 @@ TEST_F(RangeTest, BuiltinRangeViewChain)
         EXPECT_NE(val, 0);
         EXPECT_NE(val, 5);
     }
+}
+
+TEST_F(RangeTest, ToStdBasic) {
+    const auto std_range = arr | toStd();
+    static_assert(std::random_access_iterator<decltype(std_range.begin())>);
+    EXPECT_TRUE((std::same_as<std::contiguous_iterator_tag, decltype(std_range.begin())::iterator_category>));
+
+    int sum = 0;
+    std::ranges::for_each(std_range, [&sum](const int x) { sum += x; });
+    EXPECT_EQ(sum, 15);  // 1+2+3+4+5
+
+    const auto dist = std::distance(std_range.begin(), std_range.end());
+    EXPECT_EQ(dist, 5);
+
+    const auto accum = std::accumulate(std_range.begin(), std_range.end(), 0);
+    EXPECT_EQ(accum, 15);
+
+    // Test random access operations
+    auto it = std_range.begin();
+    EXPECT_EQ(it[0], 1);
+    EXPECT_EQ(it[2], 3);
+    EXPECT_EQ(it[4], 5);
+    it += 3;
+    EXPECT_EQ(*it, 4);
+    it -= 2;
+    EXPECT_EQ(*it, 2);
+    EXPECT_EQ(it + 4, std_range.end());
+    EXPECT_EQ(std_range.end() - it, 4);
+}
+
+TEST_F(RangeTest, ToStdWithEmptyRange) {
+    Array<int, 0> empty;
+    const auto std_range = empty | toStd();
+
+    EXPECT_EQ(std_range.begin(), std_range.end());
+    const auto dist = std::distance(std_range.begin(), std_range.end());
+    EXPECT_EQ(dist, 0);
+
+    int sum = 0;
+    std::ranges::for_each(std_range, [&sum](int) { sum += 1; });
+    EXPECT_EQ(sum, 0);
+
+    const auto accum = std::accumulate(std_range.begin(), std_range.end(), 0);
+    EXPECT_EQ(accum, 0);
+}
+
+TEST_F(RangeTest, ToStdWithBuiltinArray) {
+    constexpr int builtin[] = {1, 2, 3, 4, 5};
+    const auto std_range = builtin | toStd();
+    static_assert(std::contiguous_iterator<decltype(std_range.begin())>);
+    EXPECT_TRUE((std::same_as<std::contiguous_iterator_tag, decltype(std_range.begin())::iterator_category>));
+
+    int sum = 0;
+    std::ranges::for_each(std_range, [&sum](const int x) { sum += x; });
+    EXPECT_EQ(sum, 15);
+
+    const auto dist = std::distance(std_range.begin(), std_range.end());
+    EXPECT_EQ(dist, 5);
+
+    auto it = std_range.begin();
+    EXPECT_EQ(it[0], 1);
+    EXPECT_EQ(it[4], 5);
+    EXPECT_EQ(*(it + 2), 3);
+}
+
+TEST_F(RangeTest, ToStdWithChainedAdapters) {
+    const auto chained = arr | skip(1_size) | take(3_size) | transform([](const int x) { return x * 2; }) | toStd();
+    static_assert(std::forward_iterator<decltype(chained.begin())>);  // transform reduces to forward
+    EXPECT_TRUE((std::same_as<std::forward_iterator_tag, decltype(chained.begin())::iterator_category>));
+
+    std::vector<int> result;
+    std::ranges::copy(chained, std::back_inserter(result));
+    EXPECT_EQ(result, std::vector({4, 6, 8}));  // (2*2, 3*2, 4*2)
+
+    const auto dist = std::distance(chained.begin(), chained.end());
+    EXPECT_EQ(dist, 3);
+
+    const auto accum = std::accumulate(chained.begin(), chained.end(), 0);
+    EXPECT_EQ(accum, 18);  // 4+6+8
+}
+
+TEST_F(RangeTest, ToStdWithFilter) {
+    const auto filtered = arr | filter([](int x) { return x % 2 == 1; }) | toStd();
+    static_assert(std::forward_iterator<decltype(filtered.begin())>);  // filter is forward
+    EXPECT_TRUE((std::same_as<std::forward_iterator_tag, decltype(filtered.begin())::iterator_category>));
+
+    std::vector<int> result;
+    std::ranges::copy(filtered, std::back_inserter(result));
+    EXPECT_EQ(result, std::vector<int>({1, 3, 5}));
+
+    const auto dist = std::distance(filtered.begin(), filtered.end());
+    EXPECT_EQ(dist, 3);
+}
+
+TEST_F(RangeTest, ToStdWithReverse) {
+    const auto reversed = arr | reverse() | toStd();
+    static_assert(std::bidirectional_iterator<decltype(reversed.begin())>);  // reverse is bidirectional
+    EXPECT_TRUE((std::same_as<std::bidirectional_iterator_tag, decltype(reversed.begin())::iterator_category>));
+
+    std::vector<int> result;
+    std::ranges::copy(reversed, std::back_inserter(result));
+    EXPECT_EQ(result, std::vector({5, 4, 3, 2, 1}));
+
+    auto it = reversed.begin();
+    ++it; ++it;  // at 3
+    EXPECT_EQ(*it, 3);
+    --it;  // at 4
+    EXPECT_EQ(*it, 4);
+
+    const auto dist = std::distance(reversed.begin(), reversed.end());
+    EXPECT_EQ(dist, 5);
+}
+
+// TEST_F(RangeTest, ToStdWithZip) {
+//     Array<int, 5> other{10, 20, 30, 40, 50};
+//     const auto zipped = arr | zip(other) | toStd();
+//     static_assert(std::forward_iterator<decltype(zipped.begin())>);  // zip is forward
+//     EXPECT_TRUE((std::same_as<std::forward_iterator_tag, decltype(zipped.begin())::iterator_category>));
+//
+//     using Pair = Couple<int, int>;
+//     std::vector<Pair> result;
+//     std::copy(zipped.begin(), zipped.end(), std::back_inserter(result));
+//     EXPECT_EQ(result[0], (Pair{1, 10}));
+//     EXPECT_EQ(result[1], (Pair{2, 20}));
+//     EXPECT_EQ(result[2], (Pair{3, 30}));
+//     EXPECT_EQ(result[3], (Pair{4, 40}));
+//     EXPECT_EQ(result[4], (Pair{5, 50}));
+//
+//     const auto dist = std::distance(zipped.begin(), zipped.end());
+//     EXPECT_EQ(dist, 5);
+// }
+
+TEST_F(RangeTest, ToStdIteratorComparisonAndArithmetic) {
+    const auto std_range = arr | toStd();
+    auto it1 = std_range.begin();
+    const auto it2 = std_range.begin() + 2;
+    EXPECT_NE(it1, it2);
+    EXPECT_LT(it1, it2);
+    EXPECT_LE(it1, it2);
+    EXPECT_GT(it2, it1);
+    EXPECT_GE(it2, it1);
+    EXPECT_EQ(it2 - it1, 2);
+
+    it1 += 3;
+    EXPECT_EQ(*it1, 4);
+    it1 -= 1;
+    EXPECT_EQ(*it1, 3);
+
+    EXPECT_EQ(it1[1], 4);  // 3 + 1 offset
 }
