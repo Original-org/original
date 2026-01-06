@@ -327,10 +327,12 @@ export namespace original
     {
         using Base = details::ArrayImpl<T, 0>;
     public:
-        using IterType      = DefaultIterator<T, SpecifiedSource<Array>>;
-        using ConstIterType = DefaultIterator<const T, SpecifiedSource<Array>>;
-        using ValueType     = T;
-        using SizeType      = Size;
+        using IterType       = DefaultIterator<T, SpecifiedSource<Array>>;
+        using ConstIterType  = DefaultIterator<const T, SpecifiedSource<Array>>;
+        using RIterType      = ReversedIterator<IterType>;
+        using ConstRIterType = ReversedIterator<ConstIterType>;
+        using ValueType      = T;
+        using SizeType       = Size;
 
         constexpr Array() noexcept = default;
 
@@ -342,14 +344,24 @@ export namespace original
 
         constexpr Array& operator=(Array&&) noexcept = default;
 
-        constexpr IterType begin() noexcept
+        [[nodiscard]] constexpr IterType begin() noexcept
         {
             return IterType{};
         }
 
-        constexpr IterType end() noexcept
+        [[nodiscard]] constexpr IterType end() noexcept
         {
             return IterType{};
+        }
+
+        [[nodiscard]] constexpr RIterType rBegin() noexcept
+        {
+            return RIterType{};
+        }
+
+        [[nodiscard]] constexpr RIterType rEnd() noexcept
+        {
+            return RIterType{};
         }
 
         [[nodiscard]] constexpr ConstIterType begin() const noexcept
@@ -360,6 +372,16 @@ export namespace original
         [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{};
+        }
+
+        [[nodiscard]] constexpr ConstRIterType rBegin() const noexcept
+        {
+            return ConstRIterType{};
+        }
+
+        [[nodiscard]] constexpr ConstRIterType rEnd() const noexcept
+        {
+            return ConstRIterType{};
         }
 
         /**
