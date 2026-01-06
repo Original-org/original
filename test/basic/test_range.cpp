@@ -591,7 +591,7 @@ TEST_F(RangeTest, ZipWithEmptyRange) {
     }
 }
 
-TEST_F(RangeTest, ReverseRanbge) {
+TEST_F(RangeTest, ReverseRange) {
     constexpr Array<int, 5> arr {1, 2, 3, 4, 5};
     const auto reversed = arr | reverse();
     int cur = 5;
@@ -599,5 +599,80 @@ TEST_F(RangeTest, ReverseRanbge) {
     {
         EXPECT_EQ(e, cur);
         --cur;
+    }
+
+    for (const auto reverse_enum = arr | reverse() | enumerate();
+         const auto& [index, val]: reverse_enum)
+    {
+        EXPECT_EQ(index.value() + val, 5);
+    }
+
+    static constexpr int builtin[5] = {1, 2, 3, 4, 5};
+    int i = 5;
+    for (const auto reversed_builtin = builtin | reverse();
+         const auto& e: reversed_builtin)
+    {
+        EXPECT_EQ(e, i);
+        --i;
+    }
+}
+
+TEST_F(RangeTest, CallReverseMultipleTimes)
+{
+    static constexpr int builtin[5] = {1, 2, 3, 4, 5};
+    for (const auto chain_odd_times = builtin | reverse() | reverse() | reverse() | enumerate();
+         const auto& [index, val]: chain_odd_times)
+    {
+        EXPECT_EQ(index.value() + val, 5);
+    }
+
+    for (const auto chain_even_times = builtin | reverse() | reverse() | reverse() | reverse() | enumerate();
+         const auto& [index, val]: chain_even_times)
+    {
+        EXPECT_EQ(index.value(), val);
+    }
+}
+
+TEST_F(RangeTest, BuiltinRangeViewChain)
+{
+    static constexpr int builtin[5] = {1, 2, 3, 4, 5};
+    const auto chain1 = builtin | take(10_size);
+    int i = 1;
+    for (const auto& e: chain1)
+    {
+        EXPECT_EQ(i, e);
+        ++i;
+    }
+
+    const auto chain2 = builtin | take(6_size) | enumerate();
+    int j = 1;
+    for (const auto& [index, val]: chain2)
+    {
+        EXPECT_EQ(index.value(), j - 1);
+        EXPECT_EQ(val, j);
+        ++j;
+    }
+
+    const auto chain3 = builtin | take(5_size) | enumerate() | skip(1_size);
+    int cnt = 0;
+    int k = 2;
+    for (const auto& [index, val]: chain3)
+    {
+        EXPECT_EQ(val, k);
+        ++k;
+        ++cnt;
+    }
+    EXPECT_EQ(cnt, 4);
+
+    const auto chain4 = builtin
+        | reverse()
+        | enumerate()
+        | skip(1_size)
+        | take(3_size);
+    for (const auto& [index, val]: chain4)
+    {
+        EXPECT_EQ(index.value() + val, 5);
+        EXPECT_NE(val, 0);
+        EXPECT_NE(val, 5);
     }
 }
