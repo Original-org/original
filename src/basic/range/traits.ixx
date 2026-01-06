@@ -2,6 +2,7 @@ module;
 #include <type_traits>
 export module original.basic.range.traits;
 import original.basic.iterator.traits;
+import original.basic.iterator.adaptor;
 import original.basic.types;
 import original.basic.number;
 
@@ -123,15 +124,39 @@ export namespace original
     }
 
     template<typename T, Size::Type Size>
-    T* rBegin(T (&arr) [Size])
+    const T* begin(const T (&arr) [Size])
     {
-        return arr + Size - 1;
+        return arr;
     }
 
     template<typename T, Size::Type Size>
-    T* rEnd(T (&arr) [Size])
+    const T* end(const T (&arr) [Size])
     {
-        return arr - 1;
+        return arr + Size;
+    }
+
+    template<typename T, Size::Type Size>
+    ReversedIterator<T*> rBegin(T (&arr) [Size])
+    {
+        return ReversedIterator<T*>{arr + Size - 1};
+    }
+
+    template<typename T, Size::Type Size>
+    ReversedIterator<T*> rEnd(T (&arr) [Size])
+    {
+        return ReversedIterator<T*>{arr - 1};
+    }
+
+    template<typename T, Size::Type Size>
+    ReversedIterator<const T*> rBegin(const T (&arr) [Size])
+    {
+        return ReversedIterator<const T*>{arr + Size - 1};
+    }
+
+    template<typename T, Size::Type Size>
+    ReversedIterator<const T*> rEnd(const T (&arr) [Size])
+    {
+        return ReversedIterator<const T*>{arr - 1};
     }
 
     /**
@@ -313,8 +338,8 @@ export namespace original
         using ValueType      = IterTraits<BeginIterType>::ValueType;
         using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
-        using RBeginIterType = T*;
-        using REndIterType   = T*;
+        using RBeginIterType = ReversedIterator<BeginIterType>;
+        using REndIterType   = ReversedIterator<EndIterType>;
 
         static BeginIterType begin(T (&arr) [Size])
         {
@@ -328,12 +353,12 @@ export namespace original
 
         static RBeginIterType rBegin(T (&arr) [Size])
         {
-            return arr + Size - 1;
+            return RBeginIterType{arr + Size - 1};
         }
 
         static REndIterType rEnd(T (&arr) [Size])
         {
-            return arr - 1;
+            return RBeginIterType{arr - 1};
         }
     };
 
@@ -351,8 +376,8 @@ export namespace original
         using ValueType      = IterTraits<BeginIterType>::ValueType;
         using PointerType    = IterTraits<BeginIterType>::PointerType;
         using DifferenceType = IterTraits<BeginIterType>::DifferenceType;
-        using RBeginIterType = const T*;
-        using REndIterType   = const T*;
+        using RBeginIterType = ReversedIterator<BeginIterType>;
+        using REndIterType   = ReversedIterator<EndIterType>;
 
 
         static BeginIterType begin(const T (&arr) [Size])
@@ -367,14 +392,20 @@ export namespace original
 
         static RBeginIterType rBegin(const T (&arr) [Size])
         {
-            return arr + Size - 1;
+            return RBeginIterType{arr + Size - 1};
         }
 
         static REndIterType rEnd(const T (&arr) [Size])
         {
-            return arr - 1;
+            return RBeginIterType{arr - 1};
         }
     };
+
+    template<typename T, Size::Type Size>
+    struct RangeTraits<T (&)[Size]> : RangeTraits<T[Size]> {};
+
+    template<typename T, Size::Type Size>
+    struct RangeTraits<const T (&)[Size]> : RangeTraits<const T[Size]> {};
 }
 
 /** @} */ // end of RangeTraits group
