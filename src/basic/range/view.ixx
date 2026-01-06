@@ -562,7 +562,7 @@ namespace original::details
     /**
      * @brief View that yields the first N elements of a range.
      */
-    template<Range R>
+    template<ForwardRange R>
     class TakeRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
 
@@ -595,7 +595,7 @@ namespace original::details
     /**
      * @brief View that skips the first N elements of a range.
      */
-    template<Range R>
+    template<ForwardRange R>
     class SkipRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
         Size n_{};
@@ -643,29 +643,33 @@ namespace original::details
 
         auto begin()
         {
-            return this->base_.rBegin();
+            using Iter = decltype(this->endBase());
+            return ReversedIterator<Iter>{this->endBase()};
         }
 
         auto end()
         {
-            return this->base_.rEnd();
+            using Iter = decltype(this->beginBase());
+            return ReversedIterator<Iter>{this->beginBase()};
         }
 
         auto begin() const
         {
-            return this->base_.rBegin();
+            using Iter = decltype(this->endBase());
+            return ReversedIterator<Iter>{this->endBase()};
         }
 
         auto end() const
         {
-            return this->base_.rEnd();
+            using Iter = decltype(this->beginBase());
+            return ReversedIterator<Iter>{this->beginBase()};
         }
     };
 
     /**
      * @brief View that enumerates elements with an index.
      */
-    template<Range R>
+    template<ForwardRange R>
     class EnumRange : public RangeViewBase<R> {
         using Base = RangeViewBase<R>;
         Size start_{};
@@ -697,7 +701,7 @@ namespace original::details
     /**
      * @brief View that applies a transformation to each element.
      */
-    template<Range R, Invokable F>
+    template<ForwardRange R, Invokable F>
     class TransformRange : public RangeViewBase<R>
     {
         using Base = RangeViewBase<R>;
@@ -736,7 +740,7 @@ namespace original::details
     /**
      * @brief View that yields only elements satisfying a predicate.
      */
-    template<Range R, Invokable F>
+    template<ForwardRange R, Invokable F>
     class FilterRange : public RangeViewBase<R>
     {
         using Base = RangeViewBase<R>;
@@ -775,7 +779,7 @@ namespace original::details
     /**
      * @brief View that concatenates two ranges.
      */
-    template<Range Prev, Range Next>
+    template<ForwardRange Prev, ForwardRange Next>
     class ConcatRange : public RangeViewBase<Prev>
     {
         using Base = RangeViewBase<Prev>;
@@ -845,7 +849,7 @@ namespace original::details
     /**
      * @brief View that zips two ranges into pairs.
      */
-    template<Range LHS, Range RHS>
+    template<ForwardRange LHS, ForwardRange RHS>
     class ZipRange
     {
         LHS lhs_;
@@ -946,7 +950,7 @@ export namespace original::range
     {
         return details::RangePipeline
         {
-            [n]<Range R>(R&& r)
+            [n]<ForwardRange R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
@@ -962,7 +966,7 @@ export namespace original::range
     {
         return details::RangePipeline
         {
-            [n]<Range R>(R&& r)
+            [n]<ForwardRange R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
@@ -994,7 +998,7 @@ export namespace original::range
     {
         return details::RangePipeline
         {
-            [start]<Range R>(R&& r)
+            [start]<ForwardRange R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
@@ -1014,7 +1018,7 @@ export namespace original::range
     {
         return details::RangePipeline
         {
-            [func = std::forward<F>(func)]<Range R>(R&& r)
+            [func = std::forward<F>(func)]<ForwardRange R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
@@ -1048,7 +1052,7 @@ export namespace original::range
     {
         return details::RangePipeline
         {
-            [func = std::forward<F>(func)]<Range R>(R&& r)
+            [func = std::forward<F>(func)]<ForwardRange R>(R&& r)
             {
                 auto all = details::all(std::forward<R>(r));
                 using RangeType = decltype(all);
@@ -1096,22 +1100,17 @@ export namespace original::range
      * @tparam Next Second range type
      * @param next Range to append
      */
-    template<Range Next>
+    template<ForwardRange Next>
     auto concat(Next&& next) noexcept
     {
         return details::RangePipeline
         {
-            [n = details::all(std::forward<Next>(next))]<Range Prev>(Prev&& prev)
+            [n = details::all(std::forward<Next>(next))]<ForwardRange Prev>(Prev&& prev)
             {
                 auto p = details::all(std::forward<Prev>(prev));
 
                 using IterPrev = decltype(p.begin());
                 using IterNext = decltype(n.begin());
-
-                static_assert(ForwardIterator<IterPrev>,
-                    "Iter type of the prev range must satisfy ForwardIterator");
-                static_assert(ForwardIterator<IterNext>,
-                    "Iter type of the next range must satisfy ForwardIterator");
 
                 using RefPrev = IterTraits<IterPrev>::ReferenceType;
                 using RefNext = IterTraits<IterNext>::ReferenceType;
@@ -1133,21 +1132,13 @@ export namespace original::range
      * @tparam RHS Right-hand range type
      * @param rhs Range to zip with
      */
-    template<Range RHS>
+    template<ForwardRange RHS>
     auto zip(RHS&& rhs) noexcept
     {
         return details::RangePipeline
         {
-            [r = details::all(std::forward<RHS>(rhs))]<Range LHS>(LHS&& lhs)
+            [r = details::all(std::forward<RHS>(rhs))]<ForwardRange LHS>(LHS&& lhs)
             {
-                using IterLHS = RangeTraits<LHS>::BeginIterType;
-                using IterRHS = RangeTraits<RHS>::BeginIterType;
-
-                static_assert(ForwardIterator<IterLHS>,
-                    "Iter type of left hand side range must satisfy ForwardIterator");
-                static_assert(ForwardIterator<IterRHS>,
-                    "Iter type of right hand side range must satisfy ForwardIterator");
-
                 auto l = details::all(std::forward<LHS>(lhs));
                 return details::ZipRange<decltype(l), decltype(r)>{l, r};
             }
