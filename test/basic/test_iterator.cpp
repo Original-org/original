@@ -409,83 +409,6 @@ TEST(StdIteratorAdapterTest, MoveSemantics)
     EXPECT_EQ(*it1, 1);
 }
 
-TEST(ReversedIteratorTest, BasicForwardAndBackwardTraversal)
-{
-    int arr[5] = {10, 20, 30, 40, 50};
-    const auto base_end = iterator::makeIterator(arr + 5);
-    auto rev_it = iterator::reverse(base_end);
-
-    ++rev_it;
-    EXPECT_EQ(*rev_it, 50);
-
-    ++rev_it;
-    EXPECT_EQ(*rev_it, 40);
-
-    --rev_it;
-    EXPECT_EQ(*rev_it, 50);
-
-    rev_it++; // NOLINT
-    EXPECT_EQ(*rev_it, 40);
-}
-
-TEST(ReversedIteratorTest, EqualityComparison)
-{
-    int arr[3] = {1, 2, 3};
-    const auto base = iterator::makeIterator(arr + 2);
-
-    auto rev1 = iterator::reverse(base);
-    const auto rev2 = iterator::reverse(base);
-    EXPECT_TRUE(rev1 == rev2);
-
-    ++rev1;
-    EXPECT_FALSE(rev1 == rev2);
-}
-
-TEST(ReversedIteratorTest, PreAndPostIncrementDecrement)
-{
-    int arr[4] = {10, 20, 30, 40};
-    const auto base = iterator::makeIterator(arr + 3);
-    auto rev = iterator::reverse(base);
-
-    const auto post_inc = rev++;
-    EXPECT_EQ(*post_inc, 40);
-    EXPECT_EQ(*rev, 30);
-
-    const auto& pre_inc = ++rev;
-    EXPECT_EQ(*pre_inc, 20);
-
-    const auto post_dec = rev--;
-    EXPECT_EQ(*post_dec, 20);
-    EXPECT_EQ(*rev, 30);
-
-    const auto& pre_dec = --rev;
-    EXPECT_EQ(*pre_dec, 40);
-}
-
-TEST(ReversedIteratorTest, IteratorAccess)
-{
-    int arr[3] = {1, 2, 3};
-    const auto base = iterator::makeIterator(arr + 2);
-    auto rev = iterator::reverse(base);
-
-    EXPECT_EQ(*rev.iterator(), 3);
-    ++rev;
-    EXPECT_EQ(*rev.iterator(), 2);
-}
-
-TEST(ReversedIteratorTest, STLCompatibilityAccumulateReverse)
-{
-    int arr[5] = {10, 20, 30, 40, 50};
-    const auto base_begin = iterator::makeIterator(arr - 1);
-    const auto base_end   = iterator::makeIterator(arr + 4);
-
-    const auto rev_begin = iterator::reverse(base_end);
-    const auto rev_end   = iterator::reverse(base_begin);
-
-    const int sum = std::accumulate(rev_begin, rev_end, 0);
-    EXPECT_EQ(sum, 150);  // 50 + 40 + 30 + 20 + 10
-}
-
 TEST(IteratorViewConcept, DetectsIteratorWithIteratorMember)
 {
     using DefaultIter = DefaultIterator<int>;
@@ -493,9 +416,6 @@ TEST(IteratorViewConcept, DetectsIteratorWithIteratorMember)
 
     using Adapter = StdIteratorAdapter<DefaultIter>;
     static_assert(IteratorView<Adapter>);
-
-    using Rev = ReversedIterator<DefaultIter>;
-    static_assert(IteratorView<Rev>);
 }
 
 TEST(IteratorTest, IterTraitsForBuiltInPointer)
