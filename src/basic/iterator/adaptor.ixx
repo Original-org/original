@@ -286,7 +286,7 @@ export namespace original
     template<BidirectionalIterator It>
     class ReversedIterator
     {
-        It it_;
+        It it_{};
     public:
         using IterType        = IterTraits<It>::IterType;
         using DerivedType     = ReversedIterator;
@@ -295,7 +295,7 @@ export namespace original
         using PointerType     = IterTraits<It>::PointerType;
         using DifferenceType  = IterTraits<It>::DifferenceType;
 
-        constexpr ReversedIterator() = delete;
+        constexpr ReversedIterator() = default;
 
         explicit constexpr ReversedIterator(IterType it) noexcept : it_{it} {}
 
