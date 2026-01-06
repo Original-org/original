@@ -132,8 +132,6 @@ export namespace original
     public:
         using IterType       = DefaultIterator<T, SpecifiedSource<Array>>;
         using ConstIterType  = DefaultIterator<const T, SpecifiedSource<Array>>;
-        using RIterType      = ReversedIterator<IterType>;
-        using ConstRIterType = ReversedIterator<ConstIterType>;
         using ValueType      = T;
         using SizeType       = Size;
 
@@ -176,16 +174,6 @@ export namespace original
             return IterType{this->data_ + N};
         }
 
-        constexpr RIterType rBegin() noexcept
-        {
-            return RIterType{IterType{this->data_ + N - 1}};
-        }
-
-        constexpr RIterType rEnd() noexcept
-        {
-            return RIterType{IterType{this->data_ - 1}};
-        }
-
         /**
          * @brief Const overloads of begin() and end().
          */
@@ -197,16 +185,6 @@ export namespace original
         [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{this->data_ + N};
-        }
-
-        constexpr ConstRIterType rBegin() const noexcept
-        {
-            return ConstRIterType{ConstIterType{this->data_ + N - 1}};
-        }
-
-        constexpr ConstRIterType rEnd() const noexcept
-        {
-            return ConstRIterType{ConstIterType{this->data_ - 1}};
         }
 
         /**
@@ -329,8 +307,6 @@ export namespace original
     public:
         using IterType       = DefaultIterator<T, SpecifiedSource<Array>>;
         using ConstIterType  = DefaultIterator<const T, SpecifiedSource<Array>>;
-        using RIterType      = ReversedIterator<IterType>;
-        using ConstRIterType = ReversedIterator<ConstIterType>;
         using ValueType      = T;
         using SizeType       = Size;
 
@@ -354,16 +330,6 @@ export namespace original
             return IterType{};
         }
 
-        [[nodiscard]] constexpr RIterType rBegin() noexcept
-        {
-            return RIterType{};
-        }
-
-        [[nodiscard]] constexpr RIterType rEnd() noexcept
-        {
-            return RIterType{};
-        }
-
         [[nodiscard]] constexpr ConstIterType begin() const noexcept
         {
             return ConstIterType{};
@@ -372,16 +338,6 @@ export namespace original
         [[nodiscard]] constexpr ConstIterType end() const noexcept
         {
             return ConstIterType{};
-        }
-
-        [[nodiscard]] constexpr ConstRIterType rBegin() const noexcept
-        {
-            return ConstRIterType{};
-        }
-
-        [[nodiscard]] constexpr ConstRIterType rEnd() const noexcept
-        {
-            return ConstRIterType{};
         }
 
         /**
