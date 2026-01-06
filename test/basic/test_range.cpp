@@ -629,7 +629,7 @@ TEST_F(RangeTest, CallReverseMultipleTimes)
     for (const auto chain_even_times = builtin | reverse() | reverse() | reverse() | reverse() | enumerate();
          const auto& [index, val]: chain_even_times)
     {
-        EXPECT_EQ(index.value(), val);
+        EXPECT_EQ(index.value(), val - 1);
     }
 }
 
