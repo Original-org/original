@@ -37,10 +37,10 @@ namespace original::details
         Size remains_{};
 
     public:
-        using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = IterTraits<Iter>::ReferenceType;
-        using ValueType = RemoveCVRefType<ReferenceType>;
-        using PointerType = void;
+        using IterType       = IterTraits<Iter>::IterType;
+        using ReferenceType  = IterTraits<Iter>::ReferenceType;
+        using ValueType      = RemoveCVRefType<ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         TakeIterator() noexcept = default;
@@ -161,10 +161,10 @@ namespace original::details
         Size index_{};
 
     public:
-        using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = Couple<const Size, typename IterTraits<Iter>::ReferenceType>;
-        using ValueType = RemoveCVRefType<ReferenceType>;
-        using PointerType = void;
+        using IterType       = IterTraits<Iter>::IterType;
+        using ReferenceType  = Couple<const Size, typename IterTraits<Iter>::ReferenceType>;
+        using ValueType      = RemoveCVRefType<ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         EnumIterator() noexcept = default;
@@ -222,10 +222,10 @@ namespace original::details
         F* func_;
 
     public:
-        using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = InvokeResultType<F, typename IterTraits<Iter>::ReferenceType>;
-        using ValueType = RemoveCVRefType<ReferenceType>;
-        using PointerType = void;
+        using IterType       = IterTraits<Iter>::IterType;
+        using ReferenceType  = InvokeResultType<F, typename IterTraits<Iter>::ReferenceType>;
+        using ValueType      = RemoveCVRefType<ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         TransformIterator() noexcept = default;
@@ -282,10 +282,10 @@ namespace original::details
                 ++this->cur_;
         }
     public:
-        using IterType = IterTraits<Iter>::IterType;
-        using ReferenceType = IterTraits<Iter>::ReferenceType;
-        using ValueType = RemoveCVRefType<ReferenceType>;
-        using PointerType = void;
+        using IterType       = IterTraits<Iter>::IterType;
+        using ReferenceType  = IterTraits<Iter>::ReferenceType;
+        using ValueType      = RemoveCVRefType<ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<Iter>::DifferenceType;
 
         FilterIterator() noexcept = default;
@@ -357,8 +357,8 @@ namespace original::details
                 typename IterTraits<Prev>::ReferenceType,
                 typename IterTraits<Next>::ReferenceType
             >;
-        using ValueType = RemoveCVRefType<ReferenceType>;
-        using PointerType = void;
+        using ValueType      = RemoveCVRefType<ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<Prev>::DifferenceType;
 
         ConcatIterator() noexcept = default;
@@ -428,10 +428,10 @@ namespace original::details
         RHS end_rhs_;
 
     public:
-        using IterType = ZipIterator;
-        using ValueType = Couple<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>;
-        using ReferenceType = Couple<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>;
-        using PointerType = void;
+        using IterType       = ZipIterator;
+        using ValueType      = Couple<typename IterTraits<LHS>::ValueType, typename IterTraits<RHS>::ValueType>;
+        using ReferenceType  = Couple<typename IterTraits<LHS>::ReferenceType, typename IterTraits<RHS>::ReferenceType>;
+        using PointerType    = void;
         using DifferenceType = IterTraits<LHS>::DifferenceType;
 
         ZipIterator() noexcept = default;
