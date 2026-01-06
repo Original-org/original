@@ -500,34 +500,6 @@ namespace original::details
             auto& r = *this->ptr_;
             return RangeTraits<decltype(r)>::end(r);
         }
-
-        decltype(auto) rBegin() const
-        requires BidirectionalRange<R>
-        {
-            const auto& r = *this->ptr_;
-            return RangeTraits<decltype(r)>::rBegin(r);
-        }
-
-        decltype(auto) rEnd() const
-        requires BidirectionalRange<R>
-        {
-            const auto& r = *this->ptr_;
-            return RangeTraits<decltype(r)>::rEnd(r);
-        }
-
-        decltype(auto) rBegin()
-        requires BidirectionalRange<R>
-        {
-            auto& r = *this->ptr_;
-            return RangeTraits<decltype(r)>::rBegin(r);
-        }
-
-        decltype(auto) rEnd()
-        requires BidirectionalRange<R>
-        {
-            auto& r = *this->ptr_;
-            return RangeTraits<decltype(r)>::rEnd(r);
-        }
     };
 
     /**
@@ -687,26 +659,6 @@ namespace original::details
         auto end() const
         {
             return this->base_.rEnd();
-        }
-
-        auto rBegin()
-        {
-            return this->beginBase();
-        }
-
-        auto rEnd()
-        {
-            return this->endBase();
-        }
-
-        auto rBegin() const
-        {
-            return this->beginBase();
-        }
-
-        auto rEnd() const
-        {
-            return this->beginBase();
         }
     };
 
