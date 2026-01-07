@@ -35,7 +35,7 @@ export namespace original::info
          * @return Formatted version string in "major.minor.patch" format.
          * @note Uses std::format for string generation.
          */
-        std::string str() const noexcept
+        [[nodiscard]] std::string str() const noexcept
         {
             return std::format("{}.{}.{}", this->major, this->minor, this->patch);
         }
@@ -60,7 +60,7 @@ export namespace original::info
     constexpr auto ORGANIZATION = "Original-org";
 
     /** @brief Current library version. */
-    constexpr auto VERSION = Version{0, 1, 0};
+    constexpr auto VERSION = Version{0, 1, 1};
 }
 
 export namespace original::info
