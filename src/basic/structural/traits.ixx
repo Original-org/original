@@ -5,6 +5,7 @@ export module original.basic.structural.traits;
 import original.basic.number;
 import original.basic.types;
 import original.basic.structural.utility;
+import original.basic.algorithm.extremum;
 
 /**
  * @addtogroup StructuralTraits
@@ -55,6 +56,51 @@ namespace original::details
     template<typename T, Size::Type N>
     inline constexpr bool HasStructuralGetValue =
         StructuralGetCheck<T, 0, N>::value;
+
+    template<typename L, typename R, Size::Type... I>
+    consteval auto
+    structuralCompareCategoryImpl(IndexSequence<I...>)
+    {
+        return std::type_identity<
+            CommonComparisonCategory<
+                decltype(get<I>(std::declval<L>()) <=> get<I>(std::declval<R>()))
+            ...>
+        >{};
+    }
+
+    template<typename Pred, typename L, typename R, Size::Type I, Size::Type N>
+    struct StructuralEqualityComparableCheck
+    {
+        static constexpr bool value =
+        requires(const L& lhs, const R& rhs, Pred pred) {
+                { pred(get<I>(lhs), get<I>(rhs)) } -> Convertible<bool>;
+        } && StructuralEqualityComparableCheck<Pred, L, R, I + 1, N>::value;
+    };
+
+    template<typename Pred, typename L, typename R, Size::Type N>
+    struct StructuralEqualityComparableCheck<Pred, L, R, N, N>
+    : std::true_type {};
+
+    template<typename Pred, typename L, typename R, Size::Type N>
+    inline constexpr bool StructuralEqualityComparableCheckValue =
+        StructuralEqualityComparableCheck<Pred, L, R, 0, N>::value;
+
+    template<typename Pred, typename L, typename R, Size::Type I, Size::Type N>
+    struct StructuralThreeWayComparableCheck
+    {
+        static constexpr bool value =
+        requires(const L& lhs, const R& rhs, Pred pred) {
+                    { pred(get<I>(lhs), get<I>(rhs)) } -> StdThreeWayCompareResult;
+        } && StructuralThreeWayComparableCheck<Pred, L, R, I + 1, N>::value;
+    };
+
+    template<typename Pred, typename L, typename R, Size::Type N>
+    struct StructuralThreeWayComparableCheck<Pred, L, R, N, N>
+    : std::true_type {};
+
+    template<typename Pred, typename L, typename R, Size::Type N>
+    inline constexpr bool StructuralThreeWayComparableCheckValue =
+        StructuralThreeWayComparableCheck<Pred, L, R, 0, N>::value;
 }
 
 export namespace original
@@ -175,69 +221,48 @@ export namespace original
     struct StructuralTraits
     {
         using Type = std::remove_cvref_t<T>;
+
         template<Size::Type I>
         using ElementType = std::tuple_element<I, Type>::type; // NOLINT
+
         static constexpr Size::Type SIZE = std::tuple_size<Type>::value; // NOLINT
     };
 
-    /**
-     * @brief Sequentially invokes a callable for each element of a structural object.
-     *
-     * @tparam T Structural type
-     * @tparam F Callable type
-     * @param t Structural object (forwarded)
-     * @param f Callable invoked with each element
-     *
-     * Expands to f(get<0>(t)), f(get<1>(t)), ...
-     * Returns void. Useful for side effects.
-     *
-     * @code
-     * std::tuple<int, double> t{42, 3.14};
-     * forEach(t, [](auto& x) { std::cout << x << ' '; });  // prints 42 3.14
-     * @endcode
-     */
-    template<Structural T, Invokable F>
-    constexpr void
-    forEach(T&& t, F&& f)
-    {
-        forEach<StructuralTraits<T>::SIZE>
-        (
-            [&]<Size::Type I>(IndexConstant<I>)
-            {
-                f(get<I>(std::forward<T>(t)));
-            }
-        );
-    }
+    template<Structural L, Structural R>
+    using StructuralCompareCategory =
+        decltype(
+            details::structuralCompareCategoryImpl<L, R>(
+                makeIndexSequence<
+                    algorithms::minimum(
+                        StructuralTraits<L>::SIZE,
+                        StructuralTraits<R>::SIZE
+                    )
+                >()
+            )
+        )::type;
 
-    /**
-     * @brief Invokes a callable with all elements of a structural object as separate arguments.
-     *
-     * @tparam T Structural type
-     * @tparam F Callable type
-     * @param t Structural object (forwarded)
-     * @param f Callable invoked with the expanded element pack
-     *
-     * Expands to f(get<0>(t), get<1>(t), ...)
-     * Returns the result of invoking f.
-     *
-     * @code
-     * auto sum = [](auto... xs) { return (xs + ...); };
-     * std::tuple<int, double, char> t{1, 2.5, 3};
-     * constexpr auto total = forAll(t, sum);  // 6.5
-     * @endcode
-     */
-    template<Structural T, Invokable F>
-    constexpr decltype(auto)
-    forAll(T&& t, F&& f)
-    {
-        return forAll<StructuralTraits<T>::SIZE>
-        (
-            [&]<Size::Type... I>(IndexConstant<I>...)
-            {
-                return f(get<I>(std::forward<T>(t))...);
-            }
-        );
-    }
+    template<typename Pred, typename L, typename R = L>
+    concept StructuralEqualityComparable =
+    Structural<L> &&
+    Structural<R> &&
+    StructuralTraits<L>::SIZE == StructuralTraits<R>::SIZE &&
+    (StructuralTraits<L>::SIZE == 0 ||
+    details::StructuralEqualityComparableCheckValue<
+        Pred, L, R, StructuralTraits<L>::SIZE
+    >);
+
+    template<typename Pred, typename L, typename R = L>
+    concept StructuralThreeWayComparable =
+    Structural<L> &&
+    Structural<R> &&
+    requires {
+        typename StructuralCompareCategory<L, R>;
+    } &&
+    StructuralTraits<L>::SIZE == StructuralTraits<R>::SIZE &&
+    (StructuralTraits<L>::SIZE == 0 ||
+    details::StructuralThreeWayComparableCheckValue<
+        Pred, L, R, StructuralTraits<L>::SIZE
+    >);
 }
 
 /** @} */ // end of StructuralTraits group
