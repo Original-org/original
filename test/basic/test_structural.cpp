@@ -270,9 +270,11 @@ TEST(Couple, EqualityComparison)
     constexpr Couple cp1(1, 2.0f);
     constexpr Couple cp2(1, 2.0f);
     constexpr Couple cp3(2, 2.0f);
+    constexpr Couple cp4{2.0f, 2.0f};
 
     EXPECT_TRUE(cp1 == cp2);
     EXPECT_FALSE(cp1 == cp3);
+    EXPECT_TRUE(cp3 == cp4);
 }
 
 TEST(Couple, ThreeWayComparison)
@@ -280,9 +282,11 @@ TEST(Couple, ThreeWayComparison)
     constexpr Couple cp1(1, 'a');
     constexpr Couple cp2(1, 'b');
     constexpr Couple cp3(2, 'a');
+    constexpr Couple cp4{2, static_cast<int>('a')};
 
     EXPECT_LT(cp1, cp2);
     EXPECT_LT(cp1, cp3);
+    EXPECT_TRUE((cp1 <=> cp4) < 0);
 }
 
 TEST(Couple, GetFunction)
