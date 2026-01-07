@@ -78,7 +78,7 @@ export namespace original
 
     template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
-    constexpr decltype(auto) get(const Couple<T1, T2>& cp)
+    constexpr decltype(auto) get(const Couple<T1, T2>& cp) noexcept
     {
         if constexpr (I == 0)
             return cp.first;
@@ -88,7 +88,7 @@ export namespace original
 
     template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
-    constexpr decltype(auto) get(Couple<T1, T2>& cp)
+    constexpr decltype(auto) get(Couple<T1, T2>& cp) noexcept
     {
         if constexpr (I == 0)
             return cp.first;
@@ -98,12 +98,12 @@ export namespace original
 
     template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
-    constexpr decltype(auto) get(Couple<T1, T2>&& cp)
+    constexpr decltype(auto) get(Couple<T1, T2>&& cp) noexcept
     {
         if constexpr (I == 0)
-            return std::move(cp.first);
+            return std::move(cp).first;
         else
-            return std::move(cp.second);
+            return std::move(cp).second;
     }
 }
 
@@ -132,19 +132,19 @@ export namespace std
     };
 
     template<std::size_t I, typename T1, typename T2>
-    constexpr decltype(auto) get(const original::Couple<T1, T2>& cp) // NOLINT
+    constexpr decltype(auto) get(const original::Couple<T1, T2>& cp) noexcept // NOLINT
     {
         return original::get<I>(cp);
     }
 
     template<std::size_t I, typename T1, typename T2>
-    constexpr decltype(auto) get(original::Couple<T1, T2>& cp) // NOLINT
+    constexpr decltype(auto) get(original::Couple<T1, T2>& cp) noexcept // NOLINT
     {
         return original::get<I>(cp);
     }
 
     template<std::size_t I, typename T1, typename T2>
-    constexpr decltype(auto) get(original::Couple<T1, T2>&& cp) // NOLINT
+    constexpr decltype(auto) get(original::Couple<T1, T2>&& cp) noexcept // NOLINT
     {
         return original::get<I>(std::move(cp));
     }
