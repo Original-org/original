@@ -36,15 +36,13 @@ export namespace original
         constexpr bool operator==(const Couple& rhs) const
         requires EqualityComparable<T1> && EqualityComparable<T2>
         {
-            return this->first == rhs.first && this->second == rhs.second;
+            return structural::equal(*this, rhs);
         }
 
         constexpr auto operator<=>(const Couple& rhs) const
         requires ThreeWayComparable<T1> && ThreeWayComparable<T2>
         {
-            if (auto c = this->first <=> rhs.first; c != 0)
-                return c;
-            return this->second <=> rhs.second;
+            return structural::lexicographicallyCompare(*this, rhs);
         }
     };
 
@@ -56,10 +54,7 @@ export namespace original
              EqualityComparable<CommonType<T1, U1>> && EqualityComparable<CommonType<T2, U2>>
     constexpr bool operator==(const Couple<T1, T2>& lhs, const Couple<U1, U2>& rhs)
     {
-        using CommonType1 = CommonType<T1, U1>;
-        using CommonType2 = CommonType<T2, U2>;
-        return static_cast<CommonType1>(lhs.first) == static_cast<CommonType1>(rhs.first) &&
-               static_cast<CommonType2>(lhs.second) == static_cast<CommonType2>(rhs.second);
+        return structural::equal(lhs, rhs);
     }
 
     template<typename T1, typename T2, typename U1, typename U2>
@@ -67,13 +62,7 @@ export namespace original
              ThreeWayComparable<CommonType<T1, U1>> && ThreeWayComparable<CommonType<T2, U2>>
     constexpr auto operator<=>(const Couple<T1, T2>& lhs, const Couple<U1, U2>& rhs)
     {
-        using CommonType1 = CommonType<T1, U1>;
-        using CommonType2 = CommonType<T2, U2>;
-        const auto first_compare_result =
-            static_cast<CommonType1>(lhs.first) <=> static_cast<CommonType1>(rhs.first);
-        if (first_compare_result != 0)
-            return first_compare_result;
-        return static_cast<CommonType2>(lhs.second) <=> static_cast<CommonType2>(rhs.second);
+        return structural::lexicographicallyCompare(lhs, rhs);
     }
 
     template<Size::Type I, typename T1, typename T2>
