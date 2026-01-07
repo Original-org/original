@@ -3,6 +3,8 @@ module;
 #include <tuple>
 export module original.basic.structural.couple;
 import original.basic.types;
+import original.basic.number;
+import original.basic.structural.algorithm;
 
 
 export namespace original
@@ -32,6 +34,16 @@ export namespace original
         constexpr Couple(Couple&&) noexcept = default;
 
         constexpr Couple& operator=(Couple&&) noexcept = default;
+
+        template<Size::Type I>
+        requires (I < 2)
+        constexpr decltype(auto) get() const noexcept
+        {
+            if constexpr(I == 0)
+                return this->first;
+            else
+                return this->second;
+        }
 
         constexpr bool operator==(const Couple& rhs) const
         requires EqualityComparable<T1> && EqualityComparable<T2>
