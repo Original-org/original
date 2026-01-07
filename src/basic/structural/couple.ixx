@@ -4,6 +4,7 @@ module;
 export module original.basic.structural.couple;
 import original.basic.types;
 import original.basic.number;
+import original.basic.structural.utility;
 import original.basic.structural.algorithm;
 
 
@@ -81,30 +82,21 @@ export namespace original
     requires (I < 2)
     constexpr decltype(auto) get(const Couple<T1, T2>& cp) noexcept
     {
-        if constexpr (I == 0)
-            return cp.first;
-        else
-            return cp.second;
+        return cp.template get<I>();
     }
 
     template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
     constexpr decltype(auto) get(Couple<T1, T2>& cp) noexcept
     {
-        if constexpr (I == 0)
-            return cp.first;
-        else
-            return cp.second;
+        return cp.template get<I>();
     }
 
     template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
     constexpr decltype(auto) get(Couple<T1, T2>&& cp) noexcept
     {
-        if constexpr (I == 0)
-            return std::move(cp).first;
-        else
-            return std::move(cp).second;
+        return std::move(cp).template get<I>();
     }
 }
 
@@ -114,16 +106,10 @@ export namespace std
     struct tuple_size<original::Couple<T1, T2>> // NOLINT
     : std::integral_constant<std::size_t, 2> {};
 
-    template<typename T1, typename T2>
-    struct tuple_element<0, original::Couple<T1, T2>> // NOLINT
+    template<size_t I, typename T1, typename T2>
+    struct tuple_element<I, original::Couple<T1, T2>> // NOLINT
     {
-        using type = T1;
-    };
-
-    template<typename T1, typename T2>
-    struct tuple_element<1, original::Couple<T1, T2>> // NOLINT
-    {
-        using type = T2;
+        using type = original::ArgsTraits<T1, T2>::template ArgAt<I>;
     };
 
     template<std::size_t I, typename T1, typename T2>

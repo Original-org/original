@@ -19,11 +19,10 @@ namespace original::structural::details {
     >
     constexpr Category lexicographicallyCompareImpl(const L& lhs, const R& rhs, Pred pred)
     {
-        constexpr Size::Type NL = StructuralTraits<L>::SIZE;
-        if constexpr (constexpr Size::Type NR = StructuralTraits<R>::SIZE;
-                      I == algorithms::minimum(NL, NR))
+        if constexpr (constexpr Size::Type NL = StructuralTraits<L>::SIZE;
+                      I == NL)
         {
-            return static_cast<Category>(NL <=> NR);
+            return static_cast<Category>(std::strong_ordering::equal);
         }
         else
         {
