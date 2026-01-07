@@ -195,10 +195,10 @@ TEST(NumberTest, BitwiseOperators) {
     EXPECT_EQ(not_result.value(), static_cast<std::uint8_t>(~12));
 
     // Shift operations
-    constexpr U8 shift_left = a << 1;
+    constexpr U8 shift_left = a << 1u;
     EXPECT_EQ(shift_left.value(), 0b11000);  // 24
 
-    constexpr U8 shift_right = a >> 1;
+    constexpr U8 shift_right = a >> 1_size;
     EXPECT_EQ(shift_right.value(), 0b0110);  // 6
 
     // Compound assignment
@@ -215,11 +215,11 @@ TEST(NumberTest, BitwiseOperators) {
     EXPECT_EQ(c.value(), 0b0110);
 
     c = a;
-    c <<= 1;
+    c <<= 1u;
     EXPECT_EQ(c.value(), 0b11000);
 
     c = a;
-    c >>= 1;
+    c >>= 1_u8;
     EXPECT_EQ(c.value(), 0b0110);
 }
 
@@ -315,21 +315,6 @@ TEST(NumberTest, NumericCastIntegral)
     EXPECT_EQ(h.value(), 3);  // truncation
 }
 
-TEST(NumberTest, StdSizeBridge)
-{
-    using namespace original;
-
-    constexpr size_t n = 12345;
-    constexpr auto u = fromStdSize(n);
-
-    EXPECT_EQ(u.value(), 12345u);
-
-    constexpr size_t m = toStdSize(u);
-    EXPECT_EQ(m, n);
-    EXPECT_EQ(m, u);
-    EXPECT_EQ(n, u);
-}
-
 // Test traits
 TEST(NumberTest, NumberTraits) {
     static_assert(std::is_same_v<NumberType<I32>, std::int32_t>);
@@ -349,6 +334,11 @@ TEST(NumberTest, NumberTraits) {
     // NumberLikeType test
     static_assert(std::is_same_v<NumberLikeType<I32>, std::int32_t>);
     static_assert(std::is_same_v<NumberLikeType<F32>, float>);
+
+    EXPECT_EQ(std::numeric_limits<I64>::digits, std::numeric_limits<std::int64_t>::digits);
+    EXPECT_EQ(std::numeric_limits<I64>::max(), std::numeric_limits<std::int64_t>::max());
+    EXPECT_EQ(std::numeric_limits<I64>::has_infinity,
+              std::numeric_limits<std::int64_t>::has_infinity);
 
     EXPECT_TRUE(true);
 }
@@ -461,4 +451,169 @@ TEST(NumberUnaryOperator, UnaryMinusUnsignedIntegerNotAllowed)
     static_assert(!HasUnaryMinus<U16>);
     static_assert(!HasUnaryMinus<U32>);
     static_assert(!HasUnaryMinus<U64>);
+}
+
+TEST(NumberLiterals, NormalRangeIntegral) {
+    constexpr auto v1 = 42_i8;
+    static_assert(v1.value() == 42);
+    EXPECT_EQ(static_cast<int8_t>(v1), 42);
+
+    constexpr auto v2 = 1000_i16;
+    EXPECT_EQ(static_cast<int16_t>(v2), 1000);
+
+    constexpr auto v3 = 255_byte;
+    EXPECT_EQ(static_cast<uint8_t>(v3), 255);
+
+    constexpr auto v4 = 1234567890123_i64;
+    EXPECT_EQ(static_cast<int64_t>(v4), 1234567890123LL);
+}
+
+TEST(NumberLiterals, NormalRangeFloating) {
+    constexpr auto f32 = 3.14_f32;
+    EXPECT_FLOAT_EQ(static_cast<float>(f32), 3.14f);
+
+    constexpr auto f64 = 2.718281828459045_f64;
+    EXPECT_DOUBLE_EQ(static_cast<double>(f64), 2.718281828459045);
+
+    constexpr auto f80 = 1.4142135623730951_f80;
+    EXPECT_EQ(static_cast<long double>(f80), 1.4142135623730951L);
+}
+
+TEST(NumberLiteralsBoundaries, NormalBoundaries) {
+    // constexpr I8 i8_min = -128_i8;  // No allowed
+    // static_assert(i8_min.value() == minimum<I8>());
+    // EXPECT_EQ(static_cast<std::int8_t>(i8_min), -128);
+
+    constexpr auto i8_max = 127_i8;
+    static_assert(i8_max == maximum<I8>());
+    EXPECT_EQ(static_cast<std::int8_t>(i8_max), 127);
+
+    constexpr auto u8_max = 255_u8;
+    static_assert(u8_max == maximum<U8>());
+    EXPECT_EQ(static_cast<std::uint8_t>(u8_max), 255);
+
+    constexpr auto byte_max = 255_byte;
+    static_assert(byte_max.value() == 255);
+
+    constexpr auto i16_max = 32767_i16;
+    EXPECT_EQ(static_cast<std::int16_t>(i16_max),  32767);
+
+    constexpr auto i32_max = 2147483647_i32;
+    EXPECT_EQ(static_cast<std::int32_t>(i32_max),  2147483647);
+
+    constexpr auto i64_max = 9223372036854775807_i64;
+    EXPECT_EQ(static_cast<std::int64_t>(i64_max), INT64_MAX);
+
+    constexpr auto u64_max = 18446744073709551615_u64;
+    EXPECT_EQ(static_cast<std::uint64_t>(u64_max), UINT64_MAX);
+}
+
+// Additional tests for width-promoting binary operator free functions
+TEST(NumberTest, WidthPromotionBinaryOperators) {
+    // Same signedness, different widths: result is the wider type
+    constexpr auto a8  = 42_i8;
+    constexpr auto a16 = 100_i16;
+    auto sum1 = a8 + a16;
+    static_assert(std::is_same_v<decltype(sum1), I16>);
+    EXPECT_EQ(sum1, 142_i16);
+
+    auto prod1 = a8 * a16;
+    static_assert(std::is_same_v<decltype(prod1), I16>);
+    EXPECT_EQ(prod1, 4200_i16);
+
+    // Wider on left
+    constexpr auto a32 = 200000_i32;
+    auto sum2 = a32 + a16;
+    static_assert(std::is_same_v<decltype(sum2), I32>);
+    EXPECT_EQ(sum2, 200100_i32);
+
+    // Wider on right
+    auto sum3 = a16 + a32;
+    static_assert(std::is_same_v<decltype(sum3), I32>);
+    EXPECT_EQ(sum3, 200100_i32);
+
+    // Unsigned examples
+    constexpr auto u8_val  = 200_u8;
+    constexpr auto u32_val = 100000_u32;
+    auto diff_u = u32_val - u8_val;
+    static_assert(std::is_same_v<decltype(diff_u), U32>);
+    EXPECT_EQ(diff_u.value(), 99800u);
+
+    // Floating-point promotion
+    constexpr auto f32_val = 3.14_f32;
+    constexpr auto f64_val = 2.71828_f64;
+    auto float_sum = f32_val + f64_val;
+    static_assert(std::is_same_v<decltype(float_sum), F64>);
+    EXPECT_NEAR(float_sum.value(), (3.14_f64 + 2.71828_f64).value(), 1e-6);
+
+    auto float_prod = f64_val * f32_val;
+    static_assert(std::is_same_v<decltype(float_prod), F64>);
+    EXPECT_NEAR(float_prod.value(), 2.71828 * 3.14, 1e-6);
+}
+
+// Additional tests for std::numeric_limits specializations
+TEST(NumberTest, NumericLimitsSpecializations) {
+    // Integer limits
+    static_assert(std::numeric_limits<I8>::min() == std::numeric_limits<std::int8_t>::min());
+    static_assert(std::numeric_limits<I8>::max() == std::numeric_limits<std::int8_t>::max());
+    static_assert(std::numeric_limits<I8>::digits == std::numeric_limits<std::int8_t>::digits);  // NOLINT
+    static_assert(std::numeric_limits<I8>::is_signed == std::numeric_limits<std::int8_t>::is_signed);  // NOLINT
+    static_assert(std::numeric_limits<I8>::is_integer == std::numeric_limits<std::int8_t>::is_integer);  // NOLINT
+
+    static_assert(std::numeric_limits<U64>::min() == std::numeric_limits<std::uint64_t>::min());
+    static_assert(std::numeric_limits<U64>::max() == std::numeric_limits<std::uint64_t>::max());
+    static_assert(std::numeric_limits<U64>::digits == std::numeric_limits<std::uint64_t>::digits);  // NOLINT
+    static_assert(std::numeric_limits<U64>::is_signed == std::numeric_limits<std::uint64_t>::is_signed);  // NOLINT
+
+    // Floating-point limits
+    static_assert(std::numeric_limits<F32>::min() == std::numeric_limits<float>::min());
+    static_assert(std::numeric_limits<F32>::max() == std::numeric_limits<float>::max());
+    static_assert(std::numeric_limits<F32>::digits == std::numeric_limits<float>::digits);  // NOLINT
+    static_assert(std::numeric_limits<F32>::is_signed == std::numeric_limits<float>::is_signed);  // NOLINT
+    static_assert(std::numeric_limits<F32>::has_infinity == std::numeric_limits<float>::has_infinity);  // NOLINT
+    static_assert(std::numeric_limits<F32>::has_quiet_NaN == std::numeric_limits<float>::has_quiet_NaN);  // NOLINT
+
+    static_assert(std::numeric_limits<F80>::min() == std::numeric_limits<long double>::min());
+    static_assert(std::numeric_limits<F80>::max() == std::numeric_limits<long double>::max());
+    static_assert(std::numeric_limits<F80>::digits == std::numeric_limits<long double>::digits);  // NOLINT
+
+    // Runtime checks for epsilon and infinity
+    EXPECT_EQ(std::numeric_limits<F64>::epsilon(), std::numeric_limits<double>::epsilon());
+    EXPECT_EQ(std::numeric_limits<F64>::infinity(), std::numeric_limits<double>::infinity());
+    EXPECT_TRUE(std::numeric_limits<I32>::has_infinity == false);  // Integers have no infinity
+}
+
+// Additional tests for std::hash specializations
+TEST(NumberTest, HashSpecializations) {
+    // Hash for integers should match underlying type
+    constexpr std::hash<I32> hash_int{};
+    constexpr I32 int_val{42};
+    EXPECT_EQ(hash_int(int_val), std::hash<std::int32_t>{}(42));
+
+    constexpr std::hash<U64> hash_uint{};
+    constexpr auto uint_val = 123456789_u64;
+    EXPECT_EQ(hash_uint(uint_val), std::hash<std::uint64_t>{}(123456789ULL));
+
+    // Hash for floating-point should match underlying type
+    constexpr std::hash<F32> hash_float{};
+    constexpr auto float_val = 3.14_f32;
+    EXPECT_EQ(hash_float(float_val), std::hash<float>{}(3.14f));
+
+    constexpr std::hash<F64> hash_double{};
+    constexpr auto double_val = 2.718_f64;
+    EXPECT_EQ(hash_double(double_val), std::hash<double>{}(2.718));
+
+    // Ensure different values produce different hashes (probabilistically)
+    constexpr I32 int_val2{43};
+    EXPECT_NE(hash_int(int_val), hash_int(int_val2));
+
+    // Edge cases: zero, min, max
+    constexpr I32 zero{0};
+    EXPECT_EQ(hash_int(zero), std::hash<std::int32_t>{}(0));
+
+    constexpr I32 min_val{std::numeric_limits<std::int32_t>::min()};
+    EXPECT_EQ(hash_int(min_val), std::hash<std::int32_t>{}(std::numeric_limits<std::int32_t>::min()));
+
+    constexpr F32 inf_val{std::numeric_limits<float>::infinity()};
+    EXPECT_EQ(hash_float(inf_val), std::hash<float>{}(std::numeric_limits<float>::infinity()));
 }

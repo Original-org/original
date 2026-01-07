@@ -1,8 +1,7 @@
 module;
-#include <cstddef>
 export module original.basic.number.casts;
 import original.basic.number.traits;
-import original.basic.number.numberImpl;
+import original.basic.number.impl;
 import original.basic.types;
 
 
@@ -208,35 +207,6 @@ export namespace original
     }
 
     /**
-     * @brief Convert standard size_t to U64.
-     *
-     * @param n Standard size_t value
-     * @return U64 Converted unsigned 64-bit integer
-     *
-     * @note Useful for interfacing with standard library functions
-     */
-    [[nodiscard]]
-    constexpr U64 fromStdSize(const std::size_t n) noexcept
-    {
-        return U64{n};
-    }
-
-    /**
-     * @brief Convert U64 to standard size_t.
-     *
-     * @param v U64 value to convert
-     * @return size_t Converted standard size type
-     *
-     * @note Useful for passing to standard library functions
-     * @warning May truncate on platforms where size_t < 64 bits
-     */
-    [[nodiscard]]
-    constexpr std::size_t toStdSize(const U64& v) noexcept
-    {
-        return v.value();
-    }
-
-    /**
      * @brief Extracts the underlying arithmetic value from a NumberLike type.
      * @details Safely converts both wrapped number types (Integer, Floating) and
      *          standard arithmetic types to their underlying arithmetic value.
@@ -255,5 +225,40 @@ export namespace original
     constexpr NumberLikeType<T> numberLikeValue(const T& v) noexcept
     {
         return static_cast<NumberLikeType<T>>(v);
+    }
+
+    /**
+     * @brief Extracts the compile-time arithmetic value from a NumberConstant wrapper.
+     *
+     * @tparam T Type satisfying the NumberLike concept
+     * @tparam V Compile-time constant value
+     * @param c A NumberConstant instance (parameter is used only for type deduction)
+     * @return The compile-time constant value as NumberLikeType<T>
+     *
+     * @note This is a consteval function that operates at compile-time only
+     * @note The parameter is not used; only its type is needed to deduce T and V
+     *
+     * @example
+     * @code
+     * // Define a compile-time constant
+     * using Answer = NumberConstant<Integer<int>, 42>;
+     *
+     * // Extract the value at compile-time
+     * constexpr int val1 = numberLikeValue(Answer{});
+     * static_assert(val1 == 42);
+     *
+     * // With alias template
+     * using Pi = FloatingConstant<Floating<double>, 3.14159>;
+     * constexpr double pi_val = numberLikeValue(Pi{});
+     * static_assert(pi_val == 3.14159);
+     * @endcode
+     *
+     * @see numberLikeValue(const T&)
+     */
+    template<NumberLike T, NumberLikeType<T> V>
+    [[nodiscard]]
+    consteval NumberLikeType<T> numberLikeValue(NumberConstant<T, V> c) noexcept
+    {
+        return V;
     }
 }
