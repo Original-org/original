@@ -466,7 +466,7 @@ TEST(ArrayIntegralConstant, ApplyWithArrayGet)
         sum += get(arr, index);
     };
 
-    forEach<4>(getter);
+    structural::forEach<4>(getter);
 
     // 5 + 10 + 15 + 20 = 50
     EXPECT_EQ(sum, 50);
@@ -482,7 +482,7 @@ TEST(ArrayIntegralConstant, GetArrayElementsWithSequence)
         collected.push_back(get(arr, indices));
     };
 
-    forEach<3>(collector);
+    structural::forEach<3>(collector);
 
     EXPECT_EQ(collected.size(), 3);
     EXPECT_DOUBLE_EQ(collected[0], 1.5);
@@ -499,7 +499,7 @@ TEST(ArrayIntegralConstant, ModifyArrayWithForEach)
         get(arr, index) *= 2;
     };
 
-    forEach<5>(doubler);
+    structural::forEach<5>(doubler);
 
     EXPECT_EQ(get(arr, IntegralConstant<Size, 0>{}), 2);
     EXPECT_EQ(get(arr, IntegralConstant<Size, 1>{}), 4);
@@ -518,7 +518,7 @@ TEST(ArrayIntegralConstant, ArrayMappingWithForEach)
         get(result, index) = get(source, index) * get(source, index);
     };
 
-    forEach<4>(mapper);
+    structural::forEach<4>(mapper);
 
     EXPECT_EQ(get(result, IntegralConstant<Size, 0>{}), 1);
     EXPECT_EQ(get(result, IntegralConstant<Size, 1>{}), 4);
@@ -536,7 +536,7 @@ TEST(ArrayIntegralConstant, SumArrayElementsWithForEach)
         sum += get(arr, indices);
     };
 
-    forEach<6>(accumulator);
+    structural::forEach<6>(accumulator);
 
     // 10+20+30+40+50+60 = 210
     EXPECT_EQ(sum, 210);

@@ -76,7 +76,7 @@ export namespace original
         return static_cast<CommonType2>(lhs.second) <=> static_cast<CommonType2>(rhs.second);
     }
 
-    template<std::size_t I, typename T1, typename T2>
+    template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
     constexpr decltype(auto) get(const Couple<T1, T2>& cp)
     {
@@ -86,7 +86,7 @@ export namespace original
             return cp.second;
     }
 
-    template<std::size_t I, typename T1, typename T2>
+    template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
     constexpr decltype(auto) get(Couple<T1, T2>& cp)
     {
@@ -96,7 +96,7 @@ export namespace original
             return cp.second;
     }
 
-    template<std::size_t I, typename T1, typename T2>
+    template<Size::Type I, typename T1, typename T2>
     requires (I < 2)
     constexpr decltype(auto) get(Couple<T1, T2>&& cp)
     {

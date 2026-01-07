@@ -15,9 +15,9 @@ TEST(StructuralUtility, ArgsTraits)
     using Traits = ArgsTraits<int, double, float>;
     EXPECT_EQ(Traits::SIZE, 3);
     
-    static_assert(std::same_as<Traits::ArgsAt<0>, int>);
-    static_assert(std::same_as<Traits::ArgsAt<1>, double>);
-    static_assert(std::same_as<Traits::ArgsAt<2>, float>);
+    static_assert(std::same_as<Traits::ArgAt<0>, int>);
+    static_assert(std::same_as<Traits::ArgAt<1>, double>);
+    static_assert(std::same_as<Traits::ArgAt<2>, float>);
 }
 
 TEST(StructuralUtility, IntegralSequenceTraits)
@@ -38,7 +38,7 @@ TEST(StructuralUtility, MakeIntegralSequence)
     EXPECT_EQ(Traits::SIZE, 4);
 }
 
-TEST(StructuralUtility, ForAllWithMakeSequence)
+TEST(StructuralAlgorithms, ForAllWithMakeSequence)
 {
     int sum = 0;
     auto accumulator = [&sum](auto... indices) {
@@ -46,13 +46,13 @@ TEST(StructuralUtility, ForAllWithMakeSequence)
         return sum;
     };
 
-    const auto result = forAll<int, 5>(accumulator);
+    const auto result = structural::forAll<int, 5>(accumulator);
 
     // 0 + 1 + 2 + 3 + 4 = 10
     EXPECT_EQ(result, 10);
 }
 
-TEST(StructuralUtility, ForAllMultipleInvocations)
+TEST(StructuralAlgorithms, ForAllMultipleInvocations)
 {
     int call_count = 0;
     auto counter = [&call_count](auto&&...) {
@@ -60,9 +60,9 @@ TEST(StructuralUtility, ForAllMultipleInvocations)
         return call_count;
     };
 
-    const auto result1 = forAll(counter, makeIntegralSequence<int, 0>());
+    const auto result1 = structural::forAll(counter, makeIntegralSequence<int, 0>());
     EXPECT_EQ(result1, 1);
-    const auto result2 = forAll<I32, 1>(counter);
+    const auto result2 = structural::forAll<I32, 1>(counter);
     EXPECT_EQ(result2, 2);
 }
 
@@ -76,7 +76,7 @@ TEST(StructuralUtility, ArgsTraitsSingle)
 {
     using Traits = ArgsTraits<std::string>;
     EXPECT_EQ(Traits::SIZE, 1);
-    static_assert(std::same_as<Traits::ArgsAt<0>, std::string>);
+    static_assert(std::same_as<Traits::ArgAt<0>, std::string>);
 }
 
 TEST(StructuralUtility, IntegralSequenceEmpty)
@@ -86,17 +86,17 @@ TEST(StructuralUtility, IntegralSequenceEmpty)
     EXPECT_EQ(Traits::SIZE, 0);
 }
 
-TEST(StructuralUtility, ForAllWithSingleElement)
+TEST(StructuralAlgorithms, ForAllWithSingleElement)
 {
     auto getter = [](auto x) {
         return numberLikeValue(x);
     };
 
-    constexpr auto result = forAll(getter, makeIntegralSequence<int, 1>());
+    constexpr auto result = structural::forAll(getter, makeIntegralSequence<int, 1>());
     EXPECT_EQ(result, 0);
 }
 
-TEST(StructuralUtility, ForAllWithEmptySequence)
+TEST(StructuralAlgorithms, ForAllWithEmptySequence)
 {
     int count = 0;
     auto noop = [&count](auto...) {
@@ -104,11 +104,11 @@ TEST(StructuralUtility, ForAllWithEmptySequence)
         return count;
     };
 
-    const auto result = forAll(noop, makeIntegralSequence<int, 0>());
+    const auto result = structural::forAll(noop, makeIntegralSequence<int, 0>());
     EXPECT_EQ(result, 1);
 }
 
-TEST(StructuralUtility, ForAllWithLargeSequence)
+TEST(StructuralAlgorithms, ForAllWithLargeSequence)
 {
     // Test with larger sequence (10 elements)
     int sum = 0;
@@ -117,12 +117,12 @@ TEST(StructuralUtility, ForAllWithLargeSequence)
         return sum;
     };
 
-    const auto result = forAll(add_all, makeIntegralSequence<int, 10>());
+    const auto result = structural::forAll(add_all, makeIntegralSequence<int, 10>());
     // 0+1+2+3+4+5+6+7+8+9 = 45
     EXPECT_EQ(result, 45);
 }
 
-TEST(StructuralUtility, ForAllWithUnsignedIntSequence)
+TEST(StructuralAlgorithms, ForAllWithUnsignedIntSequence)
 {
     unsigned int product = 1;
     auto multiply = [&product](auto... values) {
@@ -130,12 +130,12 @@ TEST(StructuralUtility, ForAllWithUnsignedIntSequence)
         return product;
     };
 
-    const auto result = forAll<U32, 5>(multiply);
+    const auto result = structural::forAll<U32, 5>(multiply);
     // (0+1) * (1+1) * (2+1) * (3+1) * (4+1) = 1*2*3*4*5 = 120
     EXPECT_EQ(result, 120u);
 }
 
-TEST(StructuralUtility, ForAllConstExpr)
+TEST(StructuralAlgorithms, ForAllConstExpr)
 {
     // Test that apply can be used in constexpr context
     constexpr auto compute = []
@@ -145,8 +145,8 @@ TEST(StructuralUtility, ForAllConstExpr)
             ((sum += numberLikeValue(vals)), ...);
             return sum;
         };
-        
-        forAll(add, makeIntegralSequence<int, 4>());
+
+        structural::forAll(add, makeIntegralSequence<int, 4>());
         return sum;
     };
 
@@ -154,7 +154,7 @@ TEST(StructuralUtility, ForAllConstExpr)
     EXPECT_EQ(result, 6);  // 0+1+2+3 = 6
 }
 
-TEST(StructuralUtility, ForAllWithComplexLambda)
+TEST(StructuralAlgorithms, ForAllWithComplexLambda)
 {
     // Test with a more complex lambda that combines multiple operations
     struct Accumulator {
@@ -177,9 +177,9 @@ TEST(StructuralUtility, ForAllWithComplexLambda)
         acc2.product *= (numberLikeValue(indices) + 1),
         acc2.count++), ...);
     };
-    
-    forAll<int, 4>(complex_op);
-    forAll(complex_op2, makeIntegralSequence<I32, 4>());
+
+    structural::forAll<int, 4>(complex_op);
+    structural::forAll(complex_op2, makeIntegralSequence<I32, 4>());
     
     EXPECT_EQ(acc1.sum, 6);      // 0+1+2+3 = 6
     EXPECT_EQ(acc1.product, 24);  // 1*2*3*4 = 24
@@ -226,7 +226,7 @@ TEST(StructuralTraits, StructuralConceptTest)
 TEST(StructuralTraits, StructuralForEach)
 {
     Array<int, 5> arr1 {-1, 0, 1, 2, 3};
-    forEach(arr1, [](auto&& e)
+    structural::forEach(arr1, [](auto&& e)
     {
         e += 1;
     });

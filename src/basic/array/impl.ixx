@@ -8,6 +8,7 @@ import original.basic.types;
 import original.basic.number;
 import original.basic.iterator;
 import original.basic.algorithm;
+import original.basic.structural.algorithm;
 
 /**
  * @addtogroup Array
@@ -260,7 +261,7 @@ export namespace original
         constexpr Array<T, Cnt>
         subArray() const &
         {
-            return forAll<Cnt>
+            return structural::forAll<Cnt>
             (
                 [&]<Size::Type... I>(IndexConstant<I>...)
                 {
@@ -281,7 +282,7 @@ export namespace original
         constexpr Array<T, Cnt>
         subArray() &&
         {
-            return forAll<Cnt>
+            return structural::forAll<Cnt>
             (
                 [&]<Size::Type... I>(IndexConstant<I>...)
                 {
@@ -482,7 +483,7 @@ export namespace original
     constexpr Array<T, N1 + N2>
     operator+(const Array<T, N1>& a, const Array<T, N2>& b)
     {
-        return forAll<N1 + N2>(
+        return structural::forAll<N1 + N2>(
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
@@ -499,7 +500,7 @@ export namespace original
     constexpr Array<T, N1 + N2>
     operator+(Array<T, N1>&& a, const Array<T, N2>& b)
     {
-        return forAll<N1 + N2>(
+        return structural::forAll<N1 + N2>(
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
@@ -513,7 +514,7 @@ export namespace original
     constexpr Array<T, N1 + N2>
     operator+(const Array<T, N1>& a, Array<T, N2>&& b)
     {
-        return forAll<N1 + N2>(
+        return structural::forAll<N1 + N2>(
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
@@ -527,7 +528,7 @@ export namespace original
     constexpr Array<T, N1 + N2>
     operator+(Array<T, N1>&& a, Array<T, N2>&& b)
     {
-        return forAll<N1 + N2>(
+        return structural::forAll<N1 + N2>(
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Array<T, N1 + N2>{
