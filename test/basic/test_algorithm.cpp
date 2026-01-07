@@ -143,3 +143,42 @@ TEST(AlgorithmsTest, EqualAndLexCompareWithRawPointers) {
   delete[] ptr2;
   delete[] ptr3;
 }
+
+TEST(AlgorithmsTest, MinimumOfIntegers) {
+    EXPECT_EQ(original::algorithms::minimum(3, 5), 3);
+    EXPECT_EQ(original::algorithms::minimum(10, -2), -2);
+    EXPECT_EQ(original::algorithms::minimum(3, -2, 1), -2);
+    EXPECT_EQ(original::algorithms::minimum(3, 10, -2, 1), -2);
+}
+
+TEST(AlgorithmsTest, MaximumOfIntegers) {
+    EXPECT_EQ(original::algorithms::maximum(3, 5), 5);
+    EXPECT_EQ(original::algorithms::maximum(10, -2), 10);
+    EXPECT_EQ(original::algorithms::maximum(3, -2, 1), 3);
+    EXPECT_EQ(original::algorithms::maximum(3, 10, -2, 1), 10);
+}
+
+TEST(AlgorithmsTest, MinimumElementIteratorRange) {
+    static constexpr int arr[] = {3, 1, 4, 1, 5, 9, 2, 6};
+    const auto min_it = original::algorithms::minElement(arr);
+    EXPECT_EQ(*min_it, 1);
+}
+
+TEST(AlgorithmsTest, MaximumElementIteratorRange) {
+    static constexpr int arr[] = {3, 1, 4, 1, 5, 9, 2, 6};
+    const auto max_it = original::algorithms::maxElement(arr);
+    EXPECT_EQ(*max_it, 9);
+}
+
+TEST(AlgorithmsTest, CustomPredicate) {
+    static constexpr int arr[] = {21, 13, 42, 35, 45, 37, 61};
+    auto pred = [](const int a, const int b) {
+        return a % 10 < b % 10;
+    };
+    const auto it = original::algorithms::minElement(
+        std::begin(arr),
+        std::end(arr),
+        pred
+    );
+    EXPECT_EQ(*it, 21);
+}
