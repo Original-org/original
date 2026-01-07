@@ -319,3 +319,161 @@ TEST(Couple, StructuralTraits)
     static_assert(std::same_as<Traits::ElementType<0>, int>);
     static_assert(std::same_as<Traits::ElementType<1>, float>);
 }
+
+TEST(Tuple, DefaultConstructorAndGet)
+{
+    using TupleType = Tuple<int, double, float>;
+    constexpr TupleType tp{};
+    EXPECT_EQ(tp.get<0>(), 0);
+    EXPECT_EQ(tp.get<1>(), 0.0);
+    EXPECT_EQ(tp.get<2>(), 0.0f);
+
+    constexpr TupleType tp_constexpr{};
+    static_assert(tp_constexpr.get<0>() == 0);
+    static_assert(tp_constexpr.get<1>() == 0.0);
+    static_assert(tp_constexpr.get<2>() == 0.0f);
+}
+
+TEST(Tuple, ParameterizedConstructor)
+{
+    static constexpr int i = 42;
+    static constexpr double d = 3.14;
+    static constexpr char c = 'A';
+    constexpr Tuple tp(i, d, c);
+
+    EXPECT_EQ(tp.get<0>(), 42);
+    EXPECT_EQ(tp.get<1>(), 3.14);
+    EXPECT_EQ(tp.get<2>(), 'A');
+
+    static_assert(tp.get<0>() == 42);
+    static_assert(tp.get<1>() == 3.14);
+    static_assert(tp.get<2>() == 'A');
+    static_assert(SameType<decltype(tp.get<0>()), const int&>);
+}
+
+TEST(Tuple, CopyAndMoveSemantics)
+{
+    Tuple<std::string, int, bool> tp1("test", 100, true);
+
+    auto tp2 = tp1;
+    EXPECT_EQ(tp2.get<0>(), "test");
+    EXPECT_EQ(tp2.get<1>(), 100);
+    EXPECT_EQ(tp2.get<2>(), true);
+
+    auto tp3 = std::move(tp1);
+    EXPECT_EQ(tp3.get<0>(), "test");
+    EXPECT_EQ(tp3.get<1>(), 100);
+    EXPECT_EQ(tp3.get<2>(), true);
+
+    Tuple<std::string, int, bool> tp4;
+    tp4 = tp3;
+    EXPECT_EQ(tp4.get<0>(), "test");
+
+    Tuple<std::string, int, bool> tp5;
+    tp5 = std::move(tp3);
+    EXPECT_EQ(tp5.get<0>(), "test");
+}
+
+TEST(Tuple, EqualityComparison)
+{
+    constexpr Tuple tp1(1, 2.0f, 'x');
+    constexpr Tuple tp2(1, 2.0f, 'x');
+    constexpr Tuple tp3(1, 2.0f, 'y');
+    constexpr Tuple tp4(2, 2.0f, 'x');
+
+    EXPECT_TRUE(tp1 == tp2);
+    EXPECT_FALSE(tp1 == tp3);
+    EXPECT_FALSE(tp1 == tp4);
+
+    constexpr Tuple<long, float, int> tp5(1L, 2.0f, 'x');
+    EXPECT_TRUE(tp1 == tp5);
+}
+
+TEST(Tuple, ThreeWayComparison)
+{
+    constexpr Tuple tp1(1, 'a', 10.0);
+    constexpr Tuple tp2(1, 'b', 10.0);
+    constexpr Tuple tp3(2, 'a', 10.0);
+    constexpr Tuple tp4(1, 'a', 20.0);
+
+    EXPECT_TRUE((tp1 <=> tp2) < 0);  // 'a' < 'b'
+    EXPECT_TRUE((tp1 <=> tp3) < 0);  // 1 < 2
+    EXPECT_TRUE((tp1 <=> tp4) < 0);  // 10.0 < 20.0
+    EXPECT_TRUE((tp2 <=> tp1) > 0);
+    EXPECT_TRUE((tp1 <=> tp1) == 0);
+
+    constexpr Tuple tp5(1L, 'a', 10.0);
+    EXPECT_TRUE((tp1 <=> tp5) == 0);
+}
+
+TEST(Tuple, GetFunction)
+{
+    Tuple<long, bool, std::string> tp(42L, true, "hello");
+
+    EXPECT_EQ(original::get<0>(tp), 42L);
+    EXPECT_EQ(original::get<1>(tp), true);
+    EXPECT_EQ(original::get<2>(tp), "hello");
+
+    const auto& cref = tp;
+    EXPECT_EQ(original::get<0>(cref), 42L);
+
+    EXPECT_EQ(original::get<0>(std::move(tp)), 42L);
+    EXPECT_EQ(original::get<2>(std::move(tp)), "hello");
+}
+
+TEST(Tuple, StructuredBinding)
+{
+    constexpr Tuple tp(10, 3.14f, "text");
+    auto&& [i, f, s] = tp;
+
+    EXPECT_EQ(i, 10);
+    EXPECT_EQ(f, 3.14f);
+    EXPECT_STREQ(s, "text");
+
+    const auto& ctp = tp;
+    auto&& [ci, cf, cs] = ctp;
+    EXPECT_EQ(ci, 10);
+
+    auto&& [mi, mf, ms] = Tuple(1, 2.0, "move");
+    EXPECT_EQ(mi, 1);
+}
+
+TEST(Tuple, EmptyTuple)
+{
+    constexpr Tuple<> empty1;
+    constexpr Tuple<> empty2;
+
+    EXPECT_TRUE(empty1 == empty2);
+
+    EXPECT_TRUE((empty1 <=> empty2) == 0);
+}
+
+TEST(Tuple, SingleElementTuple)
+{
+    constexpr Tuple single1(42);
+    constexpr Tuple single2(42);
+    constexpr Tuple single3(42L);
+
+    EXPECT_EQ(single1.get<0>(), 42);
+    EXPECT_TRUE(single1 == single2);
+    EXPECT_TRUE(single1 == single3);
+
+    auto&& [v] = single1;
+    EXPECT_EQ(v, 42);
+}
+
+TEST(Tuple, StructuralTraits)
+{
+    using TpType = Tuple<int, float, char, double>;
+    static_assert(HasStructuralSize<TpType>);
+    static_assert(HasStructuralElements<TpType>);
+    static_assert(Structural<TpType>);
+    static_assert(TupleLike<TpType>);
+
+    using Traits = StructuralTraits<TpType>;
+    static_assert(Traits::SIZE == 4);
+    static_assert(std::same_as<Traits::ElementType<0>, int>);
+    static_assert(std::same_as<Traits::ElementType<1>, float>);
+    static_assert(std::same_as<Traits::ElementType<2>, char>);
+    static_assert(std::same_as<Traits::ElementType<3>, double>);
+}
