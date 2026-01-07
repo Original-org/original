@@ -436,6 +436,9 @@ export namespace original {
         SameType<T, std::strong_ordering> || SameType<T, std::weak_ordering> ||
         SameType<T, std::partial_ordering>;
 
+    template<typename... Ts>
+    using CommonComparisonCategory = std::common_comparison_category_t<Ts...>;
+
     /**
      * @brief Concept that constrains a type to support equality comparison.
      *
