@@ -1,19 +1,11 @@
-﻿module;
-export module original.basic.algorithm;
+module;
+export module original.basic.algorithm.comparison;
 import original.basic.types;
 import original.basic.range;
-import original.basic.iterator;
-import original.basic.container;
-import original.basic.structural;
+import original.basic.iterator.traits;
+import original.basic.algorithm.functor;
+import original.basic.structural.couple;
 
-
-export namespace original::algorithms
-{
-    struct EqualTo;
-    struct ThreeWayCompare;
-    struct LessThan;
-    struct GreaterThan;
-}
 
 namespace original::details
 {
@@ -34,7 +26,7 @@ namespace original::details
      * @return Pair of iterators pointing to the first mismatching elements or the ends.
      */
     template <Iterator Iter1, Iterator Iter2, Invokable Pred = algorithms::EqualTo>
-    Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
+    constexpr Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
                                       Iter2 first2, Iter2 last2, Pred pred)
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
@@ -68,7 +60,7 @@ namespace original::details
      * @return Pair of iterators pointing to the first mismatching elements or {last1, advanced first2}.
      */
     template <Iterator Iter1, Iterator Iter2, Invokable Pred = algorithms::EqualTo>
-    Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
+    constexpr Couple<Iter1, Iter2> mismatchImpl(Iter1 first1, Iter1 last1,
                                       Iter2 first2, Pred pred)
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
@@ -87,117 +79,6 @@ namespace original::details
 }
 
 export namespace original::algorithms {
-
-    /**
-     * @brief Default equality comparator.
-     *
-     * Uses common type conversion and `operator==` to compare two values.
-     * Suitable as the default predicate for equality-based algorithms.
-     */
-    struct EqualTo
-    {
-        /**
-         * @brief Compares two values for equality after common type conversion.
-         *
-         * @tparam T   Type of the left-hand side operand.
-         * @tparam U   Type of the right-hand side operand (defaults to T).
-         * @param lhs  Left-hand side value to compare.
-         * @param rhs  Right-hand side value to compare.
-         * @return true if the converted values are equal, false otherwise.
-         */
-        template <typename T, typename U = T>
-        requires HasCommonType<T, U> && EqualityComparable<CommonType<T, U>>
-        constexpr bool operator()(const T& lhs, const U& rhs) const
-        {
-            using CommonType = CommonType<T, U>;
-            const auto& type_lhs = static_cast<const CommonType&>(lhs);
-            const auto& type_rhs = static_cast<const CommonType&>(rhs);
-            return type_lhs == type_rhs;
-        }
-    };
-
-    /**
-     * @brief Default three-way comparator.
-     *
-     * Converts operands to their common type and returns the result of
-     * the three-way comparison (`<=>`). This is used by lexicographical
-     * comparison helpers that rely on a three-way ordering.
-     */
-    struct ThreeWayCompare
-    {
-        /**
-         * @brief Performs three-way comparison after common type conversion.
-         *
-         * @tparam T   Type of the left-hand side operand.
-         * @tparam U   Type of the right-hand side operand (defaults to T).
-         * @param lhs  Left-hand side value.
-         * @param rhs  Right-hand side value.
-         * @return std::strong_ordering (less, equal, or greater) reflecting the relationship.
-         */
-        template<typename T, typename U = T>
-        requires HasCommonType<T, U> && ThreeWayComparable<CommonType<T, U>>
-        constexpr auto operator()(const T& lhs, const U& rhs) const
-        {
-            using CommonType = CommonType<T, U>;
-            const auto& type_lhs = static_cast<const CommonType&>(lhs);
-            const auto& type_rhs = static_cast<const CommonType&>(rhs);
-            return type_lhs <=> type_rhs;
-        }
-    };
-
-    /**
-     * @brief Default less-than comparator.
-     *
-     * Compares two values after converting them to a common type using
-     * `operator<`.
-     */
-    struct LessThan
-    {
-        /**
-         * @brief Compares two values using less-than after common type conversion.
-         *
-         * @tparam T   Type of the left-hand side operand.
-         * @tparam U   Type of the right-hand side operand (defaults to T).
-         * @param lhs  Left-hand side value.
-         * @param rhs  Right-hand side value.
-         * @return true if lhs is less than rhs after conversion, false otherwise.
-         */
-        template <typename T, typename U = T>
-        requires HasCommonType<T, U> && LessComparable<CommonType<T, U>>
-        constexpr bool operator()(const T& lhs, const U& rhs) const
-        {
-            using CommonType = CommonType<T, U>;
-            const auto& type_lhs = static_cast<const CommonType&>(lhs);
-            const auto& type_rhs = static_cast<const CommonType&>(rhs);
-            return type_lhs < type_rhs;
-        }
-    };
-
-    /**
-     * @brief Default greater-than comparator.
-     *
-     * Implemented in terms of `LessThan` (i.e. `GreaterThan{}(a,b)` is
-     * equivalent to `LessThan{}(b,a)`).
-     */
-    struct GreaterThan
-    {
-        /**
-         * @brief Compares two values using greater-than (delegates to LessThan).
-         *
-         * @tparam T   Type of the left-hand side operand.
-         * @tparam U   Type of the right-hand side operand (defaults to T).
-         * @param lhs  Left-hand side value.
-         * @param rhs  Right-hand side value.
-         * @return true if lhs is greater than rhs, false otherwise.
-         */
-        template <typename T, typename U = T>
-        requires HasCommonType<T, U> && LessComparable<CommonType<T, U>>
-        constexpr bool operator()(const T& lhs, const U& rhs) const
-        {
-            return LessThan{}(rhs, lhs);
-        }
-    };
-
     /**
      * @brief Finds the first position where two iterator ranges differ.
      *
@@ -224,7 +105,7 @@ export namespace original::algorithms {
                                      typename IterTraits<Iter2>::ReferenceType>,
                         CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
-    Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
+    constexpr Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
     {
         return details::mismatchImpl(first1, last1, first2, last2, pred);
     }
@@ -254,7 +135,7 @@ export namespace original::algorithms {
                                      typename IterTraits<Iter2>::ReferenceType>,
                        CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
-    Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1,
+    constexpr Couple<Iter1, Iter2> mismatch(Iter1 first1, Iter1 last1,
                                      Iter2 first2, Pred pred = {})
     {
         return details::mismatchImpl(first1, last1, first2, pred);
@@ -284,7 +165,7 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>,
                        CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                      typename RangeTraits<Range2>::ReferenceType>>
-    auto mismatch(Range1& range1, Range2& range2, Pred pred = {})
+    constexpr auto mismatch(Range1& range1, Range2& range2, Pred pred = {})
     {
         return mismatch(RangeTraits<Range1>::begin(range1),
                         RangeTraits<Range1>::end(range1),
@@ -316,7 +197,7 @@ export namespace original::algorithms {
                                          typename RangeTraits<Range2>::ReferenceType>,
                            CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                          typename RangeTraits<Range2>::ReferenceType>>
-    bool equal(Range1 &range1, Range2 &range2, Pred pred = {})
+    constexpr bool equal(Range1 &range1, Range2 &range2, Pred pred = {})
     {
         auto&& [it1, it2] = mismatch(range1, range2, pred);
 
@@ -347,7 +228,7 @@ export namespace original::algorithms {
                                          typename IterTraits<Iter2>::ReferenceType>,
                            CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                          typename IterTraits<Iter2>::ReferenceType>>
-    bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Pred pred = {})
+    constexpr bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Pred pred = {})
     {
         auto&& [it1, it2] = mismatch(first1, last1, first2, pred);
         return it1 == last1;
@@ -379,7 +260,7 @@ export namespace original::algorithms {
                                          typename IterTraits<Iter2>::ReferenceType>,
                            CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                          typename IterTraits<Iter2>::ReferenceType>>
-    bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
+    constexpr bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
     {
         auto&& [iter1, iter2] = mismatch(first1, last1, first2, last2, pred);
         return iter1 == last1 && iter2 == last2;
@@ -411,7 +292,7 @@ export namespace original::algorithms {
                                      typename IterTraits<Iter2>::ReferenceType>,
                        CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                                      typename IterTraits<Iter2>::ReferenceType>>
-    auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
+    constexpr auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
                                   Iter2 last2, Pred pred = {})
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
@@ -456,7 +337,7 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>,
                        CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                      typename RangeTraits<Range2>::ReferenceType>>
-    auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred = {})
+    constexpr auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred = {})
     {
         return lexicographicallyCompare(RangeTraits<Range1>::begin(range1),
                                         RangeTraits<Range1>::end(range1),
@@ -490,7 +371,7 @@ export namespace original::algorithms {
                               typename IterTraits<Iter2>::ReferenceType>,
                 CommonRefType<typename IterTraits<Iter1>::ReferenceType,
                               typename IterTraits<Iter2>::ReferenceType>>
-    auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
+    constexpr auto lexicographicallyCompare(Iter1 first1, Iter1 last1, Iter2 first2,
                                   Pred pred = {})
     {
         using CommonRef = CommonRefType<typename IterTraits<Iter1>::ReferenceType,
@@ -510,3 +391,5 @@ export namespace original::algorithms {
         return (first1 == last1) <=> true;
     }
 } // namespace original::algorithms
+
+
