@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <tuple>
+#include <vector>
 import original.basic.array;
 import original.basic.structural;
 import original.basic.number;
@@ -322,6 +323,8 @@ TEST(Couple, StructuralTraits)
     static_assert(std::same_as<Traits::Type, CpType>);
     static_assert(std::same_as<Traits::ElementType<0>, int>);
     static_assert(std::same_as<Traits::ElementType<1>, float>);
+    using CpType2 = Couple<int, std::string>;
+    static_assert(Structural<CpType2>);
 }
 
 TEST(Tuple, DefaultConstructorAndGet)
@@ -438,7 +441,7 @@ TEST(Tuple, StructuredBinding)
     auto&& [ci, cf, cs] = ctp;
     EXPECT_EQ(ci, 10);
 
-    auto&& [mi, mf, ms] = Tuple(1, 2.0, "move");
+    const auto& [mi, mf, ms] = Tuple(1, 2.0, "move");
     EXPECT_EQ(mi, 1);
 }
 
@@ -466,10 +469,16 @@ TEST(Tuple, SingleElementTuple)
     EXPECT_EQ(v, 42);
 }
 
+namespace
+{
+    struct A{};
+}
+
 TEST(Tuple, StructuralTraits)
 {
     using TpType = Tuple<int, float, char, double>;
     static_assert(HasStructuralSize<TpType>);
+    static_assert(Structural<std::remove_reference_t<TpType>&>);
     static_assert(HasStructuralElements<TpType>);
     static_assert(Structural<TpType>);
     static_assert(TupleLike<TpType>);
@@ -480,4 +489,294 @@ TEST(Tuple, StructuralTraits)
     static_assert(std::same_as<Traits::ElementType<1>, float>);
     static_assert(std::same_as<Traits::ElementType<2>, char>);
     static_assert(std::same_as<Traits::ElementType<3>, double>);
+
+    using TpType2 = Tuple<int, std::vector<int>>;
+    static_assert(Structural<TpType2>);
+    using TpType3 = Tuple<int, A>;
+    static_assert(Structural<TpType3>);
+    using TpType4 = Tuple<int, A, int, std::vector<int>, char, int>;
+    static_assert(Structural<TpType4>);
+    using TpType5 = std::tuple<int, A, int, std::vector<int>, char, int>;
+    static_assert(Structural<TpType5>);
+}
+
+TEST(Casts, ToTupleFull)
+{
+    constexpr Tuple src(42, 3.14, 'A');
+    constexpr auto dst = toTuple(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<int, double, char>>);
+    EXPECT_EQ(get<0>(dst), 42);
+    EXPECT_EQ(get<1>(dst), 3.14);
+    EXPECT_EQ(get<2>(dst), 'A');
+}
+
+TEST(Casts, ToTupleFullRValue)
+{
+    constexpr auto src = Tuple(42, 3.14, 'A');
+    constexpr auto dst = toTuple(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<int, double, char>>);
+    EXPECT_EQ(get<0>(dst), 42);
+    EXPECT_EQ(get<1>(dst), 3.14);
+    EXPECT_EQ(get<2>(dst), 'A');
+}
+
+TEST(Casts, ToTuplePrefixCnt)
+{
+    constexpr Tuple src(1, 2.0, 'x', 4.0f);
+    constexpr auto dst = toTuple<2>(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<int, double>>);
+    EXPECT_EQ(get<0>(dst), 1);
+    EXPECT_EQ(get<1>(dst), 2.0);
+}
+
+TEST(Casts, ToTuplePrefixCntRValue)
+{
+    auto src = Tuple(10, 20.0, 'z');
+    auto dst = toTuple<2>(std::move(src));
+
+    static_assert(std::same_as<decltype(dst), Tuple<int, double>>);
+    EXPECT_EQ(get<0>(dst), 10);
+    EXPECT_EQ(get<1>(dst), 20.0);
+}
+
+TEST(Casts, ToTupleRangeStartCnt)
+{
+    constexpr Array<int, 5> src{0, 1, 2, 3, 4};
+    constexpr auto dst = toTuple<1, 3>(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<int, int, int>>);
+    EXPECT_EQ(get<0>(dst), 1);
+    EXPECT_EQ(get<1>(dst), 2);
+    EXPECT_EQ(get<2>(dst), 3);
+}
+
+TEST(Casts, ToTupleRangeStartCntRValue)
+{
+    Array<char, 4> src{'a', 'b', 'c', 'd'};
+    auto dst = toTuple<2, 2>(std::move(src));
+
+    static_assert(std::same_as<decltype(dst), Tuple<char, char>>);
+    EXPECT_EQ(get<0>(dst), 'c');
+    EXPECT_EQ(get<1>(dst), 'd');
+}
+
+TEST(Casts, ToCoupleDefault)
+{
+    constexpr std::pair src(100, 200.5);
+    constexpr auto dst = toCouple(src);
+
+    static_assert(std::same_as<decltype(dst), const Couple<int, double>>);
+    EXPECT_EQ(dst.first, 100);
+    EXPECT_EQ(dst.second, 200.5);
+}
+
+TEST(Casts, ToCoupleDefaultRValue)
+{
+    auto src = Couple<long, std::string>(42L, "test");
+    auto dst = toCouple(std::move(src));
+
+    static_assert(std::same_as<decltype(dst), Couple<long, std::string>>);
+    EXPECT_EQ(dst.first, 42L);
+    EXPECT_EQ(dst.second, "test");
+}
+
+TEST(Casts, ToCoupleStart)
+{
+    constexpr Tuple src(1, 2.0f, 'c', true);
+    constexpr auto dst = toCouple<2>(src);
+
+    static_assert(std::same_as<decltype(dst), const Couple<char, bool>>);
+    EXPECT_EQ(dst.first, 'c');
+    EXPECT_EQ(dst.second, true);
+}
+
+TEST(Casts, ToCoupleStartRValue)
+{
+    Tuple<std::string, int, double> src("first", 10, 20.0);
+    auto dst = toCouple<1>(std::move(src));
+
+    static_assert(std::same_as<decltype(dst), Couple<int, double>>);
+    EXPECT_EQ(dst.first, 10);
+    EXPECT_EQ(dst.second, 20.0);
+}
+
+TEST(Casts, ToTupleEmptySource)
+{
+    constexpr Tuple<> empty;
+    constexpr auto dst = toTuple(empty);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<>>);
+    EXPECT_TRUE(dst == Tuple{});
+}
+
+TEST(Casts, ToTupleCntZero)
+{
+    constexpr Tuple src(1, 2.0);
+    constexpr auto dst = toTuple<0>(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<>>);
+    EXPECT_TRUE(dst == Tuple{});
+}
+
+TEST(Casts, ToTupleStartCntZero)
+{
+    constexpr Tuple src(5);
+    [[maybe_unused]] constexpr auto dst = toTuple<0, 0>(src);
+
+    static_assert(std::same_as<decltype(dst), const Tuple<>>);
+}
+
+TEST(Tuple, ReferenceMembersLValue)
+{
+    int x = 42;
+    double y = 3.14;
+    Tuple<int&, double&> tp(x, y);
+
+    EXPECT_EQ(get<0>(tp), 42);
+    EXPECT_EQ(get<1>(tp), 3.14);
+
+    // Modify through reference
+    get<0>(tp) = 100;
+    EXPECT_EQ(x, 100);
+    EXPECT_EQ(get<0>(tp), 100);
+
+    // Const access
+    const auto& ctp = tp;
+    EXPECT_EQ(get<0>(ctp), 100);
+    EXPECT_EQ(get<1>(ctp), 3.14);
+}
+
+TEST(Tuple, ReferenceMembersConstLValue)
+{
+    const int a = 10;
+    const std::string b = "const ref";
+    Tuple<const int&, const std::string&> tp(a, b);
+
+    EXPECT_EQ(std::get<0>(tp), 10);
+    EXPECT_EQ(std::get<1>(tp), "const ref");
+
+    // Ensure no modification possible
+    static_assert(!std::is_assignable_v<decltype(get(tp, IndexConstant<0>{})), int>, "Const reference should not be assignable");
+}
+
+TEST(Tuple, ReferenceMembersRValue)
+{
+    int val = 5;
+    auto make_temp = [&]() -> Tuple<int&&, double> { return Tuple<int&&, double>(std::move(val), 2.5); };
+
+    auto tp = make_temp();  // Captures rvalue reference (but bound to temporary)
+    EXPECT_EQ(std::get<0>(tp), 5);
+    EXPECT_EQ(std::get<1>(tp), 2.5);
+
+    // Move from rvalue reference
+    int moved = std::move(std::get<0>(tp));
+    EXPECT_EQ(moved, 5);  // val is now moved-from, but test avoids UB by not accessing val post-move
+}
+
+TEST(Tuple, StructuredBindingWithReferences)
+{
+    int p = 1;
+    char q = 'z';
+    const Tuple<int&, char&> tp(p, q);
+
+    auto& [ref_p, ref_q] = tp;
+    EXPECT_EQ(ref_p, 1);
+    EXPECT_EQ(ref_q, 'z');
+
+    ref_p = 99;
+    EXPECT_EQ(p, 99);
+
+    const auto& [cref_p, cref_q] = tp;
+    EXPECT_EQ(cref_p, 99);
+
+    static_assert(std::same_as<decltype(cref_p), int&>,
+        "const Tuple<int&> does NOT make the referenced object const");
+}
+
+TEST(Couple, ReferenceMembers)
+{
+    long l = 100L;
+    bool b = true;
+    Couple<long&, bool&> cp(l, b);
+
+    EXPECT_EQ(cp.first, 100L);
+    EXPECT_EQ(cp.second, true);
+
+    cp.first = 200L;
+    EXPECT_EQ(l, 200L);
+
+    const auto& ccp = cp;
+    EXPECT_EQ(ccp.first, 200L);
+}
+
+TEST(Casts, ToTupleWithReferences)
+{
+    float f = 1.23f;
+    std::string s = "ref";
+    Tuple<float&, std::string&> src(f, s);
+
+    Tuple<float, std::string> dst = toTuple(src);  // Copies values, as toTuple uses RemoveCVRefType
+    static_assert(std::same_as<decltype(dst), Tuple<float, std::string>>, "Should remove references");
+
+    EXPECT_EQ(std::get<0>(dst), 1.23f);
+    EXPECT_EQ(std::get<1>(dst), "ref");
+
+    // Original references unaffected by dst modifications
+    auto&& ref = std::get<0>(dst);
+    ref = 4.56f;
+    EXPECT_EQ(f, 1.23f);  // No change to original
+}
+
+TEST(Casts, ToCoupleWithReferencesRValue)
+{
+    int m = 7;
+    double n = 8.9;
+    auto src = Couple<int&, double&>(m, n);
+
+    auto dst = toCouple(std::move(src));  // Moves values after removing references
+    static_assert(std::same_as<decltype(dst), Couple<int, double>>);
+
+    EXPECT_EQ(dst.first, 7);
+    EXPECT_EQ(dst.second, 8.9);
+}
+
+TEST(StructuralAlgorithms, EqualWithReferenceMembers)
+{
+    int val1 = 42, val2 = 42;
+    double d1 = 3.14, d2 = 3.14;
+    Tuple<int&, double&> tp1(val1, d1);
+    Tuple<int&, double&> tp2(val2, d2);
+
+    EXPECT_TRUE(structural::equal(tp1, tp2));
+
+    val2 = 43;
+    EXPECT_FALSE(structural::equal(tp1, tp2));
+}
+
+TEST(StructuralAlgorithms, LexicographicalCompareWithReferences)
+{
+    char c1 = 'a', c2 = 'a';
+    int i1 = 10, i2 = 20;
+    Couple<char&, int&> cp1(c1, i1);
+    Couple<char&, int&> cp2(c2, i2);
+
+    EXPECT_TRUE((cp1 <=> cp2) < 0);  // 10 < 20
+
+    i2 = 5;
+    EXPECT_TRUE((cp1 <=> cp2) > 0);  // 10 > 5
+}
+
+TEST(StructuralTraits, TraitsWithReferenceTypes)
+{
+    using TpRef = Tuple<int&, const double&>;
+    static_assert(Structural<TpRef>);
+    static_assert(TupleLike<TpRef>);
+
+    using Traits = StructuralTraits<TpRef>;
+    static_assert(Traits::SIZE == 2);
+    static_assert(std::same_as<Traits::ElementType<0>, int&>);
+    static_assert(std::same_as<Traits::ElementType<1>, const double&>);
 }
