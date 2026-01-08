@@ -42,10 +42,14 @@ namespace original::details
     struct StructuralGetCheck
     {
         static constexpr bool value =
-        requires(T& t) { get<I>(t); } &&
+        ((requires(T& t, IndexConstant<I> c) { get(t, c); } &&
+        requires(const T& t, IndexConstant<I> c) { get(t, c); } &&
+        (MoveConstructible<T> ?
+        requires(T&& t, IndexConstant<I> c) { get(std::move(t), c); } : true)) ||
+        (requires(T& t) { get<I>(t); } &&
         requires(const T& t) { get<I>(t); } &&
-        (std::is_move_constructible_v<T> ?
-        requires(T&& t) { get<I>(std::move(t)); } : true) &&
+        (MoveConstructible<T> ?
+        requires(T&& t) { get<I>(std::move(t)); } : true))) &&
         StructuralGetCheck<T, I + 1, N>::value;
     };
 
