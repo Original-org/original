@@ -186,6 +186,14 @@ export namespace std
     };
 
     template<size_t I, typename... Ts>
+    struct tuple_element<I, const original::Tuple<Ts...>> // NOLINT
+    {
+        using type = std::add_const_t<
+            tuple_element_t<I, original::Tuple<Ts...>>
+        >;
+    };
+
+    template<size_t I, typename... Ts>
     constexpr decltype(auto) get(const original::Tuple<Ts...>& tp) noexcept // NOLINT
     {
         return original::get<I>(tp);
