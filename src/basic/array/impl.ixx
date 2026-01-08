@@ -263,7 +263,7 @@ export namespace original
         {
             return structural::forAll<Cnt>
             (
-                [&]<Size::Type... I>(IndexConstant<I>...)
+                [this]<Size::Type... I>(IndexConstant<I>...)
                 {
                     return Array<T, Cnt>{
                         static_cast<T>((*this)[Start + I])...
@@ -284,7 +284,7 @@ export namespace original
         {
             return structural::forAll<Cnt>
             (
-                [&]<Size::Type... I>(IndexConstant<I>...)
+                [this]<Size::Type... I>(IndexConstant<I>...)
                 {
                     return Array<T, Cnt>{
                         static_cast<T>(
