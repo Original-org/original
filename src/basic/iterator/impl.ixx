@@ -1,6 +1,6 @@
 module;
 #include <memory>
-export module orginal.basic.iterator.impl;
+export module original.basic.iterator.impl;
 import original.basic.iterator.traits;
 import original.basic.types;
 import original.basic.number;
