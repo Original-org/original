@@ -129,6 +129,12 @@ export namespace original {
     template <typename T>
     concept IsReference = std::is_reference_v<T>;
 
+    template <typename T>
+    concept IsLValueReference = std::is_lvalue_reference_v<T>;
+
+    template <typename T>
+    concept IsRValueReference = std::is_rvalue_reference_v<T>;
+
     /**
      * @brief Concept for type convertibility.
      *
@@ -282,6 +288,12 @@ export namespace original {
 
     template <typename T, typename... Args>
     concept Constructible = std::is_constructible_v<T, Args...>;
+
+    template <typename T>
+    concept CopyConstructible = std::is_copy_constructible_v<T>;
+
+    template <typename T>
+    concept MoveConstructible = std::is_move_constructible_v<T>;
 
     /** @} */ // end of TypeTraits group
 
