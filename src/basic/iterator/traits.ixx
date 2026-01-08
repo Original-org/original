@@ -39,7 +39,7 @@ namespace original::details
     template<typename>
     struct DifferenceTrait
     {
-        using DifferenceType = Diff::Type;
+        using DifferenceType = NumberLikeType<Diff>;
     };
 
     template<HasDifferenceType T>
