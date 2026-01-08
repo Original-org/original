@@ -115,6 +115,24 @@ export namespace original
         return std::move(tp).template get<I>();
     }
 
+    template<Size::Type I, typename... Ts>
+    constexpr decltype(auto) get(const Tuple<Ts...>& tp, IndexConstant<I>) noexcept
+    {
+        return tp.template get<I>();
+    }
+
+    template<Size::Type I, typename... Ts>
+    constexpr decltype(auto) get(Tuple<Ts...>& tp, IndexConstant<I>) noexcept
+    {
+        return tp.template get<I>();
+    }
+
+    template<Size::Type I, typename... Ts>
+    constexpr decltype(auto) get(Tuple<Ts...>&& tp, IndexConstant<I>) noexcept
+    {
+        return std::move(tp).template get<I>();
+    }
+
     template<typename... Ts, typename... Us>
     requires
     (sizeof...(Ts) == sizeof...(Us)) &&

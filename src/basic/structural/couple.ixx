@@ -98,6 +98,27 @@ export namespace original
     {
         return std::move(cp).template get<I>();
     }
+
+    template<Size::Type I, typename T1, typename T2>
+    requires (I < 2)
+    constexpr decltype(auto) get(const Couple<T1, T2>& cp, IndexConstant<I>) noexcept
+    {
+        return cp.template get<I>();
+    }
+
+    template<Size::Type I, typename T1, typename T2>
+    requires (I < 2)
+    constexpr decltype(auto) get(Couple<T1, T2>& cp, IndexConstant<I>) noexcept
+    {
+        return cp.template get<I>();
+    }
+
+    template<Size::Type I, typename T1, typename T2>
+    requires (I < 2)
+    constexpr decltype(auto) get(Couple<T1, T2>&& cp, IndexConstant<I>) noexcept
+    {
+        return std::move(cp).template get<I>();
+    }
 }
 
 export namespace std

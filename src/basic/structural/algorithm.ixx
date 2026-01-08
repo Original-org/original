@@ -26,7 +26,7 @@ namespace original::structural::details {
         }
         else
         {
-            if (auto cmp = pred(get<I>(lhs), get<I>(rhs)); cmp != 0)
+            if (auto cmp = pred(get(lhs, IndexConstant<I>{}), get(rhs, IndexConstant<I>{})); cmp != 0)
                 return static_cast<Category>(cmp);
 
             return lexicographicallyCompareImpl<I + 1, Category>(lhs, rhs, pred);
@@ -34,10 +34,47 @@ namespace original::structural::details {
     }
 }
 
+export namespace original
+{
+    template<Size::Type I, typename T1, typename T2>
+    constexpr decltype(auto) get(std::pair<T1, T2>& cp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(cp);
+    }
+
+    template<Size::Type I, typename T1, typename T2>
+    constexpr decltype(auto) get(const std::pair<T1, T2>& cp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(cp);
+    }
+
+    template<Size::Type I, typename T1, typename T2>
+    constexpr decltype(auto) get(std::pair<T1, T2>&& cp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(std::move(cp));
+    }
+
+    template<Size::Type I, typename... Args>
+    constexpr decltype(auto) get(std::tuple<Args...>& tp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(tp);
+    }
+
+    template<Size::Type I, typename... Args>
+    constexpr decltype(auto) get(const std::tuple<Args...>& tp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(tp);
+    }
+
+    template<Size::Type I, typename... Args>
+    constexpr decltype(auto) get(std::tuple<Args...>&& tp, IndexConstant<I>) noexcept
+    {
+        return std::get<I>(std::move(tp));
+    }
+}
+
 export namespace original::structural
 {
-    using std::get;
-
     /**
      * @brief Invokes a functor with all integral constants from a sequence as separate arguments.
      *
@@ -178,9 +215,9 @@ export namespace original::structural
     {
         return forAll<StructuralTraits<T>::SIZE>
         (
-            [&]<Size::Type... I>(IndexConstant<I>...)
+            [&]<Size::Type... I>(IndexConstant<I>... c)
             {
-                return f(get<I>(std::forward<T>(t))...);
+                return f(get(std::forward<T>(t), c)...);
             }
         );
     }
@@ -321,9 +358,9 @@ export namespace original::structural
     {
         forEach<StructuralTraits<T>::SIZE>
         (
-            [&]<Size::Type I>(IndexConstant<I>)
+            [&]<Size::Type I>(IndexConstant<I> c)
             {
-                f(get<I>(std::forward<T>(t)));
+                f(get(std::forward<T>(t), c));
             }
         );
     }
@@ -341,9 +378,9 @@ export namespace original::structural
     {
         bool result = true;
         forEach<StructuralTraits<L>::SIZE>(
-            [&]<Size::Type I>(IndexConstant<I>)
+            [&]<Size::Type I>(IndexConstant<I> c)
             {
-                if (!pred(get<I>(lhs), get<I>(rhs)))
+                if (!pred(get(lhs, c), get(rhs, c)))
                     result = false;
             }
         );
