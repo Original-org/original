@@ -22,8 +22,8 @@ export namespace original
         requires
             Constructible<T1, U1&&> &&
             Constructible<T2, U2&&> &&
-            (!SameType<RemoveCVRefType<U1>, Couple> ||
-             !SameType<RemoveCVRefType<U2>, Couple>)
+            (!SameType<RemoveCVRefType<U1>, Couple>) &&
+            (!SameType<RemoveCVRefType<U2>, Couple>)
         constexpr Couple(U1&& first, U2&& second)
             : first(std::forward<U1>(first))
             , second(std::forward<U2>(second)) {}
@@ -38,12 +38,32 @@ export namespace original
 
         template<Size::Type I>
         requires (I < 2)
-        constexpr decltype(auto) get() const noexcept
+        constexpr decltype(auto) get() & noexcept
         {
             if constexpr(I == 0)
-                return this->first;
+                return (this->first);
             else
-                return this->second;
+                return (this->second);
+        }
+
+        template<Size::Type I>
+        requires (I < 2)
+        constexpr decltype(auto) get() const& noexcept
+        {
+            if constexpr(I == 0)
+                return (this->first);
+            else
+                return (this->second);
+        }
+
+        template<Size::Type I>
+        requires (I < 2)
+        constexpr decltype(auto) get() && noexcept
+        {
+            if constexpr(I == 0)
+                return std::move(this->first);
+            else
+                return std::move(this->second);
         }
 
         constexpr bool operator==(const Couple& rhs) const
@@ -60,7 +80,7 @@ export namespace original
     };
 
     template<typename T1, typename T2>
-    Couple(T1&&, T2&&) -> Couple<T1, T2>;
+    Couple(T1&&, T2&&) -> Couple<std::decay_t<T1>, std::decay_t<T2>>;
 
     template<typename T1, typename T2, typename U1, typename U2>
     requires HasCommonType<T1, U1> && HasCommonType<T2, U2> &&
