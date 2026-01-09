@@ -9,6 +9,70 @@ import original.basic.structural.algorithm;
 import original.basic.structural.couple;
 import original.basic.structural.tuple;
 
+
+namespace original::details
+{
+    template<Size::Type SL, Size::Type I, typename L, typename R>
+    constexpr auto forwardElemLL(L&& l, R&& r) -> decltype(auto)
+    {
+        if constexpr(I < SL)
+        {
+            return RemoveCVRefType<decltype(get(l, IndexConstant<I>{}))>
+                 (get(l, IndexConstant<I>{}));
+        }
+        else
+        {
+            return RemoveCVRefType<decltype(get(r, IndexConstant<I - SL>{}))>
+                (get(r, IndexConstant<I - SL>{}));
+        }
+    }
+
+    template<Size::Type SL, Size::Type I, typename L, typename R>
+    constexpr auto forwardElemLR(L&& l, R&& r) -> decltype(auto)
+    {
+        if constexpr(I < SL)
+        {
+            return RemoveCVRefType<decltype(get(l, IndexConstant<I>{}))>
+                 (get(l, IndexConstant<I>{}));
+        }
+        else
+        {
+            return RemoveCVRefType<decltype(std::move(get(r, IndexConstant<I - SL>{})))>
+                (std::move(get(r, IndexConstant<I - SL>{})));
+        }
+    }
+
+    template<Size::Type SL, Size::Type I, typename L, typename R>
+    constexpr auto forwardElemRL(L&& l, R&& r) -> decltype(auto)
+    {
+        if constexpr(I < SL)
+        {
+            return RemoveCVRefType<decltype(std::move(get(l, IndexConstant<I>{})))>
+                 (std::move(get(l, IndexConstant<I>{})));
+        }
+        else
+        {
+            return RemoveCVRefType<decltype(get(r, IndexConstant<I - SL>{}))>
+                (get(r, IndexConstant<I - SL>{}));
+        }
+    }
+
+    template<Size::Type SL, Size::Type I, typename L, typename R>
+    constexpr auto forwardElemRR(L&& l, R&& r) -> decltype(auto)
+    {
+        if constexpr(I < SL)
+        {
+            return RemoveCVRefType<decltype(std::move(get(l, IndexConstant<I>{})))>
+                 (std::move(get(l, IndexConstant<I>{})));
+        }
+        else
+        {
+            return RemoveCVRefType<decltype(std::move(get(r, IndexConstant<I - SL>{})))>
+                (std::move(get(r, IndexConstant<I - SL>{})));
+        }
+    }
+}
+
 export namespace original
 {
     template<Size::Type Start, Size::Type Cnt, Structural T>
@@ -62,14 +126,14 @@ export namespace original
     constexpr auto toTuple(T&& t)
     requires IsRValueReference<T&&>
     {
-        return toTuple<0, Cnt>(std::move(t));
+        return toTuple<0, Cnt>(std::forward<T>(t));
     }
 
     template<Structural T>
     constexpr auto toTuple(T&& t)
     requires IsRValueReference<T&&>
     {
-        return toTuple<0, typename StructuralTraits<T>::SIZE>(std::move(t));
+        return toTuple<0, typename StructuralTraits<T>::SIZE>(std::forward<T>(t));
     }
 
     template<Size::Type Start, Structural T>
@@ -109,6 +173,97 @@ export namespace original
     constexpr auto toCouple(T&& t)
     requires IsRValueReference<T&&>
     {
-        return toCouple<0>(std::move(t));
+        return toCouple<0>(std::forward<T>(t));
+    }
+
+    template<Structural T, Structural U>
+    constexpr auto concat(const T& lhs, const U& rhs)
+    {
+        constexpr Size::Type LS = StructuralTraits<T>::SIZE;
+        constexpr Size::Type RS = StructuralTraits<U>::SIZE;
+        return structural::forAll<LS + RS>
+        (
+            [&]<Size::Type... I>(IndexConstant<I>...)
+            {
+                return Tuple{
+                    details::forwardElemLL<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                };
+            }
+        );
+    }
+
+    template<Structural T, Structural U>
+    constexpr auto concat(const T& lhs, U&& rhs)
+    requires IsRValueReference<U&&>
+    {
+        constexpr Size::Type LS = StructuralTraits<T>::SIZE;
+        constexpr Size::Type RS = StructuralTraits<U>::SIZE;
+        return structural::forAll<LS + RS>
+        (
+            [&]<Size::Type... I>(IndexConstant<I>...)
+            {
+                return Tuple{
+                    details::forwardElemLR<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                };
+            }
+        );
+    }
+
+    template<Structural T, Structural U>
+    constexpr auto concat(T&& lhs, const U& rhs)
+    requires IsRValueReference<T&&>
+    {
+        constexpr Size::Type LS = StructuralTraits<T>::SIZE;
+        constexpr Size::Type RS = StructuralTraits<U>::SIZE;
+        return structural::forAll<LS + RS>
+        (
+            [&]<Size::Type... I>(IndexConstant<I>...)
+            {
+                return Tuple{
+                    details::forwardElemRL<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                };
+            }
+        );
+    }
+
+    template<Structural T, Structural U>
+    constexpr auto concat(T&& lhs, U&& rhs)
+    requires (IsRValueReference<T&&> && IsRValueReference<U&&>)
+    {
+        constexpr Size::Type LS = StructuralTraits<T>::SIZE;
+        constexpr Size::Type RS = StructuralTraits<U>::SIZE;
+        return structural::forAll<LS + RS>
+        (
+            [&]<Size::Type... I>(IndexConstant<I>...)
+            {
+                return Tuple{
+                    details::forwardElemRR<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                };
+            }
+        );
+    }
+
+    template<IsCouple T, IsCouple U>
+    constexpr auto operator+(T&& lhs, U&& rhs)
+    {
+        return concat(std::forward<T>(lhs), std::forward<U>(rhs));
+    }
+
+    template<IsTuple T, IsTuple U>
+    constexpr auto operator+(T&& lhs, U&& rhs)
+    {
+        return concat(std::forward<T>(lhs), std::forward<U>(rhs));
+    }
+
+    template<IsCouple T, IsTuple U>
+    constexpr auto operator+(T&& lhs, U&& rhs)
+    {
+        return concat(std::forward<T>(lhs), std::forward<U>(rhs));
+    }
+
+    template<IsTuple T, IsCouple U>
+    constexpr auto operator+(T&& lhs, U&& rhs)
+    {
+        return concat(std::forward<T>(lhs), std::forward<U>(rhs));
     }
 }
