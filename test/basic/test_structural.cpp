@@ -537,7 +537,7 @@ TEST(Casts, ToTuplePrefixCnt)
 TEST(Casts, ToTuplePrefixCntRValue)
 {
     auto src = Tuple(10, 20.0, 'z');
-    auto dst = toTuple<2>(std::move(src));
+    auto dst = toTuple<2>(std::move(src)); // NOLINT
 
     static_assert(std::same_as<decltype(dst), Tuple<int, double>>);
     EXPECT_EQ(get<0>(dst), 10);
@@ -558,7 +558,7 @@ TEST(Casts, ToTupleRangeStartCnt)
 TEST(Casts, ToTupleRangeStartCntRValue)
 {
     Array<char, 4> src{'a', 'b', 'c', 'd'};
-    auto dst = toTuple<2, 2>(std::move(src));
+    auto dst = toTuple<2, 2>(std::move(src)); // NOLINT
 
     static_assert(std::same_as<decltype(dst), Tuple<char, char>>);
     EXPECT_EQ(get<0>(dst), 'c');
@@ -667,14 +667,14 @@ TEST(Tuple, ReferenceMembersConstLValue)
 TEST(Tuple, ReferenceMembersRValue)
 {
     int val = 5;
-    auto make_temp = [&]() -> Tuple<int&&, double> { return Tuple<int&&, double>(std::move(val), 2.5); };
+    auto make_temp = [&]() -> Tuple<int&&, double> { return Tuple<int&&, double>(std::move(val), 2.5); }; // NOLINT
 
     auto tp = make_temp();  // Captures rvalue reference (but bound to temporary)
     EXPECT_EQ(std::get<0>(tp), 5);
     EXPECT_EQ(std::get<1>(tp), 2.5);
 
     // Move from rvalue reference
-    int moved = std::move(std::get<0>(tp));
+    int moved = std::move(std::get<0>(tp)); // NOLINT
     EXPECT_EQ(moved, 5);  // val is now moved-from, but test avoids UB by not accessing val post-move
 }
 
@@ -702,7 +702,7 @@ TEST(Couple, ReferenceMembers)
 {
     long l = 100L;
     bool b = true;
-    Couple<long&, bool&> cp(l, b);
+    const Couple<long&, bool&> cp(l, b);
 
     EXPECT_EQ(cp.first, 100L);
     EXPECT_EQ(cp.second, true);
@@ -718,7 +718,7 @@ TEST(Casts, ToTupleWithReferences)
 {
     float f = 1.23f;
     std::string s = "ref";
-    Tuple<float&, std::string&> src(f, s);
+    const Tuple<float&, std::string&> src(f, s);
 
     Tuple<float, std::string> dst = toTuple(src);  // Copies values, as toTuple uses RemoveCVRefType
     static_assert(std::same_as<decltype(dst), Tuple<float, std::string>>, "Should remove references");
@@ -738,7 +738,7 @@ TEST(Casts, ToCoupleWithReferencesRValue)
     double n = 8.9;
     auto src = Couple<int&, double&>(m, n);
 
-    auto dst = toCouple(std::move(src));  // Moves values after removing references
+    auto dst = toCouple(std::move(src));  // Moves values after removing references // NOLINT
     static_assert(std::same_as<decltype(dst), Couple<int, double>>);
 
     EXPECT_EQ(dst.first, 7);
