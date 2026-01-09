@@ -498,6 +498,8 @@ TEST(Tuple, StructuralTraits)
     static_assert(Structural<TpType4>);
     using TpType5 = std::tuple<int, A, int, std::vector<int>, char, int>;
     static_assert(Structural<TpType5>);
+    using TpType6 = const TpType5&;
+    static_assert(Structural<TpType6>);
 }
 
 TEST(Casts, ToTupleFull)
