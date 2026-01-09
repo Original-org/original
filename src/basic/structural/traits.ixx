@@ -128,7 +128,7 @@ export namespace original
     concept HasStructuralSize =
     requires {
         typename std::tuple_size<std::remove_cvref_t<T>>::type;
-    };
+    } || IsBuiltinArray<T>;
 
     /**
      * @brief Concept requiring a type to have valid tuple elements for all indices.
@@ -141,10 +141,10 @@ export namespace original
     template<typename T>
     concept HasStructuralElements =
     HasStructuralSize<T> &&
-    details::HasStructuralElementsValue<
+    (details::HasStructuralElementsValue<
         T,
         std::tuple_size<std::remove_cvref_t<T>>::value // NOLINT
-    >;
+    > || IsBuiltinArray<T>);
 
     /**
      * @brief Concept identifying types structurally compatible with std::tuple.
@@ -168,10 +168,62 @@ export namespace original
     template<typename T>
     concept Structural =
     HasStructuralElements<T> &&
-    details::HasStructuralGetValue<
+    (details::HasStructuralGetValue<
         T,
         std::tuple_size<std::remove_cvref_t<T>>::value // NOLINT
-    >;
+    > || IsBuiltinArray<T>);
+
+    /**
+     * @brief Traits class providing uniform access to structural type properties.
+     *
+     * @tparam T A type satisfying Structural
+     *
+     * Exposes the underlying type, element types by index, and compile-time size.
+     *
+     * @code
+     * using Traits = StructuralTraits<std::tuple<int, double, char>>;
+     * static_assert(Traits::SIZE == 3);
+     * using Second = Traits::ElementType<1>;  // double
+     * @endcode
+     */
+    template<Structural T>
+    struct StructuralTraits
+    {
+        using Type = std::remove_cvref_t<T>;
+
+        template<Size::Type I>
+        using ElementType = std::tuple_element<I, Type>::type; // NOLINT
+
+        static constexpr Size::Type SIZE = std::tuple_size<Type>::value; // NOLINT
+    };
+
+    template<typename T, Size::Type N>
+    struct StructuralTraits<T[N]>
+    {
+        using Type = T[N];
+
+        template<Size::Type = 0>
+        using ElementType = T;
+
+        static constexpr Size::Type SIZE = N;
+    };
+
+    template<typename T, Size::Type N>
+    struct StructuralTraits<T(&)[N]> : StructuralTraits<T[N]> {};
+
+    template<typename T, Size::Type N>
+    struct StructuralTraits<const T[N]>
+    {
+        using Type = const T[N];
+
+        template<Size::Type = 0>
+        using ElementType = const T;
+
+        static constexpr Size::Type SIZE = N;
+    };
+
+    template<typename T, Size::Type N>
+    struct StructuralTraits<const T(&)[N]> : StructuralTraits<const T[N]> {};
 
     /**
      * @brief Concept for pair-like structural types.
@@ -208,30 +260,6 @@ export namespace original
     Structural<T> &&
     std::tuple_size<std::remove_cvref_t<T>>::value >= 1; // NOLINT
 
-    /**
-     * @brief Traits class providing uniform access to structural type properties.
-     *
-     * @tparam T A type satisfying Structural
-     *
-     * Exposes the underlying type, element types by index, and compile-time size.
-     *
-     * @code
-     * using Traits = StructuralTraits<std::tuple<int, double, char>>;
-     * static_assert(Traits::SIZE == 3);
-     * using Second = Traits::ElementType<1>;  // double
-     * @endcode
-     */
-    template<Structural T>
-    struct StructuralTraits
-    {
-        using Type = std::remove_cvref_t<T>;
-
-        template<Size::Type I>
-        using ElementType = std::tuple_element<I, Type>::type; // NOLINT
-
-        static constexpr Size::Type SIZE = std::tuple_size<Type>::value; // NOLINT
-    };
-
     template<Structural L, Structural R>
     using StructuralCompareCategory =
         decltype(
@@ -267,6 +295,30 @@ export namespace original
     details::StructuralThreeWayComparableCheckValue<
         Pred, L, R, StructuralTraits<L>::SIZE
     >);
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(T (&arr)[N]) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(const T (&arr)[N]) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(T (&arr)[N], IndexConstant<I>) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(const T (&arr)[N], IndexConstant<I>) noexcept
+    {
+        return arr[I];
+    }
 }
 
 /** @} */ // end of StructuralTraits group
