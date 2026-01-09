@@ -227,7 +227,7 @@ TEST(StructuralTraits, StructuralConceptTest)
 TEST(StructuralTraits, StructuralForEach)
 {
     Array<int, 5> arr1 {-1, 0, 1, 2, 3};
-    structural::forEach(arr1, [](auto&& e)
+    structural::forEach(arr1, []<Size::Type I>(IndexConstant<I>, auto&& e)
     {
         e += 1;
     });

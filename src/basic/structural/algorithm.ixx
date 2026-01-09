@@ -349,7 +349,11 @@ export namespace original::structural
      *
      * @code
      * std::tuple<int, double> t{42, 3.14};
-     * forEach(t, [](auto& x) { std::cout << x << ' '; });  // prints 42 3.14
+     * forEach(t, []<Size::Type I>(IndexConstant<I>, auto& x)
+     * { std::cout << I << ": " << x << std::endl; });
+     * // prints:
+     * // 0: 42
+     * // 1: 3.14
      * @endcode
      */
     template<Structural T, Invokable F>
@@ -360,7 +364,7 @@ export namespace original::structural
         (
             [&]<Size::Type I>(IndexConstant<I> c)
             {
-                f(get(std::forward<T>(t), c));
+                f(c, get(std::forward<T>(t), c));
             }
         );
     }
