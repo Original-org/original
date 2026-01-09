@@ -8,6 +8,12 @@ import original.basic.types;
 import original.basic.number;
 
 
+export namespace original
+{
+    template<typename... Ts>
+    class Tuple;
+}
+
 namespace original::details
 {
     template<Size::Type, typename T>
@@ -33,6 +39,14 @@ namespace original::details
             : TupleLeaf<Is, Ts>{ std::forward<Us>(us) }...
         {}
     };
+
+    template<typename>
+    struct IsTupleTraits
+        : std::false_type {};
+
+    template<typename... Ts>
+    struct IsTupleTraits<Tuple<Ts...>>
+        : std::true_type {};
 }
 
 export namespace original
@@ -171,6 +185,9 @@ export namespace original
     {
         return structural::lexicographicallyCompare(lhs, rhs);
     }
+
+    template<typename T>
+    concept IsTuple = details::IsTupleTraits<RemoveCVRefType<T>>::value;
 }
 
 export namespace std

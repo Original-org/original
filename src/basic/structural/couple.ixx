@@ -11,6 +11,23 @@ import original.basic.structural.algorithm;
 export namespace original
 {
     template<typename T1, typename T2>
+    struct Couple;
+}
+
+namespace original::details
+{
+    template<typename>
+    struct IsCoupleTraits
+        : std::false_type {};
+
+    template<typename T1, typename T2>
+    struct IsCoupleTraits<Couple<T1, T2>>
+        : std::true_type {};
+}
+
+export namespace original
+{
+    template<typename T1, typename T2>
     struct Couple
     {
         T1 first{};
@@ -139,6 +156,9 @@ export namespace original
     {
         return std::move(cp).template get<I>();
     }
+
+    template<typename T>
+    concept IsCouple = details::IsCoupleTraits<RemoveCVRefType<T>>::value;
 }
 
 export namespace std
