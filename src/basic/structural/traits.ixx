@@ -240,7 +240,7 @@ export namespace original
     template<typename T>
     concept CoupleLike =
     Structural<T> &&
-    std::tuple_size<std::remove_cvref_t<T>>::value == 2; // NOLINT
+    StructuralTraits<T>::SIZE == 2; // NOLINT
 
     /**
      * @brief Concept for tuple-like structural types.
@@ -258,7 +258,7 @@ export namespace original
     template<typename T>
     concept TupleLike =
     Structural<T> &&
-    std::tuple_size<std::remove_cvref_t<T>>::value >= 1; // NOLINT
+    StructuralTraits<T>::SIZE >= 1; // NOLINT
 
     template<Structural L, Structural R>
     using StructuralCompareCategory =
