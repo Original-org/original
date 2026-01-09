@@ -36,6 +36,30 @@ namespace original::structural::details {
 
 export namespace original
 {
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(T (&arr)[N]) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(const T (&arr)[N]) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(T (&arr)[N], IndexConstant<I>) noexcept
+    {
+        return arr[I];
+    }
+
+    template<Size::Type I, typename T, Size::Type N>
+    constexpr decltype(auto) get(const T (&arr)[N], IndexConstant<I>) noexcept
+    {
+        return arr[I];
+    }
+
     template<Size::Type I, typename T1, typename T2>
     constexpr decltype(auto) get(std::pair<T1, T2>& cp, IndexConstant<I>) noexcept
     {
