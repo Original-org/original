@@ -1085,10 +1085,9 @@ TEST(BuiltinArray, BasicTraits) {
     using BuiltinArrType = int[3];
     static_assert(Structural<BuiltinArrType>);
     constexpr BuiltinArrType a = {1, 2, 3};
-    const auto& [i, j, k] = a;
-    EXPECT_EQ(i, 1);
-    EXPECT_EQ(j, 2);
-    EXPECT_EQ(k, 3);
+    EXPECT_EQ(get<0>(a), 1);
+    EXPECT_EQ(get<1>(a), 2);
+    EXPECT_EQ(get<2>(a), 3);
 }
 
 TEST(BuiltinArray, StructuralAlgorithmCompatibility) {
