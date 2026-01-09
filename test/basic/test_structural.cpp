@@ -1080,3 +1080,24 @@ TEST(Casts, OperatorPlusChainMixedReferencesAndValues)
     EXPECT_EQ(std::get<0>(first), 100);  // first holds reference
     EXPECT_EQ(std::get<0>(result), 1);   // result copied value
 }
+
+TEST(BuiltinArray, BasicTraits) {
+    using BuiltinArrType = int[3];
+    static_assert(Structural<BuiltinArrType>);
+    constexpr BuiltinArrType a = {1, 2, 3};
+    const auto& [i, j, k] = a;
+    EXPECT_EQ(i, 1);
+    EXPECT_EQ(j, 2);
+    EXPECT_EQ(k, 3);
+}
+
+TEST(BuiltinArray, StructuralAlgorithmCompatibility) {
+    using BuiltinArrType = int[5];
+    constexpr BuiltinArrType a = {0, 1, 2, 3, 4};
+    structural::forEach(a,
+        []<Size::Type I>(IndexConstant<I>, const auto& e)
+        {
+            EXPECT_EQ(I, e);
+        }
+    );
+}
