@@ -1,5 +1,6 @@
 module;
 #include <utility>
+#include <type_traits>
 export module original.basic.structural.tuple;
 import original.basic.structural.utility;
 import original.basic.structural.traits;
