@@ -780,3 +780,301 @@ TEST(StructuralTraits, TraitsWithReferenceTypes)
     static_assert(std::same_as<Traits::ElementType<0>, int&>);
     static_assert(std::same_as<Traits::ElementType<1>, const double&>);
 }
+
+TEST(Casts, ConcatLValueLValue)
+{
+    constexpr Couple<int, double> lhs(1, 2.5);
+    constexpr Tuple<char, bool> rhs('a', true);
+    constexpr auto result = concat(lhs, rhs);
+    static_assert(std::same_as<decltype(result), const Tuple<int, double, char, bool>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+    EXPECT_EQ(std::get<2>(result), 'a');
+    EXPECT_EQ(std::get<3>(result), true);
+
+    constexpr std::pair lhs2{1, 2.5};
+    constexpr std::tuple rhs2{'a', true};
+    constexpr auto result2 = concat(lhs2, rhs2);
+    static_assert(std::same_as<decltype(result2), const Tuple<int, double, char, bool>>);
+    EXPECT_EQ(std::get<0>(result2), 1);
+    EXPECT_EQ(std::get<1>(result2), 2.5);
+    EXPECT_EQ(std::get<2>(result2), 'a');
+    EXPECT_EQ(std::get<3>(result2), true);
+}
+
+TEST(Casts, ConcatLValueRValue)
+{
+    constexpr Couple<long, float> lhs(10L, 3.14f);
+    auto rhs = Tuple<std::string, int>("test", 42);
+    auto result = concat(lhs, std::move(rhs));
+
+    static_assert(std::same_as<decltype(result), Tuple<long, float, std::string, int>>);
+    EXPECT_EQ(std::get<0>(result), 10L);
+    EXPECT_EQ(std::get<1>(result), 3.14f);
+    EXPECT_EQ(std::get<2>(result), "test");
+    EXPECT_EQ(std::get<3>(result), 42);
+}
+
+TEST(Casts, ConcatRValueLValue)
+{
+    auto lhs = Tuple<bool, char>(false, 'b');
+    constexpr Couple<double, long> rhs(4.5, 20L);
+    auto result = concat(std::move(lhs), rhs); // NOLINT
+
+    static_assert(std::same_as<decltype(result), Tuple<bool, char, double, long>>);
+    EXPECT_EQ(std::get<0>(result), false);
+    EXPECT_EQ(std::get<1>(result), 'b');
+    EXPECT_EQ(std::get<2>(result), 4.5);
+    EXPECT_EQ(std::get<3>(result), 20L);
+}
+
+TEST(Casts, ConcatRValueRValue)
+{
+    auto lhs = Couple<int, std::string>(5, "left");
+    auto rhs = Tuple<float, bool>(6.7f, true);
+    auto result = concat(std::move(lhs), std::move(rhs)); // NOLINT
+
+    static_assert(std::same_as<decltype(result), Tuple<int, std::string, float, bool>>);
+    EXPECT_TRUE(lhs.get<1>().empty());
+    EXPECT_EQ(std::get<0>(result), 5);
+    EXPECT_EQ(std::get<1>(result), "left");
+    EXPECT_EQ(std::get<2>(result), 6.7f);
+    EXPECT_EQ(std::get<3>(result), true);
+}
+
+TEST(Casts, ConcatEmptyStructures)
+{
+    constexpr Tuple<> empty1;
+    constexpr Couple<int, double> non_empty(1, 2.0);
+    constexpr Tuple<> empty2;
+
+    constexpr auto result1 = concat(empty1, non_empty);
+    static_assert(std::same_as<decltype(result1), const Tuple<int, double>>);
+    EXPECT_EQ(std::get<0>(result1), 1);
+    EXPECT_EQ(std::get<1>(result1), 2.0);
+
+    constexpr auto result2 = concat(non_empty, empty2);
+    static_assert(std::same_as<decltype(result2), const Tuple<int, double>>);
+    EXPECT_EQ(std::get<0>(result2), 1);
+    EXPECT_EQ(std::get<1>(result2), 2.0);
+
+    constexpr auto result3 = concat(empty1, empty2);
+    static_assert(std::same_as<decltype(result3), const Tuple<>>);
+    EXPECT_TRUE(result3 == Tuple<>());
+}
+
+TEST(Casts, ConcatWithReferences)
+{
+    int a = 10;
+    double b = 20.5;
+    char c = 'c';
+    bool d = false;
+
+    Couple<int&, double&> lhs(a, b);
+    Tuple<char&, bool&> rhs(c, d);
+
+    auto result = concat(lhs, rhs);
+    static_assert(std::same_as<decltype(result), Tuple<int, double, char, bool>>);
+    EXPECT_EQ(std::get<0>(result), 10);
+    EXPECT_EQ(std::get<1>(result), 20.5);
+    EXPECT_EQ(std::get<2>(result), 'c');
+    EXPECT_EQ(std::get<3>(result), false);
+
+    // Modifications to result do not affect originals
+    std::get<0>(result) = 99;
+    EXPECT_EQ(a, 10);
+}
+
+TEST(Casts, OperatorPlusCoupleCouple)
+{
+    constexpr Couple<int, double> lhs(1, 2.5);
+    constexpr Couple<char, bool> rhs('a', true);
+    constexpr auto result = lhs + rhs;
+
+    static_assert(std::same_as<decltype(result), const Tuple<int, double, char, bool>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+    EXPECT_EQ(std::get<2>(result), 'a');
+    EXPECT_EQ(std::get<3>(result), true);
+}
+
+TEST(Casts, OperatorPlusTupleTuple)
+{
+    constexpr Tuple<long, float> lhs(10L, 3.14f);
+    const Tuple<std::string, int> rhs("test", 42);
+    const auto result = lhs + rhs;
+
+    static_assert(std::same_as<decltype(result), const Tuple<long, float, std::string, int>>);
+    EXPECT_EQ(std::get<0>(result), 10L);
+    EXPECT_EQ(std::get<1>(result), 3.14f);
+    EXPECT_EQ(std::get<2>(result), "test");
+    EXPECT_EQ(std::get<3>(result), 42);
+}
+
+TEST(Casts, OperatorPlusCoupleTuple)
+{
+    constexpr Couple<bool, char> lhs(false, 'b');
+    constexpr Tuple<double, long> rhs(4.5, 20L);
+    constexpr auto result = lhs + rhs;
+
+    static_assert(std::same_as<decltype(result), const Tuple<bool, char, double, long>>);
+    EXPECT_EQ(std::get<0>(result), false);
+    EXPECT_EQ(std::get<1>(result), 'b');
+    EXPECT_EQ(std::get<2>(result), 4.5);
+    EXPECT_EQ(std::get<3>(result), 20L);
+}
+
+TEST(Casts, OperatorPlusTupleCouple)
+{
+    const Tuple<int, std::string> lhs(5, "left");
+    constexpr Couple<float, bool> rhs(6.7f, true);
+    const auto result = lhs + rhs;
+
+    static_assert(std::same_as<decltype(result), const Tuple<int, std::string, float, bool>>);
+    EXPECT_EQ(std::get<0>(result), 5);
+    EXPECT_EQ(std::get<1>(result), "left");
+    EXPECT_EQ(std::get<2>(result), 6.7f);
+    EXPECT_EQ(std::get<3>(result), true);
+}
+
+TEST(Casts, OperatorPlusRValueSemantics)
+{
+    auto lhs = Couple<int, double>(1, 2.5);
+    auto rhs = Tuple<char, bool>('a', true);
+    auto result = std::move(lhs) + std::move(rhs); // NOLINT
+
+    static_assert(std::same_as<decltype(result), Tuple<int, double, char, bool>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+    EXPECT_EQ(std::get<2>(result), 'a');
+    EXPECT_EQ(std::get<3>(result), true);
+}
+
+TEST(Casts, OperatorPlusWithEmpty)
+{
+    constexpr Couple<int, double> non_empty(1, 2.0);
+    constexpr Tuple<> empty;
+
+    constexpr auto result1 = non_empty + empty;
+    static_assert(std::same_as<decltype(result1), const Tuple<int, double>>);
+    EXPECT_EQ(std::get<0>(result1), 1);
+    EXPECT_EQ(std::get<1>(result1), 2.0);
+
+    constexpr auto result2 = empty + non_empty;
+    static_assert(std::same_as<decltype(result2), const Tuple<int, double>>);
+    EXPECT_EQ(std::get<0>(result2), 1);
+    EXPECT_EQ(std::get<1>(result2), 2.0);
+}
+
+TEST(Casts, OperatorPlusChainThreeLValues)
+{
+    constexpr Couple<int, double> first(1, 2.5);
+    constexpr Tuple<char, bool> second('a', true);
+    constexpr Couple<long, float> third(10L, 3.14f);
+    constexpr auto result = first + second + third;
+
+    static_assert(std::same_as<decltype(result), const Tuple<int, double, char, bool, long, float>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+    EXPECT_EQ(std::get<2>(result), 'a');
+    EXPECT_EQ(std::get<3>(result), true);
+    EXPECT_EQ(std::get<4>(result), 10L);
+    EXPECT_EQ(std::get<5>(result), 3.14f);
+}
+
+TEST(Casts, OperatorPlusChainMixedRValues)
+{
+    auto first = Couple<std::string, int>("left", 42);
+    constexpr Tuple<double, char> second(4.5, 'b');
+    auto third = Couple<bool, long>(false, 100L);
+    auto result = std::move(first) + second + std::move(third); // NOLINT
+
+    static_assert(std::same_as<decltype(result), Tuple<std::string, int, double, char, bool, long>>);
+    EXPECT_EQ(std::get<0>(result), "left");
+    EXPECT_EQ(std::get<1>(result), 42);
+    EXPECT_EQ(std::get<2>(result), 4.5);
+    EXPECT_EQ(std::get<3>(result), 'b');
+    EXPECT_EQ(std::get<4>(result), false);
+    EXPECT_EQ(std::get<5>(result), 100L);
+}
+
+TEST(Casts, OperatorPlusChainWithEmpty)
+{
+    constexpr Tuple<> empty1;
+    constexpr Couple<int, double> middle(1, 2.5);
+    constexpr Tuple<> empty2;
+    constexpr auto result = empty1 + middle + empty2;
+
+    static_assert(std::same_as<decltype(result), const Tuple<int, double>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+}
+
+TEST(Casts, OperatorPlusChainFourMixedTypes)
+{
+    constexpr Couple<int, bool> a(1, true);
+    auto b = Tuple<double, char>(3.14, 'c');
+    const Couple<long, std::string> c(5L, "mid");
+    auto d = Tuple<float>(6.7f);
+    const auto result = a + std::move(b) + c + std::move(d); // NOLINT
+
+    static_assert(std::same_as<decltype(result), const Tuple<int, bool, double, char, long, std::string, float>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), true);
+    EXPECT_EQ(std::get<2>(result), 3.14);
+    EXPECT_EQ(std::get<3>(result), 'c');
+    EXPECT_EQ(std::get<4>(result), 5L);
+    EXPECT_EQ(std::get<5>(result), "mid");
+    EXPECT_EQ(std::get<6>(result), 6.7f);
+}
+
+TEST(Casts, OperatorPlusChainWithReferences)
+{
+    int x = 10;
+    double y = 20.5;
+    char z = 'z';
+    bool w = false;
+    long v = 30L;
+    float u = 4.2f;
+
+    Couple<int&, double&> first(x, y);
+    Tuple<char&, bool&> second(z, w);
+    Couple<long&, float&> third(v, u);
+
+    auto result = first + second + third;
+    static_assert(std::same_as<decltype(result), Tuple<int, double, char, bool, long, float>>);
+    EXPECT_EQ(std::get<0>(result), 10);
+    EXPECT_EQ(std::get<1>(result), 20.5);
+    EXPECT_EQ(std::get<2>(result), 'z');
+    EXPECT_EQ(std::get<3>(result), false);
+    EXPECT_EQ(std::get<4>(result), 30L);
+    EXPECT_EQ(std::get<5>(result), 4.2f);
+
+    // Modifications to result do not affect originals
+    std::get<0>(result) = 99;
+    EXPECT_EQ(x, 10);
+}
+
+TEST(Casts, OperatorPlusChainMixedReferencesAndValues)
+{
+    int p = 1;
+    const Couple<int&, double> first(p, 2.5);
+    bool w = true;
+    float u = 3.14f;
+    auto second = Tuple<char, bool&>( 'a', w);
+    const Couple<long, float&> third(3L, u);
+
+    auto result = first + std::move(second) + third; // NOLINT
+    static_assert(std::same_as<decltype(result), Tuple<int, double, char, bool, long, float>>);
+    EXPECT_EQ(std::get<0>(result), 1);
+    EXPECT_EQ(std::get<1>(result), 2.5);
+    EXPECT_EQ(std::get<2>(result), 'a');
+    EXPECT_EQ(std::get<3>(result), true);
+    EXPECT_EQ(std::get<4>(result), 3L);
+    EXPECT_EQ(std::get<5>(result), 3.14f);
+
+    // Check reference effects
+    p = 100;
+    EXPECT_EQ(std::get<0>(first), 100);  // first holds reference
+    EXPECT_EQ(std::get<0>(result), 1);   // result copied value
+}
