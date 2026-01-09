@@ -165,12 +165,12 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>,
                        CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                      typename RangeTraits<Range2>::ReferenceType>>
-    constexpr auto mismatch(Range1& range1, Range2& range2, Pred pred = {})
+    constexpr auto mismatch(const Range1& range1, const Range2& range2, Pred pred = {})
     {
-        return mismatch(RangeTraits<Range1>::begin(range1),
-                        RangeTraits<Range1>::end(range1),
-                        RangeTraits<Range2>::begin(range2),
-                        RangeTraits<Range2>::end(range2),
+        return mismatch(RangeTraits<const Range1>::begin(range1),
+                        RangeTraits<const Range1>::end(range1),
+                        RangeTraits<const Range2>::begin(range2),
+                        RangeTraits<const Range2>::end(range2),
                         pred);
     }
 
@@ -197,12 +197,12 @@ export namespace original::algorithms {
                                          typename RangeTraits<Range2>::ReferenceType>,
                            CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                          typename RangeTraits<Range2>::ReferenceType>>
-    constexpr bool equal(Range1 &range1, Range2 &range2, Pred pred = {})
+    constexpr bool equal(const Range1 &range1, const Range2 &range2, Pred pred = {})
     {
         auto&& [it1, it2] = mismatch(range1, range2, pred);
 
-        return it1 == RangeTraits<Range1>::end(range1) &&
-               it2 == RangeTraits<Range2>::end(range2);
+        return it1 == RangeTraits<const Range1>::end(range1) &&
+               it2 == RangeTraits<const Range2>::end(range2);
     }
 
     /**
@@ -337,12 +337,12 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>,
                        CommonRefType<typename RangeTraits<Range1>::ReferenceType,
                                      typename RangeTraits<Range2>::ReferenceType>>
-    constexpr auto lexicographicallyCompare(Range1 &range1, Range2 &range2, Pred pred = {})
+    constexpr auto lexicographicallyCompare(const Range1 &range1, const Range2 &range2, Pred pred = {})
     {
-        return lexicographicallyCompare(RangeTraits<Range1>::begin(range1),
-                                        RangeTraits<Range1>::end(range1),
-                                        RangeTraits<Range2>::begin(range2),
-                                        RangeTraits<Range2>::end(range2),
+        return lexicographicallyCompare(RangeTraits<const Range1>::begin(range1),
+                                        RangeTraits<const Range1>::end(range1),
+                                        RangeTraits<const Range2>::begin(range2),
+                                        RangeTraits<const Range2>::end(range2),
                                         pred);
     }
 
