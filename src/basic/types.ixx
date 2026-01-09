@@ -112,6 +112,10 @@ export namespace original {
     template <typename T>
     concept IsPointer = std::is_pointer_v<T>;
 
+    template<typename T>
+    concept IsBuiltinArray =
+        std::is_array_v<std::remove_cvref_t<T>>;
+
     /**
      * @brief Concept that constrains a type to be a reference type.
      *
