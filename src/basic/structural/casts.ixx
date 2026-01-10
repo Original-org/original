@@ -133,7 +133,8 @@ export namespace original
     constexpr auto toTuple(T&& t)
     requires IsRValueReference<T&&>
     {
-        return toTuple<0, typename StructuralTraits<T>::SIZE>(std::forward<T>(t));
+        constexpr auto SIZE = StructuralTraits<T>::SIZE;
+        return toTuple<0, SIZE>(std::forward<T>(t));
     }
 
     template<Size::Type Start, Structural T>
