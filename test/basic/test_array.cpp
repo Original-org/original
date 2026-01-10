@@ -6,6 +6,7 @@ import original.basic.number;
 import original.basic.container;
 import original.basic.algorithm;
 import original.basic.structural;
+import original.basic.range;
 
 using namespace original;
 using namespace original::literals;
@@ -34,6 +35,17 @@ TEST(ArrayTest, BasicOperationsNonEmpty) {
     EXPECT_EQ(carr[1_size], 20);
     EXPECT_EQ(carr.size(), 5_size);
     EXPECT_NE(carr.data(), nullptr);
+
+    Array<std::unique_ptr<int>, 5> arr2;
+
+    EXPECT_EQ(arr2.size(), 5_size);
+    EXPECT_NE(arr2.data(), nullptr);
+    EXPECT_EQ(arr2.data(), &arr2[0_size]);
+
+    arr2[0_size] = std::move(std::make_unique<int>(10));
+    EXPECT_EQ(*arr2[0_size], 10);
+    arr2[1_size] = std::move(std::make_unique<int>(20));
+    EXPECT_EQ(*arr2[1_size], 20);
 }
 
 TEST(ArrayTest, AtBoundsChecking) {
@@ -228,6 +240,12 @@ TEST(ArrayTest, NonTrivialType) {
     EXPECT_TRUE(moved_construct[0_size].moved_from);
     EXPECT_EQ(moved_construct[0_size].value, 0);
     EXPECT_EQ(moved_construct[0_size].constructed, false);
+
+    Array<std::unique_ptr<int>, 5> arr2;
+    arr2[0_size] = std::make_unique<int>(42);
+    auto moved_ptr = std::move(arr2[0_size]);
+    EXPECT_EQ(*moved_ptr, 42);
+    EXPECT_EQ(arr2[0_size], nullptr);
 }
 
 TEST(ContainerTraitsTest, ArraySatisfiesContainerConcept) {
@@ -319,6 +337,20 @@ TEST(ArrayStructuredBindingTest, BindingNonConst)
     EXPECT_EQ(arr[0_size], 100);
     EXPECT_EQ(arr[1_size], 200);
     EXPECT_EQ(std::get<2>(arr), 30);
+
+    Array<std::unique_ptr<int>, 3> arr2 {
+        std::make_unique<int>(10),
+        std::make_unique<int>(20),
+        std::make_unique<int>(30)
+    };
+    const auto& cref = arr2;
+    auto&& [ptr1, ptr2, ptr3] = cref;
+    EXPECT_EQ(*ptr1, 10);
+    EXPECT_EQ(*ptr2, 20);
+    EXPECT_EQ(*ptr3, 30);
+    auto&& [ptr4, ptr5, ptr6] = arr2;
+    *ptr6 = *ptr6 + 1;
+    EXPECT_EQ(*ptr3, 31);
 }
 
 TEST(ArrayStructuredBindingTest, BindingConst)
@@ -470,6 +502,19 @@ TEST(ArrayIntegralConstant, ApplyWithArrayGet)
 
     // 5 + 10 + 15 + 20 = 50
     EXPECT_EQ(sum, 50);
+
+    Array<std::unique_ptr<int>, 4> arr2 {};
+
+    structural::forEach(arr2, []<Size::Type I>(IndexConstant<I>, auto&& element)
+    {
+        element = std::make_unique<int>(static_cast<int>(I));
+    });
+
+    for (const auto view = arr2 | range::enumerate();
+         const auto& [index, e]: view)
+    {
+        EXPECT_EQ(index.value(), *e);
+    }
 }
 
 TEST(ArrayIntegralConstant, GetArrayElementsWithSequence)
@@ -590,6 +635,24 @@ TEST(ArrayConcatTest, ConcatWithEmptyArrays) {
     EXPECT_EQ(right[0_size], 7);
     EXPECT_EQ(right[1_size], 8);
     EXPECT_EQ(right[2_size], 9);
+
+    Array<std::unique_ptr<int>, 2> arr1 {std::make_unique<int>(0), std::make_unique<int>(1)};
+    Array<std::unique_ptr<int>, 2> arr2 {std::make_unique<int>(2), std::make_unique<int>(3)};
+    const auto result = std::move(arr1) + std::move(arr2);
+    static_assert(StructuralTraits<decltype(result)>::SIZE == 4);
+    for (const auto view = result | range::enumerate();
+         const auto& [i, e]: view)
+    {
+        EXPECT_EQ(i.value(), *e);
+    }
+    for (const auto& e: arr1)
+    {
+        EXPECT_EQ(e, nullptr);
+    }
+    for (const auto& e: arr2)
+    {
+        EXPECT_EQ(e, nullptr);
+    }
 }
 
 TEST(ArrayConcatTest, ConcatConstAndRvalue) {

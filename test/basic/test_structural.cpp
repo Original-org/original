@@ -264,6 +264,21 @@ TEST(Couple, CopyAndMoveSemantics)
     EXPECT_EQ(cp2.second, 42);
     EXPECT_EQ(cp3.first, "hello");
     EXPECT_EQ(cp3.second, 42);
+
+    Couple cp4 {std::make_unique<int>(0), std::make_unique<int>(1)};
+    structural::forEach(cp4, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(I, *e);
+    });
+    const auto cp5 = std::move(cp4);
+    structural::forEach<StructuralTraits<decltype(cp5)>::SIZE>
+    (
+        [&cp4, &cp5]<Size::Type I>(IndexConstant<I>)
+        {
+            EXPECT_EQ(std::get<I>(cp4), nullptr);
+            EXPECT_EQ(*std::get<I>(cp5), I);
+        }
+    );
 }
 
 TEST(Couple, EqualityComparison)
@@ -276,6 +291,12 @@ TEST(Couple, EqualityComparison)
     EXPECT_TRUE(cp1 == cp2);
     EXPECT_FALSE(cp1 == cp3);
     EXPECT_TRUE(cp3 == cp4);
+
+    constexpr Couple cp5{std::unique_ptr<int>(), std::unique_ptr<int>()};
+    constexpr Couple cp6{std::unique_ptr<int>(), std::unique_ptr<int>()};
+    const Couple cp7{std::unique_ptr<int>(), std::make_unique<int>(1)};
+    EXPECT_TRUE(cp6 == cp5);
+    EXPECT_FALSE(cp6 == cp7);
 }
 
 TEST(Couple, ThreeWayComparison)
@@ -288,6 +309,11 @@ TEST(Couple, ThreeWayComparison)
     EXPECT_LT(cp1, cp2);
     EXPECT_LT(cp1, cp3);
     EXPECT_TRUE((cp1 <=> cp4) < 0);
+
+    constexpr Couple cp5{std::unique_ptr<int>(), std::unique_ptr<int>()};
+    const Couple cp6{std::unique_ptr<int>(), std::make_unique<int>(1)};
+
+    EXPECT_TRUE(cp5 <=> cp6 != 0);
 }
 
 TEST(Couple, GetFunction)
@@ -308,6 +334,11 @@ TEST(Couple, StructuralBinding)
     auto&& [i, f] = cp1;
     EXPECT_EQ(i, 1);
     EXPECT_EQ(f, 2.0f);
+
+    constexpr Couple cp2 {std::unique_ptr<int>(), std::unique_ptr<int>()};
+    auto&& [ptr1, ptr2] = cp2;
+    EXPECT_EQ(ptr1, ptr2);
+    EXPECT_EQ(ptr1, nullptr);
 }
 
 TEST(Couple, StructuralTraits)
@@ -379,6 +410,18 @@ TEST(Tuple, CopyAndMoveSemantics)
     Tuple<std::string, int, bool> tp5;
     tp5 = std::move(tp3);
     EXPECT_EQ(tp5.get<0>(), "test");
+
+    Tuple tp6 {std::unique_ptr<int>(), std::unique_ptr<int>(), std::make_unique<int>(1)};
+    static_assert(SameType<decltype(tp6), Tuple<std::unique_ptr<int>, std::unique_ptr<int>, std::unique_ptr<int>>>);
+    EXPECT_EQ(tp6.get<0>(), nullptr);
+    EXPECT_EQ(tp6.get<1>(), nullptr);
+    EXPECT_EQ(*tp6.get<2>(), 1);
+
+    const auto tp7 = std::move(tp6);
+    EXPECT_EQ(tp7.get<0>(), nullptr);
+    EXPECT_EQ(tp7.get<1>(), nullptr);
+    EXPECT_EQ(*tp7.get<2>(), 1);
+    EXPECT_EQ(tp6.get<2>(), nullptr);
 }
 
 TEST(Tuple, EqualityComparison)
@@ -511,6 +554,30 @@ TEST(Casts, ToTupleFull)
     EXPECT_EQ(get<0>(dst), 42);
     EXPECT_EQ(get<1>(dst), 3.14);
     EXPECT_EQ(get<2>(dst), 'A');
+
+    Tuple src2 {std::make_unique<int>(1), std::make_unique<int>(2), std::make_unique<int>(3)};
+    const auto dst2 = toTuple(std::move(src2));
+
+    structural::forEach(dst2, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(*e, I + 1);
+    });
+    structural::forEach(src2, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(e, nullptr);
+    });
+
+    Couple src3 {std::make_unique<int>(1), std::make_unique<int>(2)};
+    const auto dst3 = toTuple(std::move(src3));
+
+    structural::forEach(dst3, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(*e, I + 1);
+    });
+    structural::forEach(src3, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(e, nullptr);
+    });
 }
 
 TEST(Casts, ToTupleFullRValue)
@@ -1028,6 +1095,25 @@ TEST(Casts, OperatorPlusChainFourMixedTypes)
     EXPECT_EQ(std::get<4>(result), 5L);
     EXPECT_EQ(std::get<5>(result), "mid");
     EXPECT_EQ(std::get<6>(result), 6.7f);
+
+    Tuple src1 {std::make_unique<int>(1)};
+    Tuple src2 {std::make_unique<int>(2), std::make_unique<int>(3), std::make_unique<int>(4)};
+    Couple src3 {std::make_unique<int>(5), std::make_unique<int>(6)};
+    const auto dst = std::move(src1) + std::move(src2) + std::move(src3);
+    static_assert(StructuralTraits<decltype(dst)>::SIZE == 6);
+    structural::forEach(dst, []<Size::Type I>(IndexConstant<I>, auto&& e)
+    {
+        EXPECT_EQ(*e, I + 1);
+    });
+    structural::forEach(src1, []<Size::Type I>(IndexConstant<I>, auto&& e){
+        EXPECT_EQ(e, nullptr);
+    });
+    structural::forEach(src2, []<Size::Type I>(IndexConstant<I>, auto&& e){
+        EXPECT_EQ(e, nullptr);
+    });
+    structural::forEach(src3, []<Size::Type I>(IndexConstant<I>, auto&& e){
+        EXPECT_EQ(e, nullptr);
+    });
 }
 
 TEST(Casts, OperatorPlusChainWithReferences)
