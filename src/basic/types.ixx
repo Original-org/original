@@ -496,6 +496,9 @@ export namespace original {
     template <typename T>
     concept LessComparable = requires(T t1, T t2) { {t1 < t2} -> Convertible<bool>; };
 
+    template <typename T>
+    concept WeakLessComparable = LessComparable<T> && EqualityComparable<T>;
+
     /**
      * @brief Concept that constrains a type to support greater-than comparison.
      *
@@ -515,6 +518,9 @@ export namespace original {
      */
     template <typename T>
     concept GreaterComparable = requires(T t1, T t2) { {t1 > t2} -> Convertible<bool>; };
+
+    template <typename T>
+    concept WeakGreaterComparable = GreaterComparable<T> && EqualityComparable<T>;
 
     /**
      * @brief Concept that constrains a type to support three-way comparison.
@@ -789,4 +795,26 @@ export namespace original {
     concept Functor = Invokable<F> && std::is_class_v<std::remove_reference_t<F>>;
 
     /** @} */ // end of InvocableTypes group
+
+    template<typename T>
+    concept Incrementable =
+    requires(T a, T b)
+    {
+        { ++a } -> SameType<T&>;
+    };
+
+    template<typename T>
+    concept Decrementable =
+    requires(T a, T b)
+    {
+        { --a } -> SameType<T&>;
+    };
+
+    template<typename T>
+    concept IncrementableComparable =
+        IsObject<T> &&
+        CopyConstructible<T> &&
+        MoveConstructible<T> &&
+        Incrementable<T> &&
+        WeakLessComparable<T>;
 } // namespace original
