@@ -678,3 +678,116 @@ TEST_F(RangeTest, BuiltinRangeViewChain)
         EXPECT_NE(val, 5);
     }
 }
+
+TEST(IotaTest, BasicForward)
+{
+    const auto r1 = iota(5_size);
+    auto it = r1.begin();
+    EXPECT_EQ(*it, 0_size); ++it;
+    EXPECT_EQ(*it, 1_size); ++it;
+    EXPECT_EQ(*it, 2_size); ++it;
+    EXPECT_EQ(*it, 3_size); ++it;
+    EXPECT_EQ(*it, 4_size); ++it;
+    EXPECT_EQ(it, r1.end());
+
+    for (const auto r2 = iota(5_size) | enumerate();
+         const auto& [index, val]: r2)
+    {
+        EXPECT_EQ(index, val);
+    }
+}
+
+TEST(IotaTest, WithStartAndEnd)
+{
+    const auto r = iota(7_size, 11_size);
+    auto it = r.begin();
+    EXPECT_EQ(*it, 7_size); ++it;
+    EXPECT_EQ(*it, 8_size); ++it;
+    EXPECT_EQ(*it, 9_size); ++it;
+    EXPECT_EQ(*it, 10_size); ++it;
+    EXPECT_EQ(it, r.end());
+    for (const auto r2 = iota(7_size, 11_size) | enumerate(7_size);
+         const auto& [index, val]: r2)
+    {
+        EXPECT_EQ(index, val);
+    }
+}
+
+TEST(IotaTest, EmptyRange)
+{
+    EXPECT_EQ(iota(8_size, 8_size).begin(), iota(8_size, 8_size).end());
+    EXPECT_EQ(iota(100_size, 50_size).begin(), iota(100_size, 50_size).end()); // first > last
+    bool iterated = false;
+    for (const auto r = iota(8_size, 8_size);
+         const auto& _ : r)
+    {
+        iterated = true;
+    }
+    EXPECT_FALSE(iterated);
+}
+
+TEST(IotaTest, ReverseBasic)
+{
+    auto r = iota(1, 6) | reverse();
+    auto it = r.begin();
+    EXPECT_EQ(*it, 5); ++it;
+    EXPECT_EQ(*it, 4); ++it;
+    EXPECT_EQ(*it, 3); ++it;
+    EXPECT_EQ(*it, 2); ++it;
+    EXPECT_EQ(*it, 1); ++it;
+    EXPECT_EQ(it, r.end());
+}
+
+TEST(IotaTest, ReverseWithBidirectional)
+{
+    auto r = iota(3, 8) | reverse();
+    auto it = r.begin();
+    EXPECT_EQ(*it, 7);
+    ++it; EXPECT_EQ(*it, 6);
+    ++it; EXPECT_EQ(*it, 5);
+    ++it; EXPECT_EQ(*it, 4);
+    --it; --it; EXPECT_EQ(*it, 6);
+}
+
+TEST(IotaTest, CompositionSimple)
+{
+    // take
+    {
+        auto r = iota(100_size) | take(4_size);
+        auto it = r.begin();
+        EXPECT_EQ(*it++, 0_size);
+        EXPECT_EQ(*it++, 1_size);
+        EXPECT_EQ(*it++, 2_size);
+        EXPECT_EQ(*it++, 3_size);
+        EXPECT_EQ(it, r.end());
+    }
+
+    // transform + filter
+    {
+        auto r = iota(1, 10)
+               | filter([](auto x){ return x % 2 == 1; })
+               | transform([](auto x){ return x * 10; });
+
+        auto it = r.begin();
+        EXPECT_EQ(*it++, 10);
+        EXPECT_EQ(*it++, 30);
+        EXPECT_EQ(*it++, 50);
+        EXPECT_EQ(*it++, 70);
+        EXPECT_EQ(*it++, 90);
+        EXPECT_EQ(it, r.end());
+    }
+}
+
+TEST(IotaTest, ConstCorrectness)
+{
+    const auto r = iota(1, 5);
+    auto it = r.begin();
+    EXPECT_EQ(*it, 1);
+    ++it;
+    EXPECT_EQ(*it, 2);
+
+    auto cit = r.begin();
+    ++cit;
+    --cit;
+    EXPECT_EQ(*cit, 1);
+}
