@@ -464,6 +464,66 @@ namespace original::details
         }
     };
 
+    template<IncrementableComparable T>
+    class IotaIterator
+    : public ForwardIteratorBase<
+        IotaIterator<T>,
+        T,
+        T,
+        void
+    >
+    {
+        T value_{};
+    public:
+        using IterType       = IotaIterator;
+        using ValueType      = T;
+        using ReferenceType  = T;
+        using PointerType    = void;
+
+        constexpr IotaIterator() noexcept = default;
+
+        explicit constexpr IotaIterator(T v) noexcept
+            : value_(std::move(v)) {}
+
+        constexpr ReferenceType operator*() const noexcept
+        {
+            return this->value_;
+        }
+
+        constexpr IotaIterator& operator++() noexcept
+        {
+            ++this->value_;
+            return *this;
+        }
+
+        constexpr IotaIterator operator++(int) noexcept
+        {
+            auto tmp = *this;
+            ++*this;
+            return tmp;
+        }
+
+        constexpr IotaIterator& operator--() noexcept
+        requires Decrementable<T>
+        {
+            --this->value_;
+            return *this;
+        }
+
+        constexpr IotaIterator operator--(int) noexcept
+        requires Decrementable<T>
+        {
+            auto tmp = *this;
+            --*this;
+            return tmp;
+        }
+
+        constexpr bool operator==(const IotaIterator& rhs) const noexcept
+        {
+            return this->value_ == rhs.value_;
+        }
+    };
+
     /**
      * @brief Lightweight range reference wrapper.
      *
@@ -916,6 +976,26 @@ namespace original::details
         }
     };
 
+    template<IncrementableComparable T>
+    class IotaRange
+    {
+        T first_;
+        T last_;
+    public:
+        IotaRange(T first, T last) noexcept
+            : first_(std::move(first)), last_(std::move(last)) {}
+
+        auto begin() const
+        {
+            return IotaIterator<T>{this->first_};
+        }
+
+        auto end() const
+        {
+            return IotaIterator<T>{this->last_};
+        }
+    };
+
     /**
      * @brief Internal type for building pipeline operators.
      */
@@ -1143,6 +1223,27 @@ export namespace original::range
                 return details::ZipRange<decltype(l), decltype(r)>{l, r};
             }
         };
+    }
+
+    template<IncrementableComparable T = Size>
+    auto iota(T first, T last) noexcept
+    {
+        if (first == last || first < last) {}
+        else
+        {
+            first = last;
+        }
+        return details::IotaRange<T>
+        {
+            std::move(first),
+            std::move(last)
+        };
+    }
+
+    template<IncrementableComparable T = Size>
+    auto iota(T last) noexcept
+    {
+        return iota(T{}, std::move(last));
     }
 }
 
