@@ -427,6 +427,22 @@ export namespace original
         return Floating<To>{result};
     }
 
+    template<StdFloating U, StdFloating V>
+    requires (!SameType<U, V>)
+    constexpr bool operator==(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        return static_cast<To>(lhs.value()) == static_cast<To>(rhs.value());
+    }
+
+    template<StdFloating U, StdFloating V>
+    requires (!SameType<U, V>)
+    constexpr std::partial_ordering operator<=>(Floating<U> lhs, Floating<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        return static_cast<To>(lhs.value()) <=> static_cast<To>(rhs.value());
+    }
+
     namespace literals
     {
                 /**

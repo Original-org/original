@@ -762,6 +762,22 @@ export namespace original
         return Integer<To>(result);
     }
 
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
+    constexpr bool operator==(Integer<U> lhs, Integer<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        return static_cast<To>(lhs.value()) == static_cast<To>(rhs.value());
+    }
+
+    template<StdIntegral U, StdIntegral V>
+    requires StdSameSignIntegral<U, V> && (!SameType<U, V>)
+    constexpr std::strong_ordering operator<=>(Integer<U> lhs, Integer<V> rhs) noexcept
+    {
+        using To = std::conditional_t<sizeof(U) <= sizeof(V), V, U>;
+        return static_cast<To>(lhs.value()) <=> static_cast<To>(rhs.value());
+    }
+
     namespace literals
     {
                 /**
