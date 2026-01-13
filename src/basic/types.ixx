@@ -2,6 +2,7 @@ module;
 #include <type_traits>
 #include <compare>
 #include <concepts>
+#include <utility>
 export module original.basic.types;
 
 namespace original::details {
@@ -179,6 +180,9 @@ export namespace original {
     template <typename T, typename U>
     concept SameType = std::same_as<T, U>;
 
+    template<typename T>
+    using RemoveReference = std::remove_reference_t<T>;
+
     /**
      * @brief Removes cv-qualifiers and reference from a type.
      *
@@ -298,6 +302,17 @@ export namespace original {
 
     template <typename T>
     concept MoveConstructible = std::is_move_constructible_v<T>;
+
+    template <typename T>
+    concept CopyAssignable = std::is_copy_assignable_v<T>;
+
+    template <typename T>
+    concept MoveAssignable = std::is_move_assignable_v<T>;
+
+    template <typename T, typename U>
+    concept AssignableFrom = requires(T t, U&& u) {
+        { t = std::forward<U>(u) } -> std::same_as<T&>;
+    };
 
     /** @} */ // end of TypeTraits group
 
