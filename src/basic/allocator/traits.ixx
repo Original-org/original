@@ -50,7 +50,7 @@ export namespace original
         }
 
         template<AllocationLayout L>
-        static void deallocate(A& a, void* ptr, L l)
+        static void deallocate(A& a, void* ptr, L l) noexcept
         {
             a.deallocate(ptr, l.size(), l.align());
         }
@@ -62,7 +62,7 @@ export namespace original
         }
 
         template<IsObject T>
-        static void destroy(T* ptr)
+        static void destroy(T* ptr) noexcept
         {
             ptr->~T();
         }
