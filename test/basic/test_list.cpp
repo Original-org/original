@@ -386,3 +386,105 @@ TEST(ListTest, PipelineComposition) {
     EXPECT_EQ(result[0_size], 20);
     EXPECT_EQ(result[1_size], 40);
 }
+
+namespace
+{
+    struct ThrowOnNth {
+        static inline int counter = 0;
+        static inline int throw_on = -1;
+
+        int value{};
+
+        ThrowOnNth(const int v = 0) : value(v) { // NOLINT
+            if (++counter == throw_on)
+                throw std::runtime_error("ctor throw");
+        }
+
+        ThrowOnNth(const ThrowOnNth& other) : value(other.value) {
+            if (++counter == throw_on)
+                throw std::runtime_error("copy ctor throw");
+        }
+
+        ThrowOnNth(ThrowOnNth&& other) noexcept(false) : value(other.value) {
+            if (++counter == throw_on)
+                throw std::runtime_error("move ctor throw");
+        }
+
+        ThrowOnNth& operator=(const ThrowOnNth&) = default;
+        ThrowOnNth& operator=(ThrowOnNth&&) = default;
+
+        static void reset(const int throw_at) {
+            counter = 0;
+            throw_on = throw_at;
+        }
+    };
+}
+
+TEST(ListExceptionSafety, EmplaceEndStrongGuarantee) {
+    List<ThrowOnNth> lst;
+    lst.reserve(2_size);
+
+    lst.emplaceEnd(1);
+    lst.emplaceEnd(2);
+
+    const auto snapshot = lst;
+
+    ThrowOnNth::reset(3);
+
+    try {
+        lst.emplaceEnd(3);
+        FAIL();
+    } catch (const std::runtime_error&) {}
+
+    EXPECT_EQ(lst.size(), snapshot.size());
+    EXPECT_TRUE(original::algorithms::equal(
+        lst, snapshot,
+        [](auto& a, auto& b){ return a.value == b.value; }));
+}
+
+TEST(ListExceptionSafety, ReserveStrongGuarantee) {
+    List<ThrowOnNth> lst{1, 2, 3};
+    const auto snapshot = lst;
+
+    ThrowOnNth::reset(1);
+
+    try {
+        lst.reserve(100_size);
+        FAIL();
+    } catch (...) {}
+
+    EXPECT_TRUE(original::algorithms::equal(
+        lst, snapshot,
+        [](auto& a, auto& b){ return a.value == b.value; }));
+}
+
+namespace {
+    struct MoveThrowsCopyOK {
+        int value{};
+
+        MoveThrowsCopyOK(int v = 0) : value(v) {} // NOLINT
+
+        MoveThrowsCopyOK(const MoveThrowsCopyOK& other) noexcept
+            : value(other.value) {}
+
+        MoveThrowsCopyOK(MoveThrowsCopyOK&& other) noexcept(false)
+            : value(other.value) {
+            throw std::runtime_error("move throws");
+        }
+    };
+}
+
+TEST(ListExceptionSafety, ReallocateUsesCopyIfMoveMayThrow) {
+    List<MoveThrowsCopyOK> lst;
+    lst.reserve(1_size);
+    lst.emplaceEnd(1);
+    lst.emplaceEnd(2);
+
+    EXPECT_NO_THROW({
+        lst.reserve(10_size);
+    });
+
+    EXPECT_EQ(lst.size(), 2_size);
+    EXPECT_EQ(lst[0_size].value, 1);
+    EXPECT_EQ(lst[1_size].value, 2);
+}
