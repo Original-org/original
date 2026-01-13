@@ -3,6 +3,9 @@
 
 import original.basic.algorithm;
 import original.basic.range;
+import original.basic.number;
+
+using namespace original::literals;
 
 TEST(AlgorithmsTest, EqualWithNativeArraysAndPointers) {
 
@@ -176,9 +179,246 @@ TEST(AlgorithmsTest, CustomPredicate) {
         return a % 10 < b % 10;
     };
     const auto it = original::algorithms::minElement(
-        std::begin(arr),
-        std::end(arr),
+        original::begin(arr),
+        original::end(arr),
         pred
     );
     EXPECT_EQ(*it, 21);
+
+    const auto it2 = original::algorithms::minElement(arr, pred);
+    EXPECT_EQ(*it2, 21);
+}
+
+TEST(AlgorithmsTest, MoveBackwardsBasicUsage) {
+    {
+        int src[] = {10, 20, 30, 40, 50};
+        int dst[] = {1, 2, 3, 4, 5, 6, 7};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst)
+        );
+
+        EXPECT_EQ(dst[2], 10);
+        EXPECT_EQ(dst[3], 20);
+        EXPECT_EQ(dst[4], 30);
+        EXPECT_EQ(dst[5], 40);
+        EXPECT_EQ(dst[6], 50);
+
+        EXPECT_EQ(result, dst + 2);
+    }
+
+    {
+        int src[] = {100, 200, 300, 400, 500};
+        int dst[] = {0, 0, 0, 0, 0, 0};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst),
+            3_size
+        );
+
+        EXPECT_EQ(dst[3], 300);
+        EXPECT_EQ(dst[4], 400);
+        EXPECT_EQ(dst[5], 500);
+
+        EXPECT_EQ(dst[0], 0);
+        EXPECT_EQ(dst[1], 0);
+        EXPECT_EQ(dst[2], 0);
+
+        EXPECT_EQ(result, dst + 3);
+    }
+
+    {
+        int src[] = {7, 8, 9};
+        int dst[8] = {};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst),
+            10_size
+        );
+
+        EXPECT_EQ(dst[5], 7);
+        EXPECT_EQ(dst[6], 8);
+        EXPECT_EQ(dst[7], 9);
+
+        EXPECT_EQ(result, dst + 5);
+    }
+}
+
+TEST(AlgorithmsTest, MoveBackwardsWithDifferentTypes) {
+    {
+        int src[] = {1, 2, 3, 4};
+        long dst[6] = {};
+
+        const auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst)
+        );
+
+        EXPECT_EQ(dst[2], 1L);
+        EXPECT_EQ(dst[3], 2L);
+        EXPECT_EQ(dst[4], 3L);
+        EXPECT_EQ(dst[5], 4L);
+
+        EXPECT_EQ(result, dst + 2);
+    }
+}
+
+TEST(AlgorithmsTest, MoveBackwardsEdgeCases) {
+    {
+        int src[1]{};
+        int dst[5] = {99, 99, 99, 99, 99};
+
+        const auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::begin(src),
+            original::end(dst)
+        );
+
+        EXPECT_EQ(dst[4], 99);
+        EXPECT_EQ(result, original::end(dst));
+    }
+
+    {
+        int src[] = {10, 20};
+        int dst[4] = {1, 2, 3, 4};
+
+        const auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst),
+            0_size
+        );
+
+        EXPECT_EQ(dst[3], 4);
+        EXPECT_EQ(result, original::end(dst));
+    }
+}
+
+TEST(AlgorithmsTest, MoveBackwardsWithFourIterators) {
+    {
+        int src[] = {10, 20, 30, 40, 50};
+        int dst[] = {1, 2, 3, 4, 5, 6, 7};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst)
+        );
+
+        EXPECT_EQ(dst[2], 10);
+        EXPECT_EQ(dst[3], 20);
+        EXPECT_EQ(dst[4], 30);
+        EXPECT_EQ(dst[5], 40);
+        EXPECT_EQ(dst[6], 50);
+
+        EXPECT_EQ(result, dst + 2);
+    }
+
+    {
+        int src[] = {100, 200, 300, 400, 500};
+        int dst[] = {0, 0, 0, 0, 0, 0};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst),
+            3_size
+        );
+
+        EXPECT_EQ(dst[3], 300);
+        EXPECT_EQ(dst[4], 400);
+        EXPECT_EQ(dst[5], 500);
+
+        EXPECT_EQ(dst[0], 0);
+        EXPECT_EQ(dst[1], 0);
+        EXPECT_EQ(dst[2], 0);
+
+        EXPECT_EQ(result, dst + 3);
+    }
+
+    {
+        int src[] = {1, 2, 3, 4, 5};
+        int dst[3] = {};
+
+        auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst)
+        );
+
+        EXPECT_EQ(dst[0], 3);
+        EXPECT_EQ(dst[1], 4);
+        EXPECT_EQ(dst[2], 5);
+
+        EXPECT_EQ(result, dst);
+    }
+}
+
+TEST(AlgorithmsTest, MoveBackwardsWithCountLimiter) {
+    {
+        int src[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int dst[15] = {};
+
+        const auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::end(dst),
+            5_size
+        );
+
+        EXPECT_EQ(dst[10], 6);
+        EXPECT_EQ(dst[11], 7);
+        EXPECT_EQ(dst[12], 8);
+        EXPECT_EQ(dst[13], 9);
+        EXPECT_EQ(dst[14], 10);
+
+        for (int i = 0; i < 10; ++i) {
+            EXPECT_EQ(dst[i], 0);
+        }
+
+        EXPECT_EQ(result, dst + 10);
+    }
+
+    {
+        int src[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int dst[15] = {};
+
+        const auto result = original::algorithms::moveBackwards(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst),
+            3_size
+        );
+
+        EXPECT_EQ(dst[12], 8);
+        EXPECT_EQ(dst[13], 9);
+        EXPECT_EQ(dst[14], 10);
+
+        for (int i = 0; i < 12; ++i) {
+            EXPECT_EQ(dst[i], 0);
+        }
+
+        EXPECT_EQ(result, dst + 12);
+    }
+}
+
+TEST(AlgorithmsTest, MoveBackwardsOverlappingRanges) {
+    {
+        int data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+        const auto result = original::algorithms::moveBackwards(
+            data + 2, data + 7,
+            data + 9,
+            5_size
+        );
+
+        EXPECT_EQ(data[0], 1);
+        EXPECT_EQ(data[1], 2);
+        EXPECT_EQ(data[2], 3);
+        EXPECT_EQ(data[3], 4);
+        EXPECT_EQ(data[4], 3);
+        EXPECT_EQ(data[5], 4);
+        EXPECT_EQ(data[6], 5);
+        EXPECT_EQ(data[7], 6);
+        EXPECT_EQ(data[8], 7);
+        EXPECT_EQ(data[9], 10);
+
+        EXPECT_EQ(result, data + 4);
+    }
 }
