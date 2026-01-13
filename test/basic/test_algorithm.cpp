@@ -422,3 +422,255 @@ TEST(AlgorithmsTest, MoveBackwardsOverlappingRanges) {
         EXPECT_EQ(result, data + 4);
     }
 }
+
+TEST(AlgorithmsTest, MoveBasicUsage) {
+    {
+        int src[] = {10, 20, 30, 40, 50};
+        int dst[] = {1, 2, 3, 4, 5, 6, 7};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst)
+        );
+
+        EXPECT_EQ(dst[0], 10);
+        EXPECT_EQ(dst[1], 20);
+        EXPECT_EQ(dst[2], 30);
+        EXPECT_EQ(dst[3], 40);
+        EXPECT_EQ(dst[4], 50);
+        EXPECT_EQ(dst[5], 6);
+        EXPECT_EQ(dst[6], 7);
+
+        EXPECT_EQ(result, dst + 5);
+    }
+
+    {
+        int src[] = {100, 200, 300, 400, 500};
+        int dst[] = {0, 0, 0, 0, 0, 0};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst),
+            3_size
+        );
+
+        EXPECT_EQ(dst[0], 100);
+        EXPECT_EQ(dst[1], 200);
+        EXPECT_EQ(dst[2], 300);
+        for (const auto& e: dst | original::range::skip(3_size))
+        {
+            EXPECT_EQ(e, 0);
+        }
+
+        EXPECT_EQ(result, dst + 3);
+    }
+
+    {
+        int src[] = {7, 8, 9};
+        int dst[8] = {};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst),
+            10_size
+        );
+
+        EXPECT_EQ(dst[0], 7);
+        EXPECT_EQ(dst[1], 8);
+        EXPECT_EQ(dst[2], 9);
+        for (const auto& e: dst | original::range::skip(3_size))
+        {
+            EXPECT_EQ(e, 0);
+        }
+
+        EXPECT_EQ(result, dst + 3);
+    }
+}
+
+TEST(AlgorithmsTest, MoveWithDifferentTypes) {
+    {
+        int src[] = {1, 2, 3, 4};
+        long dst[6] = {};
+
+        const auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst)
+        );
+
+        EXPECT_EQ(dst[0], 1L);
+        EXPECT_EQ(dst[1], 2L);
+        EXPECT_EQ(dst[2], 3L);
+        EXPECT_EQ(dst[3], 4L);
+        EXPECT_EQ(dst[4], 0L);
+        EXPECT_EQ(dst[5], 0L);
+
+        EXPECT_EQ(result, dst + 4);
+    }
+}
+
+TEST(AlgorithmsTest, MoveEdgeCases) {
+    {
+        int src[1]{};
+        int dst[5] = {99, 99, 99, 99, 99};
+
+        const auto result = original::algorithms::move(
+            original::begin(src), original::begin(src),
+            original::begin(dst)
+        );
+
+        EXPECT_EQ(dst[0], 99);
+        EXPECT_EQ(dst[1], 99);
+        EXPECT_EQ(dst[2], 99);
+        EXPECT_EQ(dst[3], 99);
+        EXPECT_EQ(dst[4], 99);
+
+        EXPECT_EQ(result, original::begin(dst));
+    }
+
+    {
+        int src[] = {10, 20};
+        int dst[4] = {1, 2, 3, 4};
+
+        const auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst),
+            0_size
+        );
+
+        EXPECT_EQ(dst[0], 1);
+        EXPECT_EQ(dst[1], 2);
+        EXPECT_EQ(dst[2], 3);
+        EXPECT_EQ(dst[3], 4);
+
+        EXPECT_EQ(result, original::begin(dst));
+    }
+}
+
+TEST(AlgorithmsTest, MoveWithFourIterators) {
+    {
+        int src[] = {10, 20, 30, 40, 50};
+        int dst[] = {1, 2, 3, 4, 5, 6, 7};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst)
+        );
+
+        EXPECT_EQ(dst[0], 10);
+        EXPECT_EQ(dst[1], 20);
+        EXPECT_EQ(dst[2], 30);
+        EXPECT_EQ(dst[3], 40);
+        EXPECT_EQ(dst[4], 50);
+        EXPECT_EQ(dst[5], 6);
+        EXPECT_EQ(dst[6], 7);
+
+        EXPECT_EQ(result, dst + 5);
+    }
+
+    {
+        int src[] = {100, 200, 300, 400, 500};
+        int dst[] = {0, 0, 0, 0, 0, 0};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst),
+            3_size
+        );
+
+        EXPECT_EQ(dst[0], 100);
+        EXPECT_EQ(dst[1], 200);
+        EXPECT_EQ(dst[2], 300);
+        EXPECT_EQ(dst[3], 0);
+        EXPECT_EQ(dst[4], 0);
+        EXPECT_EQ(dst[5], 0);
+
+        EXPECT_EQ(result, dst + 3);
+    }
+
+    {
+        int src[] = {1, 2, 3, 4, 5};
+        int dst[3] = {};
+
+        auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst)
+        );
+
+        EXPECT_EQ(dst[0], 1);
+        EXPECT_EQ(dst[1], 2);
+        EXPECT_EQ(dst[2], 3);
+
+        EXPECT_EQ(result, dst + 3);
+    }
+}
+
+TEST(AlgorithmsTest, MoveWithCountLimiter) {
+    {
+        int src[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int dst[15] = {};
+
+        const auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst),
+            5_size
+        );
+
+        EXPECT_EQ(dst[0], 1);
+        EXPECT_EQ(dst[1], 2);
+        EXPECT_EQ(dst[2], 3);
+        EXPECT_EQ(dst[3], 4);
+        EXPECT_EQ(dst[4], 5);
+        for (const auto& e: dst | original::range::skip(5_size))
+        {
+            EXPECT_EQ(e, 0);
+        }
+
+        EXPECT_EQ(result, dst + 5);
+    }
+
+    {
+        int src[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int dst[15] = {};
+
+        const auto result = original::algorithms::move(
+            original::begin(src), original::end(src),
+            original::begin(dst), original::end(dst),
+            7_size
+        );
+
+        EXPECT_EQ(dst[0], 1);
+        EXPECT_EQ(dst[1], 2);
+        EXPECT_EQ(dst[2], 3);
+        EXPECT_EQ(dst[3], 4);
+        EXPECT_EQ(dst[4], 5);
+        EXPECT_EQ(dst[5], 6);
+        EXPECT_EQ(dst[6], 7);
+
+        EXPECT_EQ(result, dst + 7);
+    }
+}
+
+TEST(AlgorithmsTest, MoveOverlappingRanges) {
+    {
+        int data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+        const auto result = original::algorithms::move(
+            data + 2, data + 7,
+            data + 0,
+            5_size
+        );
+
+        EXPECT_EQ(data[0], 3);
+        EXPECT_EQ(data[1], 4);
+        EXPECT_EQ(data[2], 5);
+        EXPECT_EQ(data[3], 6);
+        EXPECT_EQ(data[4], 7);
+        EXPECT_EQ(data[5], 6);
+        EXPECT_EQ(data[6], 7);
+        EXPECT_EQ(data[7], 8);
+        EXPECT_EQ(data[8], 9);
+        EXPECT_EQ(data[9], 10);
+
+        EXPECT_EQ(result, data + 5);
+    }
+}
