@@ -167,11 +167,11 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>>
     constexpr auto mismatch(const Range1& range1, const Range2& range2, Pred pred = {})
     {
-        return mismatch(RangeTraits<const Range1>::begin(range1),
-                        RangeTraits<const Range1>::end(range1),
-                        RangeTraits<const Range2>::begin(range2),
-                        RangeTraits<const Range2>::end(range2),
-                        pred);
+        return algorithms::mismatch(RangeTraits<const Range1>::begin(range1),
+                                    RangeTraits<const Range1>::end(range1),
+                                    RangeTraits<const Range2>::begin(range2),
+                                    RangeTraits<const Range2>::end(range2),
+                                    pred);
     }
 
     /**
@@ -199,7 +199,7 @@ export namespace original::algorithms {
                                          typename RangeTraits<Range2>::ReferenceType>>
     constexpr bool equal(const Range1 &range1, const Range2 &range2, Pred pred = {})
     {
-        auto&& [it1, it2] = mismatch(range1, range2, pred);
+        auto&& [it1, it2] = algorithms::mismatch(range1, range2, pred);
 
         return it1 == RangeTraits<const Range1>::end(range1) &&
                it2 == RangeTraits<const Range2>::end(range2);
@@ -230,7 +230,7 @@ export namespace original::algorithms {
                                          typename IterTraits<Iter2>::ReferenceType>>
     constexpr bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Pred pred = {})
     {
-        auto&& [it1, it2] = mismatch(first1, last1, first2, pred);
+        auto&& [it1, it2] = algorithms::mismatch(first1, last1, first2, pred);
         return it1 == last1;
     }
 
@@ -262,7 +262,7 @@ export namespace original::algorithms {
                                          typename IterTraits<Iter2>::ReferenceType>>
     constexpr bool equal(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2, Pred pred = {})
     {
-        auto&& [iter1, iter2] = mismatch(first1, last1, first2, last2, pred);
+        auto&& [iter1, iter2] = algorithms::mismatch(first1, last1, first2, last2, pred);
         return iter1 == last1 && iter2 == last2;
     }
 
@@ -339,11 +339,11 @@ export namespace original::algorithms {
                                      typename RangeTraits<Range2>::ReferenceType>>
     constexpr auto lexicographicallyCompare(const Range1 &range1, const Range2 &range2, Pred pred = {})
     {
-        return lexicographicallyCompare(RangeTraits<const Range1>::begin(range1),
-                                        RangeTraits<const Range1>::end(range1),
-                                        RangeTraits<const Range2>::begin(range2),
-                                        RangeTraits<const Range2>::end(range2),
-                                        pred);
+        return algorithms::lexicographicallyCompare(RangeTraits<const Range1>::begin(range1),
+                                                    RangeTraits<const Range1>::end(range1),
+                                                    RangeTraits<const Range2>::begin(range2),
+                                                    RangeTraits<const Range2>::end(range2),
+                                                    pred);
     }
 
     /**
