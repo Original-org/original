@@ -4,3 +4,4 @@
 export import original.basic.algorithm.functor;
 export import original.basic.algorithm.comparison;
 export import original.basic.algorithm.extremum;
+export import original.basic.algorithm.modification;
