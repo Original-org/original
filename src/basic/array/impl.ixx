@@ -15,6 +15,12 @@ import original.basic.structural.algorithm;
  * @{
  */
 
+export namespace original
+{
+    template<IsObject T, Size::Type N>
+    class Array;
+}
+
 namespace original::details
 {
     using namespace original::literals;
@@ -112,10 +118,21 @@ namespace original::details
             return this->data_[numberLikeValue(index)];
         }
     };
+
+    template<typename>
+    struct IsArrayTraits
+    : std::false_type {};
+
+    template<IsObject T, Size::Type N>
+    struct IsArrayTraits<Array<T, N>>
+        : std::true_type {};
 }
 
 export namespace original
 {
+    template<typename T>
+    concept IsArray = details::IsArrayTraits<RemoveCVRefType<T>>::value;
+
     /**
      * @brief Fixed-size array with std::array-compatible interface.
      *
