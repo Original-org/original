@@ -1,6 +1,7 @@
 module;
 #include <stdexcept>
 export module original.basic.list.impl;
+export module original.basic.list.arrayList;
 import original.basic.types;
 import original.basic.number;
 import original.basic.algorithm;
@@ -13,9 +14,9 @@ export namespace original
 {
     using namespace original::literals;
     template<IsObject T, Allocator Alloc = NormalAllocator>
-    class List
+    class ArrayList
     {
-        using Self             = List;
+        using Self               = ArrayList;
     public:
         using ValueType        = T;
         using ConstValueType   = const ValueType;
@@ -129,7 +130,7 @@ export namespace original
             this->data_ = static_cast<PointerType>(this->allocateMemory(this->capacity_));
         }
 
-        void copyFrom(const List& rhs)
+        void copyFrom(const ArrayList& rhs)
         requires CopyConstructible<ValueType>
         {
             if constexpr (StatefulAllocator<AllocatorType>)
@@ -142,7 +143,7 @@ export namespace original
             forwardElements<true>(this->data_, rhs.data_, this->size_);
         }
 
-        void moveFrom(List&& rhs) noexcept
+        void moveFrom(ArrayList&& rhs) noexcept
         {
             if constexpr (StatefulAllocator<AllocatorType>)
             {
@@ -166,17 +167,17 @@ export namespace original
             this->data_ = static_cast<PointerType>(new_data);
         }
     public:
-        explicit List(AllocatorType alloc = {}) : alloc_(std::move(alloc))
+        explicit ArrayList(AllocatorType alloc = {}) : alloc_(std::move(alloc))
         {
             this->init(1_size);
         }
 
-        explicit List(const Size capacity, AllocatorType alloc = {}) : alloc_(std::move(alloc))
+        explicit ArrayList(const Size capacity, AllocatorType alloc = {}) : alloc_(std::move(alloc))
         {
             this->init(algorithms::maximum(1_size, capacity));
         }
 
-        List(std::initializer_list<T> lst, AllocatorType alloc = {}) : alloc_(std::move(alloc))
+        ArrayList(std::initializer_list<T> lst, AllocatorType alloc = {}) : alloc_(std::move(alloc))
         {
             this->init(algorithms::maximum(1_size, 2_size * lst.size()));
             SizeType cnt{lst.size()};
@@ -184,13 +185,13 @@ export namespace original
             this->size_ = cnt;
         }
 
-        List(const List& rhs)
+        ArrayList(const ArrayList& rhs)
         requires CopyConstructible<ValueType>
         {
             this->copyFrom(rhs);
         }
 
-        List& operator=(const List& rhs)
+        ArrayList& operator=(const ArrayList& rhs)
         requires CopyConstructible<ValueType>
         {
             if (this == &rhs)
@@ -200,12 +201,12 @@ export namespace original
             return *this;
         }
 
-        List(List&& rhs) noexcept
+        ArrayList(ArrayList&& rhs) noexcept
         {
             this->moveFrom(std::move(rhs));
         }
 
-        List& operator=(List&& rhs) noexcept
+        ArrayList& operator=(ArrayList&& rhs) noexcept
         {
             if (this == &rhs)
                 return *this;
@@ -319,7 +320,7 @@ export namespace original
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
-        const ValueType& at(U index) const
+        ConstReferenceType at(U index) const
         {
             if (index >= this->size_)
                 throw std::out_of_range{"Index out of range"};
@@ -329,7 +330,7 @@ export namespace original
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
-        ValueType& at(U index)
+        ReferenceType at(U index)
         {
             if (index >= this->size_)
                 throw std::out_of_range{"Index out of range"};
@@ -339,14 +340,14 @@ export namespace original
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
-        const ValueType& operator[](U index) const noexcept
+        ConstReferenceType operator[](U index) const noexcept
         {
             return this->data_[numberLikeValue(index)];
         }
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
-        ValueType& operator[](U index) noexcept
+        ReferenceType operator[](U index) noexcept
         {
             return this->data_[numberLikeValue(index)];
         }
@@ -366,7 +367,7 @@ export namespace original
             return this->capacity_;
         }
 
-        bool operator==(const List& rhs) const
+        bool operator==(const ArrayList& rhs) const
         requires EqualityComparable<ValueType>
         {
             if (this->size_ != rhs.size_)
@@ -375,13 +376,13 @@ export namespace original
             return algorithms::equal(*this, rhs);
         }
 
-        auto operator<=>(const List& rhs) const
+        auto operator<=>(const ArrayList& rhs) const
         requires ThreeWayComparable<ValueType>
         {
             return algorithms::lexicographicallyCompare(*this, rhs);
         }
 
-        ~List()
+        ~ArrayList()
         {
             this->destroySelf();
         }
