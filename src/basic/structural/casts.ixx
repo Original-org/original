@@ -12,63 +12,31 @@ import original.basic.structural.tuple;
 
 namespace original::details
 {
-    template<Size::Type SL, Size::Type I, typename L, typename R>
-    constexpr auto forwardElemLL(L&& l, R&& r) -> decltype(auto)
+    template<bool Copy, Size::Type I, Structural T>
+    constexpr auto forwardElemImpl(T&& t) -> decltype(auto)
     {
-        if constexpr(I < SL)
+        if constexpr(Copy)
         {
-            return RemoveCVRefType<decltype(get(l, IndexConstant<I>{}))>
-                 (get(l, IndexConstant<I>{}));
+            return RemoveCVRefType<decltype(get(t, IndexConstant<I>{}))>
+                 (get(t, IndexConstant<I>{}));
         }
         else
         {
-            return RemoveCVRefType<decltype(get(r, IndexConstant<I - SL>{}))>
-                (get(r, IndexConstant<I - SL>{}));
+            return RemoveCVRefType<decltype(std::move(get(t, IndexConstant<I>{})))>
+                (std::move(get(t, IndexConstant<I>{})));
         }
     }
 
-    template<Size::Type SL, Size::Type I, typename L, typename R>
-    constexpr auto forwardElemLR(L&& l, R&& r) -> decltype(auto)
+    template<bool LeftCopy, bool RightCopy, Size::Type SL, Size::Type I, Structural L, Structural R>
+    constexpr auto forwardElem(L&& l, R&& r) -> decltype(auto)
     {
         if constexpr(I < SL)
         {
-            return RemoveCVRefType<decltype(get(l, IndexConstant<I>{}))>
-                 (get(l, IndexConstant<I>{}));
+            return forwardElemImpl<LeftCopy, I>(std::forward<L>(l));
         }
         else
         {
-            return RemoveCVRefType<decltype(std::move(get(r, IndexConstant<I - SL>{})))>
-                (std::move(get(r, IndexConstant<I - SL>{})));
-        }
-    }
-
-    template<Size::Type SL, Size::Type I, typename L, typename R>
-    constexpr auto forwardElemRL(L&& l, R&& r) -> decltype(auto)
-    {
-        if constexpr(I < SL)
-        {
-            return RemoveCVRefType<decltype(std::move(get(l, IndexConstant<I>{})))>
-                 (std::move(get(l, IndexConstant<I>{})));
-        }
-        else
-        {
-            return RemoveCVRefType<decltype(get(r, IndexConstant<I - SL>{}))>
-                (get(r, IndexConstant<I - SL>{}));
-        }
-    }
-
-    template<Size::Type SL, Size::Type I, typename L, typename R>
-    constexpr auto forwardElemRR(L&& l, R&& r) -> decltype(auto)
-    {
-        if constexpr(I < SL)
-        {
-            return RemoveCVRefType<decltype(std::move(get(l, IndexConstant<I>{})))>
-                 (std::move(get(l, IndexConstant<I>{})));
-        }
-        else
-        {
-            return RemoveCVRefType<decltype(std::move(get(r, IndexConstant<I - SL>{})))>
-                (std::move(get(r, IndexConstant<I - SL>{})));
+            return forwardElemImpl<RightCopy, I - SL>(std::forward<R>(r));
         }
     }
 }
@@ -187,7 +155,7 @@ export namespace original
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Tuple{
-                    details::forwardElemLL<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                    details::forwardElem<true, true, LS, I>(lhs, rhs)...
                 };
             }
         );
@@ -204,7 +172,7 @@ export namespace original
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Tuple{
-                    details::forwardElemLR<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                    details::forwardElem<true, false, LS, I>(lhs, std::forward<U>(rhs))...
                 };
             }
         );
@@ -221,7 +189,7 @@ export namespace original
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Tuple{
-                    details::forwardElemRL<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                    details::forwardElem<false, true, LS, I>(std::forward<T>(lhs), rhs)...
                 };
             }
         );
@@ -238,7 +206,7 @@ export namespace original
             [&]<Size::Type... I>(IndexConstant<I>...)
             {
                 return Tuple{
-                    details::forwardElemRR<StructuralTraits<T>::SIZE, I>(lhs, rhs)...
+                    details::forwardElem<false, false, LS, I>(std::forward<T>(lhs), std::forward<U>(rhs))...
                 };
             }
         );
