@@ -1,6 +1,7 @@
 module;
 #include <stdexcept>
-export module original.basic.list.impl;
+#include <utility>
+#include <new>
 export module original.basic.list.arrayList;
 import original.basic.types;
 import original.basic.number;
@@ -18,17 +19,19 @@ export namespace original
     {
         using Self               = ArrayList;
     public:
-        using ValueType        = T;
-        using ConstValueType   = const ValueType;
-        using PointerType      = ValueType*;
-        using ConstPointerType = ValueType *const;
-        using IterType         = DefaultIterator<ValueType, SpecifiedSource<Self>>;
-        using ConstIterType    = DefaultIterator<ConstValueType, SpecifiedSource<Self>>;
-        using SizeType         = Size;
-        using AllocatorType    = Alloc;
+        using ValueType          = T;
+        using ConstValueType     = const ValueType;
+        using PointerType        = ValueType*;
+        using ConstPointerType   = ValueType *const;
+        using ReferenceType      = ValueType&;
+        using ConstReferenceType = const ValueType&;
+        using IterType           = DefaultIterator<ValueType, SpecifiedSource<Self>>;
+        using ConstIterType      = DefaultIterator<ConstValueType, SpecifiedSource<Self>>;
+        using SizeType           = Size;
+        using AllocatorType      = Alloc;
     private:
-        using AllocTraits      = AllocatorTraits<AllocatorType>;
-        using AllocLayout      = DefaultLayout;
+        using AllocTraits        = AllocatorTraits<AllocatorType>;
+        using AllocLayout        = DefaultLayout;
 
         PointerType data_{};
         SizeType size_{};
