@@ -264,48 +264,19 @@ export namespace original
             return algorithms::lexicographicallyCompare(*this, rhs);
         }
 
-        /**
-         * @brief Extracts a subarray (lvalue reference overload).
-         *
-         * @tparam Start Starting index
-         * @tparam Cnt Number of elements to extract
-         * @return Array<T, Cnt> containing elements [Start, Start+Cnt)
-         *
-         * Requires Start + Cnt <= N.
-         */
         template<Size::Type Start, Size::Type Cnt>
         requires (Start + Cnt <= N)
         constexpr Array<T, Cnt>
-        subArray() const &
+        subArray(this auto&& self)
         {
+            using RefType = decltype(self);
             return structural::forAll<Cnt>
             (
-                [this]<Size::Type... I>(IndexConstant<I>...)
-                {
-                    return Array<T, Cnt>{
-                        static_cast<T>((*this)[Start + I])...
-                    };
-                }
-            );
-        }
-
-        /**
-         * @brief Extracts a subarray (rvalue reference overload).
-         *
-         * Moves elements when possible.
-         */
-        template<Size::Type Start, Size::Type Cnt>
-        requires (Start + Cnt <= N)
-        constexpr Array<T, Cnt>
-        subArray() &&
-        {
-            return structural::forAll<Cnt>
-            (
-                [this]<Size::Type... I>(IndexConstant<I>...)
+                [&]<Size::Type... I>(IndexConstant<I>...)
                 {
                     return Array<T, Cnt>{
                         static_cast<T>(
-                            std::move((*this)[Start + I])
+                            forwarding<RefType>(self[Start + I])
                         )...
                     };
                 }
