@@ -543,6 +543,12 @@ export namespace std
         using type = T;
     };
 
+    template<typename T, std::size_t I>
+    struct tuple_element<I, original::Array<T, 0>>
+    {
+        using type = T;
+    };
+
     /**
      * @brief std::get overloads for original::Array.
      */
