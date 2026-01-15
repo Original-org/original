@@ -93,22 +93,29 @@ export namespace original
         }
 
         template<bool Copy>
+        static decltype(auto) forwardElement(PointerType old_data, const SizeType index)
+        {
+            if constexpr (Copy)
+            {
+                return old_data[index.value()];
+            }
+            else
+            {
+                return std::move_if_noexcept(old_data[index.value()]);
+            }
+        }
+
+        template<bool Copy>
         static void forwardElements(ConstPointerType new_data,
                                     ConstPointerType old_data,
                                     const SizeType cnt)
         {
-            using RefType = std::conditional_t<
-                Copy,
-                std::add_lvalue_reference_t<ValueType>,
-                std::add_rvalue_reference_t<ValueType>
-            >;
             SizeType cur{};
             try
             {
                 for (const auto i: range::iota(cnt))
                 {
-                    AllocTraits::construct(ptrAt(new_data, i),
-                        forwardingIfNoExcept<RefType>(old_data[i.value()]));
+                    AllocTraits::construct(ptrAt(new_data, i), forwardElement<Copy>(old_data, i));
                     ++cur;
                 }
             }
