@@ -832,22 +832,4 @@ export namespace original {
         MoveConstructible<T> &&
         Incrementable<T> &&
         WeakLessComparable<T>;
-
-    template<typename T, typename E>
-    constexpr decltype(auto) forwarding(E&& element) noexcept {
-        if constexpr(IsLValueReference<T>){
-            return std::forward<E>(element);
-        } else {
-            return std::move(std::forward<E>(element));
-        }
-    }
-
-    template<typename T, typename E>
-    constexpr decltype(auto) forwardingIfNoExcept(E&& element) noexcept {
-        if constexpr(IsLValueReference<T>){
-            return std::forward<E>(element);
-        } else {
-            return std::move_if_noexcept(std::forward<E>(element));
-        }
-    }
 } // namespace original
