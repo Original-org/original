@@ -1173,9 +1173,9 @@ TEST(BuiltinArray, BasicTraits) {
     static_assert(!CoupleLike<BuiltinArrType>);
     static_assert(TupleLike<BuiltinArrType>);
     constexpr BuiltinArrType a = {1, 2, 3};
-    EXPECT_EQ(get<0>(a), 1);
-    EXPECT_EQ(get<1>(a), 2);
-    EXPECT_EQ(get<2>(a), 3);
+    EXPECT_EQ(get(a, IndexConstant<0>{}), 1);
+    EXPECT_EQ(get(a, IndexConstant<1>{}), 2);
+    EXPECT_EQ(get(a, IndexConstant<2>{}), 3);
 }
 
 TEST(BuiltinArray, StructuralAlgorithmCompatibility) {
