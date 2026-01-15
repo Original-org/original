@@ -10,4 +10,4 @@ export import original.basic.container;
 export import original.basic.array;
 export import original.basic.algorithm;
 export import original.basic.structural;
-export import original.basic.list;
+export import original.basic.arrayList;
