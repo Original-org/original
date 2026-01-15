@@ -269,14 +269,14 @@ export namespace original
         constexpr Array<T, Cnt>
         subArray(this auto&& self)
         {
-            using RefType = decltype(self);
+            using SelfType = decltype(self);
             return structural::forAll<Cnt>
             (
                 [&]<Size::Type... I>(IndexConstant<I>...)
                 {
-                    return Array<T, Cnt>{
-                        static_cast<T>(
-                            forwarding<RefType>(self[Start + I])
+                    return Array<ValueType, Cnt>{
+                        static_cast<ValueType>(
+                            get(std::forward<SelfType>(self), IndexConstant<Start + I>{})
                         )...
                     };
                 }
