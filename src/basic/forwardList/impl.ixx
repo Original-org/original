@@ -372,6 +372,22 @@ export namespace original
             this->head_ = this->before_->next_;
         }
 
+        template<UnsignedIntegralLike U>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
+        ConstReferenceType at(U index) const
+        {
+            auto ptr = static_cast<NodePointerType>(this->getNodePointer(index));
+            return ptr->value_;
+        }
+
+        template<UnsignedIntegralLike U>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
+        ReferenceType at(U index)
+        {
+            auto ptr = static_cast<NodePointerType>(this->getNodePointer(index));
+            return ptr->value_;
+        }
+
         IterType begin() noexcept
         {
             return IterType{this->before_->next_};
