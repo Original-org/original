@@ -1,6 +1,7 @@
 module;
 #include <stdexcept>
 #include <utility>
+#include <new>
 export module original.basic.forwardList.impl;
 import original.basic.types;
 import original.basic.number;
