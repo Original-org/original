@@ -49,6 +49,9 @@ export namespace original
         struct Node : BaseNode
         {
             ValueType value_{};
+
+            template<typename... Args>
+            explicit Node(Args&&... args) : BaseNode(), value_(std::forward<Args>(args)...) {}
         };
 
         template<typename Value, typename Reference>
@@ -231,6 +234,29 @@ export namespace original
             this->before_ = nullptr;
             this->head_ = nullptr;
         }
+
+        template<UnsignedIntegralLike U, typename V>
+        requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
+        void pushImpl(U index, V&& value)
+        {
+            BaseNodePointerType prev = this->getNodePointer(index);
+            NodePointerType new_node = this->template createNode<NodeType>(std::forward<V>(value));
+            connectNodes(new_node, prev->next_);
+            connectNodes(prev, new_node);
+            this->head_ = this->before_->next_;
+        }
+
+        template<typename V>
+        void pushEndImpl(V&& value)
+        {
+            BaseNodePointerType prev = this->before_;
+            while (prev->next_)
+                prev = prev->next_;
+            NodePointerType new_node = this->template createNode<NodeType>(std::forward<V>(value));
+            connectNodes(new_node, prev->next_);
+            connectNodes(prev, new_node);
+            this->head_ = this->before_->next_;
+        }
     public:
         using IterType            = Iterator<ValueType, ReferenceType>;
         using ConstIterType       = Iterator<ConstValueType, ConstReferenceType>;
@@ -282,50 +308,26 @@ export namespace original
 
         void pushEnd(const ValueType& value)
         {
-            BaseNodePointerType prev = this->before_;
-            while (prev->next_)
-                prev = prev->next_;
-            NodePointerType new_node = this->createNode<NodeType>();
-            new_node->value_ = value;
-            connectNodes(new_node, prev->next_);
-            connectNodes(prev, new_node);
-            this->head_ = this->before_->next_;
+            this->pushEndImpl(value);
         }
 
         void pushEnd(ValueType&& value)
         {
-            BaseNodePointerType prev = this->before_;
-            while (prev->next_)
-                prev = prev->next_;
-            NodePointerType new_node = this->createNode<NodeType>();
-            new_node->value_ = std::move(value);
-            connectNodes(new_node, prev->next_);
-            connectNodes(prev, new_node);
-            this->head_ = this->before_->next_;
+            this->pushEndImpl(std::move(value));
         }
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         void push(U index, const ValueType& value)
         {
-            BaseNodePointerType prev = this->getNodePointer(index);
-            NodePointerType new_node = this->createNode<NodeType>();
-            new_node->value_ = value;
-            connectNodes(new_node, prev->next_);
-            connectNodes(prev, new_node);
-            this->head_ = this->before_->next_;
+            this->pushImpl(index, value);
         }
 
         template<UnsignedIntegralLike U>
         requires SameType<NumberLikeType<U>, NumberLikeType<SizeType>>
         void push(U index, ValueType&& value)
         {
-            BaseNodePointerType prev = this->getNodePointer(index);
-            NodePointerType new_node = this->createNode<NodeType>();
-            new_node->value_ = std::move(value);
-            connectNodes(new_node, prev->next_);
-            connectNodes(prev, new_node);
-            this->head_ = this->before_->next_;
+            this->pushImpl(index, std::move(value));
         }
 
         void popBegin()
