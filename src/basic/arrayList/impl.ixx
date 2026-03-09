@@ -41,8 +41,8 @@ export namespace original
         static AllocLayout layout(const SizeType capacity) noexcept
         {
             return AllocLayout{
-                Size{sizeof(ValueType)} * capacity,
-                Size{alignof(ValueType)}
+                SizeType{sizeof(ValueType)} * capacity,
+                SizeType{alignof(ValueType)}
             };
         }
 
