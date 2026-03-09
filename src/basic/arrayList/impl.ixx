@@ -146,7 +146,7 @@ export namespace original
             forwardElements<true>(this->data_, rhs.data_, this->size_);
         }
 
-        void moveFrom(ArrayList&& rhs) noexcept
+        void moveFrom(ArrayList& rhs) noexcept
         {
             if constexpr (StatefulAllocator<AllocatorType>)
             {
@@ -206,7 +206,7 @@ export namespace original
 
         ArrayList(ArrayList&& rhs) noexcept
         {
-            this->moveFrom(std::move(rhs));
+            this->moveFrom(rhs);
         }
 
         ArrayList& operator=(ArrayList&& rhs) noexcept
@@ -214,7 +214,7 @@ export namespace original
             if (this == &rhs)
                 return *this;
             this->destroySelf();
-            this->moveFrom(std::move(rhs));
+            this->moveFrom(rhs);
             return *this;
         }
 
