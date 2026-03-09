@@ -180,6 +180,12 @@ export namespace original
             return cur;
         }
 
+        void setNull() noexcept
+        {
+            this->before_ = nullptr;
+            this->head_ = nullptr;
+        }
+
         void init()
         {
             this->before_ = this->createNode<BaseNodeType>();
@@ -212,8 +218,7 @@ export namespace original
             }
             this->before_ = rhs.before_;
             this->head_ = rhs.head_;
-            rhs.before_ = nullptr;
-            rhs.head_ = nullptr;
+            rhs.setNull();
         }
 
         void destroySelf() noexcept
@@ -232,8 +237,7 @@ export namespace original
                 this->deleteNode(static_cast<NodePointerType>(cur_self));
                 cur_self = next;
             }
-            this->before_ = nullptr;
-            this->head_ = nullptr;
+            this->setNull();
         }
 
         template<UnsignedIntegralLike U, typename V>
