@@ -274,6 +274,7 @@ export namespace original
         ForwardList(const ForwardList& rhs)
         requires CopyConstructible<ValueType>
         {
+            this->init();
             this->copyFrom(rhs);
         }
 
@@ -283,12 +284,14 @@ export namespace original
             if (this == &rhs)
                 return *this;
             this->destroySelf();
+            this->init();
             this->copyFrom(rhs);
             return *this;
         }
 
         ForwardList(ForwardList&& rhs) noexcept
         {
+            this->init();
             this->moveFrom(rhs);
         }
 
@@ -297,6 +300,7 @@ export namespace original
             if (this == &rhs)
                 return *this;
             this->destroySelf();
+            this->init();
             this->moveFrom(rhs);
             return *this;
         }
