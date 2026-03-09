@@ -44,8 +44,6 @@ export namespace original
             {
                 this->next_ = nullptr;
             }
-
-            virtual ~BaseNode() = default;
         };
 
         struct Node : BaseNode
@@ -220,14 +218,14 @@ export namespace original
             NodePointerType next;
             if (cur_self)
             {
-                next = dynamic_cast<NodePointerType>(cur_self->next_);
+                next = static_cast<NodePointerType>(cur_self->next_);
                 this->deleteNode(cur_self);
                 cur_self = next;
             }
             while (cur_self)
             {
-                next = dynamic_cast<NodePointerType>(cur_self->next_);
-                this->deleteNode<NodeType>(dynamic_cast<NodePointerType>(cur_self));
+                next = static_cast<NodePointerType>(cur_self->next_);
+                this->deleteNode(static_cast<NodePointerType>(cur_self));
                 cur_self = next;
             }
             this->before_ = nullptr;
