@@ -101,25 +101,25 @@ export namespace original {
 }
 
 export namespace original {
-    class [[nodiscard]] Regular : public OnCopy<>, public OnMove<> {
+    class Regular : public OnCopy<>, public OnMove<> {
     protected:
         constexpr Regular() noexcept = default;
     };
 
-    class [[nodiscard]] MoveOnly : public OnCopy<copy::Disabled>, public OnMove<> {
+    class MoveOnly : public OnCopy<copy::Disabled>, public OnMove<> {
     protected:
         constexpr MoveOnly() noexcept = default;
     };
 
-    class [[nodiscard]] CopyOnly : public OnCopy<>, public OnMove<move::Disabled> {
+    class CopyOnly : public OnCopy<>, public OnMove<move::Disabled> {
     protected:
         constexpr CopyOnly() noexcept = default;
     };
 
-    class [[nodiscard]] Immobile : public OnCopy<copy::Disabled>, public OnMove<move::Disabled> {
+    class Immobile : public OnCopy<copy::Disabled>, public OnMove<move::Disabled> {
     protected:
         constexpr Immobile() noexcept = default;
     };
 
-    class [[nodiscard]] Static : public Immobile, public OnInstantiate<instantiate::Disabled> {};
+    class Static : public Immobile, public OnInstantiate<instantiate::Disabled> {};
 }
