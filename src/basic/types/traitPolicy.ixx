@@ -120,4 +120,6 @@ export namespace original {
     protected:
         constexpr Immobile() noexcept = default;
     };
+
+    class [[nodiscard]] Static : public Immobile, public OnInstantiate<instantiate::Disabled> {};
 }
