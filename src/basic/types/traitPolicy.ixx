@@ -101,25 +101,25 @@ export namespace original {
 }
 
 export namespace original {
-    class Regular : public OnCopy<>, public OnMove<> {
+    struct Regular : OnCopy<>, OnMove<> {
     protected:
         constexpr Regular() noexcept = default;
     };
 
-    class MoveOnly : public OnCopy<copy::Disabled>, public OnMove<> {
+    struct MoveOnly : OnCopy<copy::Disabled>, OnMove<> {
     protected:
         constexpr MoveOnly() noexcept = default;
     };
 
-    class CopyOnly : public OnCopy<>, public OnMove<move::Disabled> {
+    struct CopyOnly : OnCopy<>, OnMove<move::Disabled> {
     protected:
         constexpr CopyOnly() noexcept = default;
     };
 
-    class Immobile : public OnCopy<copy::Disabled>, public OnMove<move::Disabled> {
+    struct Immobile : OnCopy<copy::Disabled>, OnMove<move::Disabled> {
     protected:
         constexpr Immobile() noexcept = default;
     };
 
-    class Static : public Immobile, public OnInstantiate<instantiate::Disabled> {};
+    struct Static : Immobile, OnInstantiate<instantiate::Disabled> {};
 }
