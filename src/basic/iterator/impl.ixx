@@ -109,11 +109,8 @@ export namespace original
         typename Reference,
         typename Pointer
     >
-    class ForwardIteratorBase : public IteratorBase<Derived, T, Reference, Pointer>
+    class ForwardIteratorBase : public Trivial, public IteratorBase<Derived, T, Reference, Pointer>
     {
-    protected:
-        constexpr ForwardIteratorBase() = default;
-
     public:
         using DerivedType = Derived;
         using ValueType = T;
