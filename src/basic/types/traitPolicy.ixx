@@ -27,8 +27,6 @@ export namespace original {
     class OnCopy<copy::Enabled> {
     protected:
         constexpr explicit OnCopy() noexcept = default;
-        constexpr OnCopy(const OnCopy&) noexcept = default;
-        constexpr OnCopy& operator=(const OnCopy&) noexcept = default;
     };
 
     template<>
@@ -61,8 +59,6 @@ export namespace original {
     class OnMove<move::Enabled> {
     protected:
         constexpr explicit OnMove() noexcept = default;
-        constexpr OnMove(OnMove&&) noexcept = default;
-        constexpr OnMove& operator=(OnMove&&) noexcept = default;
     };
 
     template<>
