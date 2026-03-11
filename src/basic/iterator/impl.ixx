@@ -30,6 +30,8 @@ export namespace original
         using PointerType = Pointer;      ///< Element pointer type.
 
     protected:
+        constexpr IteratorBase() noexcept = default;
+
         /**
          * @brief Get derived reference.
          * @return Reference to derived object.
@@ -109,8 +111,11 @@ export namespace original
         typename Reference,
         typename Pointer
     >
-    class ForwardIteratorBase : public Trivial, public IteratorBase<Derived, T, Reference, Pointer>
+    class ForwardIteratorBase : public IteratorBase<Derived, T, Reference, Pointer>
     {
+    protected:
+        constexpr ForwardIteratorBase() noexcept = default;
+
     public:
         using DerivedType = Derived;
         using ValueType = T;
@@ -393,7 +398,7 @@ export namespace original
         /**
          * @brief Default constructor.
          */
-        constexpr NormalIterator() = default;
+        constexpr NormalIterator() noexcept = default;
 
         /**
          * @brief Constructor from pointer.
