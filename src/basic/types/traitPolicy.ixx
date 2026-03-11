@@ -33,9 +33,12 @@ export namespace original {
     class OnCopy<copy::Disabled> {
     protected:
         constexpr OnCopy() noexcept = default;
+        constexpr OnCopy(OnCopy&&) noexcept = default;
+        constexpr OnCopy& operator=(OnCopy&&) noexcept = default;
+
     public:
-        constexpr OnCopy(const OnCopy&) noexcept = delete;
-        constexpr OnCopy& operator=(const OnCopy&) noexcept = delete;
+        OnCopy(const OnCopy&) = delete;
+        OnCopy& operator=(const OnCopy&) = delete;
     };
 }
 
@@ -66,6 +69,9 @@ export namespace original {
     protected:
         constexpr OnMove() noexcept = default;
     public:
+        constexpr OnMove(const OnMove&) noexcept = default;
+        constexpr OnMove& operator=(const OnMove&) noexcept = default;
+
         constexpr OnMove(OnMove&&) noexcept = delete;
         constexpr OnMove& operator=(OnMove&&) noexcept = delete;
     };
