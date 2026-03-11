@@ -71,6 +71,35 @@ export namespace original {
     };
 }
 
+namespace original::instantiate::details {
+    struct InstantiatePolicyTag : original::details::traitPolicyTag {};
+
+    template<typename T>
+    concept InstantiatePolicy = std::is_base_of_v<InstantiatePolicyTag, T>;
+}
+
+export namespace original::instantiate {
+    struct Enabled : details::InstantiatePolicyTag {};
+    struct Disabled : details::InstantiatePolicyTag {};
+}
+
+export namespace original {
+    template<instantiate::details::InstantiatePolicy = instantiate::Enabled>
+    class OnInstantiate;
+
+    template<>
+    class OnInstantiate<instantiate::Enabled> {
+    protected:
+        constexpr OnInstantiate() noexcept = default;
+    };
+
+    template<>
+    class OnInstantiate<instantiate::Disabled> {
+    public:
+        constexpr OnInstantiate() noexcept = delete;
+    };
+}
+
 export namespace original {
     class [[nodiscard]] Regular : public OnCopy<>, public OnMove<> {
     protected:
