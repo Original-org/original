@@ -72,9 +72,9 @@ export namespace original {
 }
 
 export namespace original {
-    class [[nodiscard]] Trivial : public OnCopy<>, public OnMove<> {
+    class [[nodiscard]] Regular : public OnCopy<>, public OnMove<> {
     protected:
-        constexpr Trivial() noexcept = default;
+        constexpr Regular() noexcept = default;
     };
 
     class [[nodiscard]] MoveOnly : public OnCopy<copy::Disabled>, public OnMove<> {
