@@ -35,16 +35,9 @@ export namespace original
         using NodeType            = Node;
         using NodePointerType     = NodeType*;
 
-        struct BaseNode
+        struct BaseNode : private MoveOnly
         {
             BaseNodePointerType next_{};
-
-            BaseNode() = default;
-
-            BaseNode(const BaseNode&)
-            {
-                this->next_ = nullptr;
-            }
         };
 
         struct Node : BaseNode
