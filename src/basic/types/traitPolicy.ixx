@@ -76,11 +76,11 @@ export namespace original {
 }
 
 export namespace original {
-    class [[nodiscard]] Trivial : OnCopy<>, OnMove<> {};
+    class [[nodiscard]] Trivial : public OnCopy<>, public OnMove<> {};
 
-    class [[nodiscard]] MoveOnly : OnCopy<copy::Disabled>, OnMove<> {};
+    class [[nodiscard]] MoveOnly : public OnCopy<copy::Disabled>, public OnMove<> {};
 
-    class [[nodiscard]] CopyOnly : OnCopy<>, OnMove<move::Disabled> {};
+    class [[nodiscard]] CopyOnly : public OnCopy<>, public OnMove<move::Disabled> {};
 
-    class [[nodiscard]] Immobile : OnCopy<copy::Disabled>, OnMove<move::Disabled> {};
+    class [[nodiscard]] Immobile : public OnCopy<copy::Disabled>, public OnMove<move::Disabled> {};
 }
