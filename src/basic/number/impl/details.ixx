@@ -186,6 +186,7 @@ namespace original::details
         if constexpr (StdSignedIntegral<T>)
         {
             if (b == -1 && b == std::numeric_limits<T>::min())
+            if (a == std::numeric_limits<T>::min() && b == static_cast<T>(-1))
                 throw std::overflow_error{"Mod operation overflow"};
         }
 
@@ -220,7 +221,7 @@ namespace original::details
     constexpr T checkedShiftLeft(T a, std::size_t shift)
     {
         if (constexpr std::size_t bits = std::numeric_limits<T>::digits;
-            shift > bits)
+            shift >= bits)
             throw std::overflow_error{"Shift operation overflows"};
 
         if constexpr (StdSignedIntegral<T>)
@@ -229,7 +230,7 @@ namespace original::details
                 throw std::overflow_error{"Shift operation overflows"};
         }
 
-        if (a > std::numeric_limits<std::size_t>::max() >> shift)
+        if (a > (std::numeric_limits<T>::max() >> shift))
             throw std::overflow_error{"Shift operation overflows"};
 
         return a << shift;
