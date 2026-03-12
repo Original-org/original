@@ -146,6 +146,10 @@ export namespace original
         Number<T> &&
         StdUnsignedIntegral<NumberType<T>>;
 
+    template<typename T>
+    concept Integral =
+        SignedInteger<T> || UnsignedInteger<T>;
+
     /**
      * @brief Floating-point wrapper concept.
      * @tparam T Type to test.
