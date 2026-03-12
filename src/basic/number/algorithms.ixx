@@ -24,11 +24,16 @@ export namespace original
      * auto min_u16 = minimum<U16>();  // Returns 0
      * @endcode
      */
-    template<Number T>
-    [[nodiscard]] constexpr T minimum() noexcept
-    {
+    template<Integral T>
+    [[nodiscard]] constexpr T minimum() noexcept {
         using NumberType = NumberType<T>;
         return T{std::numeric_limits<NumberType>::min()};
+    }
+
+    template<FloatingPoint T>
+    [[nodiscard]] constexpr T minimum() noexcept {
+        using NumberType = NumberType<T>;
+        return T{std::numeric_limits<NumberType>::lowest()};
     }
 
     /**
