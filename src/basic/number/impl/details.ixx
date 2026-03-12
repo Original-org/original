@@ -185,7 +185,6 @@ namespace original::details
 
         if constexpr (StdSignedIntegral<T>)
         {
-            if (b == -1 && b == std::numeric_limits<T>::min())
             if (a == std::numeric_limits<T>::min() && b == static_cast<T>(-1))
                 throw std::overflow_error{"Mod operation overflow"};
         }
