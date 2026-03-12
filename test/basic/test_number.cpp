@@ -1,6 +1,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 #include <limits>
+#include <stdexcept>
 #include <type_traits>
 import original.basic.number;
 
@@ -616,4 +617,54 @@ TEST(NumberTest, HashSpecializations) {
 
     constexpr F32 inf_val{std::numeric_limits<float>::infinity()};
     EXPECT_EQ(hash_float(inf_val), std::hash<float>{}(std::numeric_limits<float>::infinity()));
+}
+
+// Boundary checks that should throw from checked integer operations.
+TEST(NumberCheckedBoundaries, DivisionMinByNegativeOne) {
+    constexpr I32 min_val{std::numeric_limits<std::int32_t>::min()};
+    constexpr I32 neg_one{-1};
+
+    // Control: division path already has dedicated overflow protection.
+    EXPECT_THROW(
+        {
+        const auto _ = min_val / neg_one;
+        (void)_;
+        },
+        std::overflow_error
+    );
+}
+
+TEST(NumberCheckedBoundaries, ModuloMinByNegativeOne) {
+    constexpr I32 min_val{std::numeric_limits<std::int32_t>::min()};
+    constexpr I32 neg_one{-1};
+
+    EXPECT_THROW(
+        {
+        const auto _ = min_val % neg_one;
+        (void)_;
+        },
+        std::overflow_error
+    );
+}
+
+TEST(NumberCheckedBoundaries, ShiftLeftShouldRejectOverflowAndOutOfRangeCount) {
+    auto max_u8 = 255_u8;
+
+    // Regression target: left shift should reject arithmetic overflow for U8.
+    EXPECT_THROW(
+        {
+        max_u8 <<= 1u;
+        },
+        std::overflow_error
+    );
+
+    auto one = 1_u8;
+
+    // Regression target: shift count equal to width (8 for uint8_t) should throw.
+    EXPECT_THROW(
+        {
+        one <<= 8u;
+        },
+        std::overflow_error
+    );
 }
